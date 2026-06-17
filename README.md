@@ -1,16 +1,34 @@
-# React + Vite
+# SwDyum — Premium Bihari Pickle Boutique
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A luxurious, editorial e-commerce platform showcasing Swadyum's traditional clay-aged Bihari pickles. Built with React, Vite, custom CSS, and integrated with Supabase.
 
-Currently, two official plugins are available:
+## ✨ Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Luxury Design System**: Harmonies of dark charcoal, cream, and gold accents reflecting the premium heritage brand.
+- **Shopping Cart**: Dynamic item subtotals, weight metrics selectors, and free shipping progress alerts.
+- **Secure Checkout**: Multi-option payment simulation (COD, UPI, Card) and form verification.
+- **Customer Dashboard**: Track past order statuses (Placed, Sun-Cured, Shipped, Delivered) and manage profiles/addresses.
+- **Printable Invoices**: Built-in TAX receipts with GST calculations and print-optimized styling.
+- **Supabase Integration**: Connected to live database tables (`profiles`, `orders`) and Supabase Auth.
 
-## React Compiler
+## 🛠️ Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Frontend**: React 19 + Vite 8
+- **Styling**: Custom vanilla CSS variables and Framer Motion transitions
+- **Backend**: Supabase JS Client & Auth Session Management
+- **Database**: PostgreSQL (Supabase) with Local Storage grace fallbacks
 
-## Expanding the ESLint configuration
+## 🚀 Setup & Installation
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Install dependencies:
+   ```bash
+   npm install
+   ```
+2. Start the development server:
+   ```bash
+   npm run dev
+   ```
+3. Build for production:
+   ```bash
+   npm run build
+   ```
