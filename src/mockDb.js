@@ -250,12 +250,33 @@ export const mockDb = {
         .single();
 
       if (!error && data) {
-        return {
+        const parsedOrder = {
           ...data,
           items: typeof data.items === 'string' ? JSON.parse(data.items) : data.items,
           shippingDetails: typeof data.shipping_details === 'string' ? JSON.parse(data.shipping_details) : data.shipping_details,
-          paymentMethod: data.payment_method
+          paymentMethod: data.payment_method,
+          trackingId: data.tracking_id || null,
+          courierName: data.courier_name || 'BlueDart Express'
         };
+
+        // Attach realistic Shiprocket tracking history checkpoints if tracking ID exists
+        if (parsedOrder.trackingId) {
+          const baseDate = new Date(parsedOrder.date);
+          parsedOrder.trackingHistory = [
+            { checkpoint: "Patna Warehouse", status: "Shipment details uploaded & package picked up by courier", time: new Date(baseDate.getTime() + 1000 * 60 * 30).toISOString() },
+            { checkpoint: "Patna Terminal Hub", status: "Sorted and dispatched to regional airport hub", time: new Date(baseDate.getTime() + 1000 * 60 * 120).toISOString() },
+            { checkpoint: "In Transit", status: "Flight departed, package in route to destination city", time: new Date(baseDate.getTime() + 1000 * 60 * 240).toISOString() }
+          ];
+
+          if (parsedOrder.status.toLowerCase() === 'delivered') {
+            parsedOrder.trackingHistory.push({
+              checkpoint: "Doorstep Delivery",
+              status: "Shipment delivered successfully with OTP authentication",
+              time: new Date(baseDate.getTime() + 1000 * 60 * 480).toISOString()
+            });
+          }
+        }
+        return parsedOrder;
       }
     } catch (e) {
       // Fallback to local
@@ -263,7 +284,20 @@ export const mockDb = {
 
     // Local fallback
     const orders = mockDb.getLocalOrders();
-    return orders.find(o => o.id === orderId) || null;
+    const localOrder = orders.find(o => o.id === orderId) || null;
+    if (localOrder) {
+      if (!localOrder.trackingId) {
+        localOrder.trackingId = `SR-AWB-${Math.floor(Math.random() * 900000 + 100000)}`;
+        localOrder.courierName = 'BlueDart Express';
+      }
+      const baseDate = new Date(localOrder.date);
+      localOrder.trackingHistory = [
+        { checkpoint: "Patna Warehouse", status: "Package picked up by courier", time: new Date(baseDate.getTime() + 1000 * 60 * 30).toISOString() },
+        { checkpoint: "Patna Terminal Hub", status: "Sorted and dispatched to regional airport hub", time: new Date(baseDate.getTime() + 1000 * 60 * 120).toISOString() },
+        { checkpoint: "In Transit", status: "Flight departed, package in route to destination city", time: new Date(baseDate.getTime() + 1000 * 60 * 240).toISOString() }
+      ];
+    }
+    return localOrder;
   },
 
   createOrder: async (orderData) => {
@@ -274,6 +308,8 @@ export const mockDb = {
       id: orderId,
       date: new Date().toISOString(),
       status: "Processing",
+      trackingId: `SR-AWB-${Math.floor(Math.random() * 900000 + 100000)}`,
+      courierName: 'BlueDart Express',
       ...orderData
     };
 
@@ -290,14 +326,27 @@ export const mockDb = {
           total: orderData.total,
           status: "Processing",
           payment_method: orderData.paymentMethod,
-          shipping_details: orderData.shippingDetails
+          shipping_details: orderData.shippingDetails,
+          tracking_id: newOrder.trackingId,
+          courier_name: newOrder.courierName
         };
 
         const { error } = await supabase
           .from('orders')
           .insert([supabaseOrder]);
 
-        if (error) {
+        if (!error) {
+          // Trigger the Edge Function call asynchronously to sync with Shiprocket
+          supabase.functions.invoke('shiprocket-sync', {
+            body: { orderId: orderId }
+          }).then(({ data, error: fnError }) => {
+            if (fnError || !data || !data.success) {
+              console.log("Supabase function call skipped/failed. Running in mock tracking mode.");
+            }
+          }).catch(() => {
+            // fail silently, falls back to pre-seeded mock tracking
+          });
+        } else {
           // Fall back to saving locally
           mockDb.saveLocalOrder(newOrder);
         }

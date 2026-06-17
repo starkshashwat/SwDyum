@@ -139,31 +139,51 @@ function OrderDetailsPage({ onNavigate, orderId, currentUser }) {
         </section>
 
         {/* SECTION 2: COURIER TRACKING DATA */}
-        {statusIndex >= 2 && (
+        {order.trackingId && (
           <section className="details-card courier-card">
             <h3 className="card-sec-title">Tracking Information</h3>
             <div className="courier-grid">
               <div className="courier-info-item">
                 <span className="c-label">Courier Partner:</span>
-                <span className="c-val">BlueDart Express Cargo</span>
+                <span className="c-val">{order.courierName || 'BlueDart Express'}</span>
               </div>
               <div className="courier-info-item">
                 <span className="c-label">Tracking ID:</span>
-                <span className="c-val highlight">BD983726189IN</span>
+                <span className="c-val highlight">{order.trackingId}</span>
               </div>
               <div className="courier-info-item">
                 <span className="c-label">Status:</span>
                 <span className="c-val">
-                  {currentStatus === 'delivered' ? 'Shipment delivered safely.' : 'In Transit. Out for delivery in your city.'}
+                  {currentStatus === 'delivered' ? 'Shipment delivered safely.' : 'In Transit. Out for delivery.'}
                 </span>
               </div>
               <div className="courier-info-item">
                 <span className="c-label">Estimated Delivery:</span>
                 <span className="c-val">
-                  {currentStatus === 'delivered' ? 'Delivered successfully' : 'Within 24 Hours'}
+                  {currentStatus === 'delivered' ? 'Delivered successfully' : 'Within 2-3 Business Days'}
                 </span>
               </div>
             </div>
+
+            {/* Vertical Shipment Checkpoints Timeline */}
+            {order.trackingHistory && (
+              <div className="tracking-checkpoints-log" style={{ marginTop: '2.5rem', borderTop: '1px solid #eef0f2', paddingTop: '1.5rem' }}>
+                <h4 style={{ marginBottom: '1.2rem', fontSize: '0.95rem', color: 'var(--dark-text)' }}>Shipment History Checkpoints</h4>
+                <div className="vertical-timeline" style={{ display: 'flex', flexDirection: 'column', gap: '1.2rem' }}>
+                  {order.trackingHistory.map((history, hidx) => (
+                    <div key={hidx} className="checkpoint-row" style={{ display: 'flex', gap: '1.5rem', alignItems: 'flex-start' }}>
+                      <span className="checkpoint-bullet" style={{ color: 'var(--primary-green)', fontSize: '1rem' }}>✦</span>
+                      <div className="checkpoint-details">
+                        <strong style={{ display: 'block', fontSize: '0.9rem', color: 'var(--dark-text)' }}>
+                          {history.checkpoint} - <span style={{ fontWeight: '500', color: 'var(--muted-text)' }}>{history.status}</span>
+                        </strong>
+                        <span style={{ fontSize: '0.75rem', color: 'var(--muted-text)' }}>{formatDate(history.time)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </section>
         )}
 
