@@ -288,7 +288,7 @@ export const mockDb = {
     if (localOrder) {
       if (!localOrder.trackingId) {
         localOrder.trackingId = `SR-AWB-${Math.floor(Math.random() * 900000 + 100000)}`;
-        localOrder.courierName = 'BlueDart Express';
+        localOrder.courierName = 'Shiprocket (BlueDart Express)';
       }
       const baseDate = new Date(localOrder.date);
       localOrder.trackingHistory = [
@@ -309,7 +309,7 @@ export const mockDb = {
       date: new Date().toISOString(),
       status: "Processing",
       trackingId: `SR-AWB-${Math.floor(Math.random() * 900000 + 100000)}`,
-      courierName: 'BlueDart Express',
+      courierName: 'Shiprocket (BlueDart Express)',
       ...orderData
     };
 
