@@ -1,0 +1,61 @@
+:root {
+  --primary-green: #2F5E3B;
+  --premium-gold: #C79A3B;
+  --cream: #F8F5F0;
+  --dark-text: #1F1F1F;
+  --muted-text: #666666;
+  --mango-accent: #D87A1D;
+  --font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  background-color: var(--cream);
+  color: var(--dark-text);
+  overflow-x: hidden;
+}
+
+a {
+  text-decoration: none;
+}
+
+ul {
+  list-style: none;
+}
+
+/* Global Section Typography (Matching Our Story / Section 2 styling) */
+.section-subtitle {
+  color: var(--primary-green) !important;
+  font-size: 26px !important;
+  font-family: 'Brush Script MT', cursive, sans-serif !important;
+  font-style: italic !important;
+  display: block !important;
+  text-transform: none !important;
+  letter-spacing: normal !important;
+  margin-bottom: 1rem !important;
+}
+
+.section-headline {
+  font-family: var(--font-family) !important;
+  font-size: 48px !important;
+  font-weight: 800 !important;
+  color: var(--dark-text) !important;
+  line-height: 1.25 !important;
+  letter-spacing: -1.2px !important;
+  margin-bottom: 1.5rem !important;
+  text-transform: none !important;
+}
+
+@media (max-width: 768px) {
+  .section-headline {
+    font-size: 36px !important;
+  }
+}
+

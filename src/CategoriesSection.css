@@ -1,0 +1,319 @@
+.categories-section {
+  position: relative;
+  width: 100vw;
+  padding: 10rem 0;
+  background-color: #ffffff;
+  overflow: hidden;
+}
+
+/* Container */
+.categories-container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 5%;
+}
+
+/* SECTION INTRO */
+.categories-intro {
+  text-align: center;
+  margin-bottom: 6rem;
+}
+
+.categories-eyebrow {
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--premium-gold);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  display: block;
+}
+
+.categories-headline {
+  font-family: var(--font-family);
+  font-size: 64px;
+  font-weight: 800;
+  color: var(--dark-text);
+  line-height: 1.15;
+  letter-spacing: -1.5px;
+  margin-bottom: 2.5rem;
+}
+
+.categories-subtext {
+  font-family: var(--font-family);
+  font-size: 20px;
+  color: var(--muted-text);
+  line-height: 1.75;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+/* ASYMMETRICAL EDITORIAL GRID */
+.categories-grid-magazine {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 3rem;
+  margin-bottom: 6rem;
+}
+
+/* Cards default setup */
+.category-magazine-card {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+  cursor: pointer;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Magazine grid placements */
+.cat-mango-hero {
+  grid-column: span 8;
+  height: 520px;
+}
+
+.cat-garlic {
+  grid-column: span 4;
+  height: 520px;
+}
+
+.cat-lemon, .cat-chili, .cat-mixed {
+  grid-column: span 4;
+  height: 420px;
+}
+
+.cat-heritage-full {
+  grid-column: span 12;
+  height: 480px;
+}
+
+/* Visual element containment */
+.cat-card-visual {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.cat-card-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cat-card-gradient {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.05) 0%, rgba(0, 0, 0, 0.75) 100%);
+  z-index: 2;
+  transition: background 0.4s ease;
+}
+
+/* Golden spotlight glow overlay */
+.cat-card-highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 50% 50%, rgba(199, 154, 59, 0.16) 0%, transparent 60%);
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+
+/* Card details (Bottom Left aligned) */
+.cat-card-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 3rem;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  color: #ffffff;
+}
+
+.cat-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.cat-card-subtitle {
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--premium-gold);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+
+.cat-card-title {
+  font-family: var(--font-family);
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+}
+
+.cat-mango-hero .cat-card-title,
+.cat-heritage-full .cat-card-title {
+  font-size: 38px;
+  letter-spacing: -1px;
+}
+
+/* CTA reveal elements */
+.cat-card-cta-wrapper {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform: translateY(12px);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.cat-card-explore-btn {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-family: var(--font-family);
+  font-size: 15px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  cursor: pointer;
+  padding: 0;
+  letter-spacing: 0.5px;
+}
+
+.cta-icon-arrow {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s ease;
+}
+
+
+/* HOVER CARD TRANSFORMS */
+
+.category-magazine-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.08);
+}
+
+.category-magazine-card:hover .cat-card-img {
+  transform: scale(1.05);
+}
+
+.category-magazine-card:hover .cat-card-gradient {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.02) 0%, rgba(0, 0, 0, 0.85) 100%);
+}
+
+.category-magazine-card:hover .cat-card-highlight {
+  opacity: 1;
+}
+
+/* Pull up the CTA button smoothly */
+.category-magazine-card:hover .cat-card-cta-wrapper {
+  max-height: 50px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.cat-card-explore-btn:hover .cta-icon-arrow {
+  transform: translateX(4px);
+}
+
+
+/* BOTTOM GLOBAL CTA */
+.categories-footer {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.explore-all-gold-btn {
+  background-color: transparent;
+  border: 2px solid var(--premium-gold);
+  color: var(--dark-text);
+  padding: 1.1rem 3rem;
+  font-family: var(--font-family);
+  font-size: 16px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  transition: all 0.4s ease;
+  border-radius: 2px;
+}
+
+.explore-all-gold-btn:hover {
+  background-color: var(--premium-gold);
+  color: #ffffff;
+  box-shadow: 0 8px 25px rgba(199, 154, 59, 0.2);
+}
+
+
+/* RESPONSIVENESS */
+
+@media (max-width: 1100px) {
+  .categories-headline {
+    font-size: 52px;
+  }
+  .cat-card-title {
+    font-size: 24px;
+  }
+  .cat-mango-hero .cat-card-title,
+  .cat-heritage-full .cat-card-title {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 768px) {
+  .categories-section {
+    padding: 6rem 0;
+  }
+  
+  .categories-headline {
+    font-size: 40px;
+  }
+  
+  .categories-subtext {
+    font-size: 18px;
+  }
+  
+  .categories-grid-magazine {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .category-magazine-card {
+    grid-column: span 12 !important;
+    height: 320px !important;
+  }
+  
+  .cat-card-info {
+    padding: 2rem;
+  }
+  
+  .cat-card-title {
+    font-size: 22px !important;
+  }
+  
+  /* Auto reveal CTA on mobile touch */
+  .cat-card-cta-wrapper {
+    max-height: 50px;
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

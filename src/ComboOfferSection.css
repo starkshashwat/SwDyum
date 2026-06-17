@@ -1,0 +1,539 @@
+.combo-offer-section {
+  position: relative;
+  width: 100vw;
+  height: 250vh; /* Deep scroll track for unboxing animations */
+  background-color: #0D0D0D;
+  overflow: visible;
+}
+
+.combo-sticky-wrapper {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Background Vignette */
+.combo-bg-vignette {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: 
+    radial-gradient(circle at 50% 50%, rgba(20, 20, 20, 0) 40%, rgba(5, 5, 5, 0.95) 100%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Gold Flakes Drift in Background */
+.combo-particles-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.combo-gold-flake {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background-color: var(--premium-gold);
+  opacity: 0.4;
+  border-radius: 1px;
+  box-shadow: 0 0 6px rgba(199, 154, 59, 0.5);
+}
+
+.flake-1 { top: 20%; left: 15%; animation: flakeDrift 15s ease-in-out infinite; }
+.flake-2 { top: 60%; left: 8%; animation: flakeDrift 18s ease-in-out infinite 2s; }
+.flake-3 { top: 15%; left: 82%; animation: flakeDrift 16s ease-in-out infinite 1s; }
+.flake-4 { top: 75%; left: 90%; animation: flakeDrift 20s ease-in-out infinite 3s; }
+.flake-5 { top: 45%; left: 40%; animation: flakeDrift 14s ease-in-out infinite 4s; }
+
+@keyframes flakeDrift {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); opacity: 0.2; }
+  50% { transform: translate(15px, -20px) rotate(180deg); opacity: 0.6; }
+}
+
+/* CONTENT CONTAINER */
+.combo-content-container {
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 6%;
+  display: flex;
+  align-items: center;
+  gap: 6rem;
+  position: relative;
+  z-index: 3;
+}
+
+/* LEFT SIDE: Text Editorial content */
+.combo-text-side {
+  flex: 0 0 42%;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.combo-offer-section .section-subtitle {
+  color: var(--premium-gold) !important;
+  margin-bottom: 2rem !important;
+}
+
+.combo-offer-section .section-headline {
+  color: #ffffff !important;
+  font-size: 80px !important;
+  line-height: 1.05 !important;
+  letter-spacing: -2px !important;
+}
+
+.combo-offer-section .section-headline span {
+  color: var(--premium-gold);
+}
+
+.combo-description {
+  font-family: var(--font-family);
+  font-size: 20px;
+  color: #a0a0a0;
+  line-height: 1.7;
+  max-width: 480px;
+}
+
+.combo-cta-group {
+  margin-top: 1rem;
+}
+
+.combo-gold-button {
+  background-color: var(--premium-gold);
+  color: #0d0d0d;
+  border: none;
+  padding: 1.2rem 3rem;
+  font-family: var(--font-family);
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 1rem;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 8px 25px rgba(199, 154, 59, 0.25);
+  border-radius: 2px;
+}
+
+.combo-gold-button:hover {
+  background-color: #dfba6b;
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(199, 154, 59, 0.45);
+}
+
+.button-arrow {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.3s ease;
+}
+
+.combo-gold-button:hover .button-arrow {
+  transform: translateX(4px);
+}
+
+.combo-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 2rem;
+}
+
+.feat-item {
+  font-family: var(--font-family);
+  font-size: 15px;
+  color: #8c8c8c;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.feat-bullet {
+  color: var(--premium-gold);
+}
+
+/* RIGHT SIDE: 3D UNBOXING VISUAL */
+.combo-visual-side {
+  flex: 1;
+  height: 60vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+}
+
+/* Spotlight radial overlay background */
+.spotlight-effect {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(199, 154, 59, 0.15) 0%, transparent 65%);
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* 3D SCENE STYLING */
+.giftbox-3d-scene {
+  position: relative;
+  width: 320px;
+  height: 320px;
+  perspective: 1200px;
+  transform-style: preserve-3d;
+  z-index: 2;
+  margin-top: 40px; /* Offset for unboxing slide */
+}
+
+/* Box Base container */
+.giftbox-base {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 300px;
+  height: 300px;
+  z-index: 4;
+}
+
+.box-base-inner {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: #121212;
+  border: 4px solid #1f1f1f;
+  box-shadow: 
+    0 15px 35px rgba(0, 0, 0, 0.6),
+    inset 0 0 30px rgba(0, 0, 0, 0.8);
+  border-radius: 4px;
+}
+
+.box-inner-shadow {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  pointer-events: none;
+}
+
+/* Glowing Gold Core inside box base */
+.box-glow-core {
+  position: absolute;
+  top: 20%;
+  left: 20%;
+  width: 60%;
+  height: 60%;
+  background: radial-gradient(circle, rgba(199, 154, 59, 0.8) 0%, rgba(216, 122, 29, 0.3) 50%, transparent 80%);
+  filter: blur(8px);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* 3D Lid styling on top */
+.giftbox-lid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 320px;
+  height: 320px;
+  z-index: 10;
+  transform-style: preserve-3d;
+  cursor: pointer;
+}
+
+.lid-top {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: #161616;
+  border: 4px solid #222222;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border-radius: 4px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2;
+}
+
+/* Gold Foil border layout on lid */
+.gold-foil-border-outer {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  border: 1px solid var(--premium-gold);
+}
+
+.gold-foil-border-inner {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  bottom: 16px;
+  border: 1.5px double var(--premium-gold);
+  opacity: 0.7;
+}
+
+/* Embossed gold Swadyum branding on lid */
+.lid-embossed-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+  color: var(--premium-gold);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+.gold-logo-svg {
+  width: 72px;
+  height: 72px;
+}
+
+.gold-brand-name {
+  font-family: var(--font-family);
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 4px;
+}
+
+.gold-sub-brand {
+  font-family: var(--font-family);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  opacity: 0.7;
+}
+
+/* 3D lid sides thickness */
+.lid-side {
+  position: absolute;
+  background-color: #111111;
+  border: 1px solid #1a1a1a;
+  z-index: 1;
+}
+
+.side-front {
+  width: 320px;
+  height: 20px;
+  bottom: -20px;
+  left: 0;
+  transform-origin: top;
+  transform: rotateX(-90deg);
+}
+
+.side-left {
+  width: 20px;
+  height: 320px;
+  top: 0;
+  left: -20px;
+  transform-origin: right;
+  transform: rotateY(-90deg);
+}
+
+.side-right {
+  width: 20px;
+  height: 320px;
+  top: 0;
+  right: -20px;
+  transform-origin: left;
+  transform: rotateY(90deg);
+}
+
+/* GIFTBOX PRODUCTS FLOATING LAYER */
+.giftbox-contents-layer {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 5;
+  pointer-events: none;
+  transform-style: preserve-3d;
+}
+
+.giftbox-product {
+  position: absolute;
+  width: 95px;
+  height: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  top: 90px;
+  left: 112px;
+  transform-style: preserve-3d;
+  pointer-events: auto;
+}
+
+.giftbox-product img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 15px 20px rgba(0, 0, 0, 0.45));
+  transition: transform 0.4s ease;
+}
+
+.giftbox-product:hover img {
+  transform: scale(1.1) translateY(-8px);
+}
+
+/* Gold label below each jar */
+.product-tag {
+  font-family: var(--font-family);
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--premium-gold);
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-top: 0.8rem;
+  background-color: rgba(13, 13, 13, 0.85);
+  padding: 0.3rem 0.8rem;
+  border: 1px solid rgba(199, 154, 59, 0.3);
+  border-radius: 3px;
+  white-space: nowrap;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.4s ease 0.2s;
+}
+
+.giftbox-product img:hover + .product-tag,
+.giftbox-product:hover .product-tag {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* RESPONSIVENESS AND MOBILE FALLBACKS */
+
+@media (max-width: 1200px) {
+  .combo-headline {
+    font-size: 64px;
+  }
+  .combo-content-container {
+    gap: 3rem;
+  }
+}
+
+@media (max-width: 992px) {
+  .combo-headline {
+    font-size: 52px;
+  }
+  .combo-description {
+    font-size: 18px;
+  }
+  .combo-content-container {
+    flex-direction: column;
+    padding-top: 4rem;
+  }
+  .combo-text-side {
+    text-align: center;
+    align-items: center;
+    flex: none;
+    width: 100%;
+  }
+  .combo-visual-side {
+    width: 100%;
+    height: 45vh;
+  }
+}
+
+/* Mobile Stacked Fallback Overrides */
+@media (max-width: 768px) {
+  .combo-offer-section {
+    height: auto !important;
+    padding: 6rem 0;
+  }
+  
+  .combo-sticky-wrapper {
+    position: relative !important;
+    height: auto !important;
+    width: 100% !important;
+    overflow: visible !important;
+  }
+
+  .combo-content-container {
+    flex-direction: column !important;
+    gap: 4rem !important;
+    padding: 0 1.5rem !important;
+  }
+
+  .combo-headline {
+    font-size: 44px;
+  }
+
+  /* Static Grid for Jars on Mobile (instead of floating out of screen bounds) */
+  .giftbox-3d-scene {
+    width: 100% !important;
+    height: auto !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    perspective: none !important;
+    transform-style: flat !important;
+  }
+
+  .giftbox-lid {
+    display: none !important; /* Hide box lid to reveal contents directly on mobile */
+  }
+
+  .giftbox-base {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    max-width: 300px;
+    height: 120px !important;
+    margin-bottom: 3rem;
+  }
+
+  .box-glow-core {
+    opacity: 0.5 !important;
+    scale: 1 !important;
+  }
+
+  .giftbox-contents-layer {
+    position: relative !important;
+    width: 100% !important;
+    height: auto !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 2.5rem 1.5rem !important;
+    padding: 0 1rem;
+    transform: none !important;
+  }
+
+  .giftbox-product {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    height: 140px !important;
+    transform: none !important;
+    opacity: 1 !important;
+  }
+
+  .product-tag {
+    opacity: 1 !important;
+    transform: none !important;
+    margin-top: 0.5rem;
+  }
+}

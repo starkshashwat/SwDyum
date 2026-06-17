@@ -1,0 +1,492 @@
+.benefits-section {
+  position: relative;
+  width: 100vw;
+  padding: 10rem 0;
+  background-color: var(--cream);
+  overflow: hidden;
+}
+
+/* Background Decorative Sketches (2% - 4% subtle opacity) */
+.benefits-bg-decoration {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.bg-sketch {
+  position: absolute;
+  color: var(--premium-gold);
+  opacity: 0.035;
+  transition: opacity 0.5s ease;
+}
+
+.sketch-left {
+  top: 15%;
+  left: -5%;
+  width: 25vw;
+  max-width: 350px;
+  transform: rotate(15deg);
+}
+
+.sketch-right {
+  bottom: 10%;
+  right: -3%;
+  width: 15vw;
+  max-width: 200px;
+}
+
+.sketch-top-right {
+  top: -2%;
+  right: -2%;
+  width: 20vw;
+  max-width: 250px;
+}
+
+/* Container */
+.benefits-container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 0 5%;
+  position: relative;
+  z-index: 2;
+}
+
+/* SECTION INTRO */
+.benefits-intro {
+  text-align: center;
+  margin-bottom: 6rem;
+}
+
+.benefits-eyebrow {
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--premium-gold);
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  margin-bottom: 2rem;
+  display: block;
+}
+
+.benefits-headline {
+  font-family: var(--font-family);
+  font-size: 64px;
+  font-weight: 800;
+  color: var(--dark-text);
+  line-height: 1.15;
+  letter-spacing: -1.5px;
+  margin-bottom: 2.5rem;
+}
+
+.benefits-subtext {
+  font-family: var(--font-family);
+  font-size: 20px;
+  color: var(--muted-text);
+  line-height: 1.75;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+/* ASYMMETRICAL BENEFITS GRID */
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 3.5rem;
+  margin-bottom: 8rem;
+}
+
+/* COLLECTIBLE HERITAGE CARD STYLES */
+.benefit-card {
+  position: relative;
+  background-color: #ffffff;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.02),
+    inset 0 0 1px rgba(0, 0, 0, 0.15);
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+}
+
+/* Inset Gold Border & Paper Overlay Setup */
+.card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  box-sizing: border-box;
+}
+
+.card-inner::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  border: 1px double rgba(199, 154, 59, 0.22);
+  pointer-events: none;
+  transition: border-color 0.4s ease;
+  z-index: 3;
+}
+
+/* Fine Matte Paper Texture Noise overlay */
+.paper-texture-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.96), rgba(253, 250, 243, 0.92)),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+  z-index: 1;
+  pointer-events: none;
+  opacity: 0.75;
+  transition: opacity 0.5s ease;
+}
+
+.card-visual-wrapper {
+  position: relative;
+  z-index: 2;
+}
+
+.benefit-svg {
+  display: block;
+}
+
+.card-text-wrapper {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.benefit-title {
+  font-family: var(--font-family);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--dark-text);
+  letter-spacing: -0.5px;
+}
+
+.benefit-description {
+  font-family: var(--font-family);
+  font-size: 17px;
+  color: var(--muted-text);
+  line-height: 1.65;
+}
+
+/* CARD LAYOUTS MAPPED TO GRID */
+
+/* Wide Cards: Sun-Cured & Handmade (7 columns) */
+.card-suncured {
+  grid-column: span 7;
+}
+
+.card-handmade {
+  grid-column: span 7;
+}
+
+.card-wide .card-inner {
+  display: flex;
+  align-items: center;
+  padding: 3.5rem 3rem;
+  gap: 3.5rem;
+}
+
+.card-wide .card-visual-wrapper {
+  flex: 0 0 42%;
+  display: flex;
+  justify-content: center;
+}
+
+.card-wide .card-text-wrapper {
+  flex: 1;
+}
+
+.sun-cured-svg {
+  width: 100%;
+  max-width: 170px;
+  height: auto;
+}
+
+.handmade-svg {
+  width: 100%;
+  max-width: 170px;
+  height: auto;
+}
+
+/* Staggered text alignment on second wide card */
+.card-handmade .card-inner {
+  flex-direction: row-reverse;
+}
+
+/* Vertical Cards: Rich In Flavor & No Preservatives (5 columns) */
+.card-flavor {
+  grid-column: span 5;
+}
+
+.card-preservatives {
+  grid-column: span 5;
+}
+
+.card-vertical .card-inner {
+  display: flex;
+  flex-direction: column;
+  padding: 4.5rem 3rem 4rem 3rem;
+  gap: 3rem;
+}
+
+.card-vertical .card-visual-wrapper {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.card-vertical .card-text-wrapper {
+  text-align: center;
+}
+
+.flavor-svg {
+  width: 100%;
+  max-width: 150px;
+  height: auto;
+}
+
+.leaf-svg {
+  width: 100%;
+  max-width: 150px;
+  height: auto;
+}
+
+/* Featured Recipe Card: Full Width (12 columns, max-width center) */
+.card-recipe {
+  grid-column: span 12;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.card-recipe .card-inner {
+  display: flex;
+  align-items: center;
+  padding: 4rem 4.5rem;
+  gap: 4.5rem;
+}
+
+.card-recipe .card-visual-wrapper {
+  flex: 0 0 35%;
+  display: flex;
+  justify-content: center;
+}
+
+.card-recipe .card-text-wrapper {
+  flex: 1;
+}
+
+.recipe-scroll-svg {
+  width: 100%;
+  max-width: 220px;
+  height: auto;
+}
+
+
+/* HOVER MICRO INTERACTIONS */
+
+.benefit-card:hover {
+  transform: translateY(-4px) scale(1.012);
+  box-shadow: 
+    0 24px 55px rgba(0, 0, 0, 0.05),
+    inset 0 0 1px rgba(0, 0, 0, 0.2);
+}
+
+.benefit-card:hover .paper-texture-overlay {
+  opacity: 1;
+}
+
+.benefit-card:hover .card-inner::before {
+  border-color: rgba(199, 154, 59, 0.55);
+}
+
+/* Visual illustrations transition states */
+
+/* Sun Cured: Sun rays rotate & pulsate */
+@keyframes sunRayRotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes sunPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.03); }
+}
+
+.benefit-card:hover .sun-group {
+  transform-origin: 100px 45px;
+  animation: sunPulse 3s ease-in-out infinite;
+}
+
+.benefit-card:hover .sun-group .sun-ray-line {
+  transform-origin: 100px 45px;
+  animation: sunRayRotate 25s linear infinite;
+}
+
+/* Flavor swirl & seed drifting */
+@keyframes seedFloat {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(2px, -3px); }
+}
+
+.benefit-card:hover .flavor-swirl {
+  stroke-dashoffset: -20;
+  transition: stroke-dashoffset 4.5s linear infinite;
+}
+
+.benefit-card:hover .seed-1 { animation: seedFloat 3.5s ease-in-out infinite; }
+.benefit-card:hover .seed-2 { animation: seedFloat 4s ease-in-out infinite 0.5s; }
+.benefit-card:hover .seed-3 { animation: seedFloat 3s ease-in-out infinite 1s; }
+.benefit-card:hover .seed-4 { animation: seedFloat 4.5s ease-in-out infinite 1.5s; }
+
+.benefit-card:hover .spice-chili {
+  transform-origin: 75px 105px;
+  transform: rotate(-4deg) scale(1.02);
+  transition: transform 0.6s ease;
+}
+
+.benefit-card:hover .spice-garlic {
+  transform-origin: 118px 113px;
+  transform: translate(2px, -1px) rotate(4deg);
+  transition: transform 0.6s ease;
+}
+
+/* Leaf seal tilt */
+.benefit-card:hover .leaf-branch {
+  transform-origin: 80px 80px;
+  transform: rotate(5deg) scale(1.02);
+  transition: transform 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.2);
+}
+
+/* Mixing spoon stir action */
+@keyframes mixStir {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  33% { transform: translate(-2px, 3px) rotate(-1.5deg); }
+  66% { transform: translate(2px, -2px) rotate(1.5deg); }
+}
+
+.benefit-card:hover .spoon-hand-group {
+  transform-origin: 110px 50px;
+  animation: mixStir 3s ease-in-out infinite;
+}
+
+/* Scroll group scale-up */
+.benefit-card:hover .scroll-group {
+  transform: scale(1.03);
+  transform-origin: 120px 80px;
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.benefit-card:hover .scroll-fish {
+  transform: translate(2px, -1px);
+  transition: transform 0.5s ease;
+}
+
+
+/* SECTION FOOTER STATEMENT */
+.benefits-footer {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.gold-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+.benefits-footer .divider-line {
+  width: 140px;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--premium-gold), transparent);
+}
+
+.benefits-footer .divider-diamond {
+  width: 8px;
+  height: 8px;
+  background-color: var(--premium-gold);
+  transform: rotate(45deg);
+}
+
+.footer-statement {
+  font-family: var(--font-family);
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--primary-green);
+  letter-spacing: -0.2px;
+}
+
+
+/* RESPONSIVENESS */
+
+@media (max-width: 1100px) {
+  .benefits-headline {
+    font-size: 52px;
+  }
+  .benefits-grid {
+    gap: 2rem;
+  }
+  .card-wide .card-inner {
+    padding: 2.5rem 2rem;
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .benefits-section {
+    padding: 6rem 0;
+  }
+  .benefits-headline {
+    font-size: 40px;
+  }
+  .benefits-subtext {
+    font-size: 18px;
+  }
+  .benefits-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .benefit-card {
+    grid-column: span 12 !important;
+    max-width: 100% !important;
+  }
+  .card-wide .card-inner, 
+  .card-handmade .card-inner,
+  .card-recipe .card-inner {
+    flex-direction: column !important;
+    text-align: center;
+    padding: 3rem 2rem;
+    gap: 2.5rem;
+  }
+  .card-wide .card-visual-wrapper,
+  .card-recipe .card-visual-wrapper {
+    flex: none;
+    width: 100%;
+  }
+  .benefit-svg {
+    max-width: 140px !important;
+  }
+  .footer-statement {
+    font-size: 18px;
+    padding: 0 1rem;
+  }
+  .benefits-footer .divider-line {
+    width: 80px;
+  }
+}
