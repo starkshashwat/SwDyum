@@ -505,3 +505,156 @@
     padding: 2rem 1.5rem;
   }
 }
+
+/* ── Shiprocket AWB Success Block ─────────────────────────────────────────── */
+.shiprocket-success-block {
+  margin-top: 1.5rem;
+  padding: 1.2rem;
+  background: linear-gradient(135deg, #f0faf2, #e8f5eb);
+  border: 1.5px solid var(--primary-green);
+  border-radius: 10px;
+}
+
+.sr-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.sr-logo-tag {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--primary-green);
+}
+
+.sr-assigned-badge {
+  background-color: var(--primary-green);
+  color: #ffffff;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.awb-code {
+  font-family: 'Courier New', monospace;
+  font-size: 1rem;
+  letter-spacing: 1px;
+}
+
+.label-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  background-color: var(--primary-green);
+  color: #ffffff;
+  padding: 9px 18px;
+  border-radius: 6px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.label-download-btn:hover {
+  background-color: #1e3f26;
+  transform: translateY(-1px);
+}
+
+/* Shiprocket pending/error notice */
+.sr-pending-notice {
+  margin-top: 1.2rem;
+  padding: 1rem;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 8px;
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+  font-size: 0.88rem;
+  text-align: left;
+}
+
+.sr-pending-notice span:first-child {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.sr-pending-notice strong {
+  display: block;
+  margin-bottom: 0.25rem;
+  color: var(--dark-text);
+}
+
+.sr-pending-notice p {
+  color: var(--muted-text);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.sr-pending-notice code {
+  font-family: 'Courier New', monospace;
+  font-size: 0.82rem;
+  background: rgba(0,0,0,0.05);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
+/* Success footer - two buttons */
+.success-footer {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.view-order-btn {
+  background: transparent;
+  color: var(--primary-green);
+  border: 2px solid var(--primary-green);
+  padding: 11px 28px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.view-order-btn:hover {
+  background-color: var(--primary-green);
+  color: #ffffff;
+}
+
+/* Shiprocket badge in checkout summary */
+.sr-checkout-badge {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  background: linear-gradient(135deg, #f0faf2, #eaf5eb);
+  border: 1px solid rgba(47, 94, 59, 0.2);
+  border-radius: 8px;
+  padding: 0.9rem;
+  margin: 1.2rem 0;
+  font-size: 0.82rem;
+}
+
+.sr-checkout-badge > span:first-child {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.sr-checkout-badge strong {
+  display: block;
+  color: var(--primary-green);
+  font-size: 0.85rem;
+  margin-bottom: 0.15rem;
+}
+
+.sr-checkout-badge p {
+  color: var(--muted-text);
+  margin: 0;
+}

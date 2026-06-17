@@ -232,6 +232,211 @@
   color: var(--primary-green);
 }
 
+/* AWB monospace display */
+.awb-mono {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+  font-size: 0.98rem;
+}
+
+/* Courier card header row */
+.courier-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eef0f2;
+}
+
+.courier-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.sr-powered-tag {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--primary-green);
+  background: #f0faf2;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid rgba(47, 94, 59, 0.2);
+}
+
+.refresh-tracking-btn {
+  background: transparent;
+  border: 1.5px solid var(--primary-green);
+  color: var(--primary-green);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.refresh-tracking-btn:hover:not(:disabled) {
+  background: var(--primary-green);
+  color: #ffffff;
+}
+
+.refresh-tracking-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Label download row */
+.label-download-row {
+  margin-top: 1.5rem;
+}
+
+.label-download-btn-full {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: var(--primary-green);
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.label-download-btn-full:hover {
+  background-color: #1e3f26;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(47, 94, 59, 0.25);
+}
+
+/* Vertical Tracking Timeline */
+.tracking-timeline-section {
+  margin-top: 2.5rem;
+  border-top: 1px solid #eef0f2;
+  padding-top: 1.8rem;
+}
+
+.tracking-timeline-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--dark-text);
+  margin-bottom: 1.5rem;
+}
+
+.vertical-timeline-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.vt-row {
+  display: flex;
+  gap: 1.2rem;
+  align-items: flex-start;
+}
+
+.vt-connector {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 18px;
+}
+
+.vt-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: #e0e0e0;
+  border: 2px solid #ccc;
+  flex-shrink: 0;
+  margin-top: 3px;
+  transition: all 0.2s;
+}
+
+.vt-latest .vt-dot {
+  background-color: var(--primary-green);
+  border-color: var(--primary-green);
+  box-shadow: 0 0 0 4px rgba(47, 94, 59, 0.12);
+}
+
+.vt-line {
+  width: 2px;
+  flex: 1;
+  min-height: 28px;
+  background-color: #e0e0e0;
+  margin: 4px 0;
+}
+
+.vt-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding-bottom: 1.4rem;
+  flex: 1;
+}
+
+.vt-location {
+  font-size: 0.9rem;
+  color: var(--dark-text);
+  font-weight: 700;
+}
+
+.vt-latest .vt-location {
+  color: var(--primary-green);
+}
+
+.vt-status {
+  font-size: 0.82rem;
+  color: var(--muted-text);
+  line-height: 1.4;
+}
+
+.vt-time {
+  font-size: 0.75rem;
+  color: #aaa;
+}
+
+/* Loading & error states */
+.tracking-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: var(--muted-text);
+  font-size: 0.9rem;
+  padding: 1rem 0;
+}
+
+.mini-spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(47, 94, 59, 0.2);
+  border-top-color: var(--primary-green);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.tracking-error-notice {
+  font-size: 0.85rem;
+  color: #8a6d3b;
+  background: #fff8e1;
+  border: 1px solid #ffe082;
+  border-radius: 6px;
+  padding: 0.8rem 1rem;
+  margin-top: 0.5rem;
+}
+
+
 /* Printable Tax Invoice Styles */
 .invoice-print-sheet {
   background-color: #ffffff;

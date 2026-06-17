@@ -88,6 +88,17 @@ export const mockDb = {
     localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
   },
 
+  updateLocalOrder: (updatedOrder) => {
+    const orders = mockDb.getLocalOrders();
+    const idx = orders.findIndex((o) => o.id === updatedOrder.id);
+    if (idx > -1) {
+      orders[idx] = { ...orders[idx], ...updatedOrder };
+    } else {
+      orders.push(updatedOrder);
+    }
+    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+  },
+
   // Auth Operations
   loginCustomer: async (email, password) => {
     try {
