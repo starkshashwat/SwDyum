@@ -18,8 +18,13 @@ import { fileURLToPath } from 'url';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 // ─── Load .env (ESM compatible) ───────────────────────────────────────────────
+import fs from 'fs';
 try {
-  const envFile = readFileSync(resolve(__dirname, '.env'), 'utf-8');
+  let envPath = resolve(__dirname, '.env.local');
+  if (!fs.existsSync(envPath)) {
+    envPath = resolve(__dirname, '.env');
+  }
+  const envFile = readFileSync(envPath, 'utf-8');
   envFile.split('\n').forEach((line) => {
     const trimmed = line.trim();
     if (trimmed && !trimmed.startsWith('#')) {
@@ -60,7 +65,7 @@ async function getShiprocketToken() {
   const email = process.env.SHIPROCKET_EMAIL;
   const password = process.env.SHIPROCKET_PASSWORD;
 
-  if (!email || email.includes('your_api_user_email')) {
+  if (!email) {
     throw new Error('Shiprocket credentials not set. Update SHIPROCKET_EMAIL in .env');
   }
 
@@ -350,8 +355,7 @@ app.get('/api/shiprocket/track/:awb', async (req, res) => {
 
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
-  const shiprocketReady =
-    !!process.env.SHIPROCKET_EMAIL && !process.env.SHIPROCKET_EMAIL.includes('your_api_user_email');
+  const shiprocketReady = !!process.env.SHIPROCKET_EMAIL;
   const razorpayReady =
     !!process.env.RAZORPAY_KEY_ID && !process.env.RAZORPAY_KEY_ID.includes('rzp_test_YOUR');
 
@@ -368,8 +372,7 @@ app.get('/api/health', (req, res) => {
 
 // ─── Start Server ─────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
-  const shiprocketOk =
-    process.env.SHIPROCKET_EMAIL && !process.env.SHIPROCKET_EMAIL.includes('your_api_user_email');
+  const shiprocketOk = !!process.env.SHIPROCKET_EMAIL;
   const razorpayOk =
     process.env.RAZORPAY_KEY_ID && !process.env.RAZORPAY_KEY_ID.includes('rzp_test_YOUR');
 

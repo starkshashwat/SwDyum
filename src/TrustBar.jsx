@@ -1,121 +1,43 @@
 import React from 'react';
 import './TrustBar.css';
 
+const trustItems = [
+  { icon: 'leaf', text: '100% Organic' },
+  { icon: 'sun', text: 'Sun-Cured Process' },
+  { icon: 'shield', text: 'No Preservatives' },
+  { icon: 'truck', text: 'Pan-India Delivery' },
+  { icon: 'star', text: '10,000+ Happy Families' },
+  { icon: 'heart', text: 'Handcrafted with Love' },
+  { icon: 'award', text: 'Premium Quality' },
+  { icon: 'check', text: 'FSSAI Approved' },
+];
+
+const icons = {
+  leaf: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 1c1 2 2 4.5 2 8 0 5.5-4.8 11-10 11z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>,
+  sun: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>,
+  shield: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+  truck: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>,
+  star: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>,
+  heart: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>,
+  award: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>,
+  check: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>,
+};
+
 function TrustBar() {
+  // Double the items for seamless infinite scroll
+  const doubled = [...trustItems, ...trustItems];
+
   return (
-    <div className="trust-bar-section">
-      
-      {/* Subtle background decorative motifs (3% opacity) */}
-      <div className="trust-bar-bg-decor">
-        {/* Madhubani border line */}
-        <div className="trust-border-decor"></div>
-        {/* Mustard seeds pattern background */}
-        <svg className="trust-seed-svg" viewBox="0 0 100 20" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="10" cy="10" r="1.5" fill="currentColor" />
-          <circle cx="30" cy="8" r="1.2" fill="currentColor" />
-          <circle cx="50" cy="12" r="1.5" fill="currentColor" />
-          <circle cx="70" cy="6" r="1" fill="currentColor" />
-          <circle cx="90" cy="10" r="1.3" fill="currentColor" />
-        </svg>
+    <section className="trust-bar" aria-label="Trust badges">
+      <div className="trust-bar-track">
+        {doubled.map((item, i) => (
+          <div className="trust-bar-item" key={i}>
+            <span className="trust-bar-icon">{icons[item.icon]}</span>
+            <span className="trust-bar-text">{item.text}</span>
+          </div>
+        ))}
       </div>
-
-      <div className="trust-bar-container">
-        
-        {/* Item 01: 100% Natural */}
-        <div className="trust-item">
-          <div className="trust-icon-wrapper">
-            <svg className="trust-icon-svg" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-              {/* Leaf illustration */}
-              <path d="M20 32 C20 32 32 24 32 14 C32 10 28 8 24 8 C18 8 20 16 20 16 C20 16 22 8 16 8 C12 8 8 10 8 14 C8 24 20 32 20 32 Z" fill="none" stroke="currentColor" strokeWidth="1.8" />
-              <path d="M20 16 L20 32" fill="none" stroke="currentColor" strokeWidth="1.2" /> {/* Stem line */}
-              <path d="M20 22 C23 20 25 18 27 18" fill="none" stroke="currentColor" strokeWidth="1" />
-              <path d="M20 26 C17 24 15 22 13 22" fill="none" stroke="currentColor" strokeWidth="1" />
-            </svg>
-            <div className="glow-circle"></div>
-          </div>
-          <span className="trust-text">100% Natural</span>
-        </div>
-
-        {/* Item 02: Homemade Recipe */}
-        <div className="trust-item">
-          <div className="trust-icon-wrapper">
-            <svg className="trust-icon-svg" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-              {/* Recipe Scroll illustration */}
-              <path d="M12 10 L28 10 C32 10 32 14 28 16 L12 16 C8 16 8 10 12 10 Z" fill="none" stroke="currentColor" strokeWidth="1.8" /> {/* Rolled top */}
-              <path d="M10 15 L10 28 C10 32 15 32 15 32 L27 32 C30 32 30 28 27 28 C24 28 25 32 25 32" fill="none" stroke="currentColor" strokeWidth="1.8" />
-              <path d="M30 14 L30 29" fill="none" stroke="currentColor" strokeWidth="1.8" />
-              {/* Lines representing written recipe text */}
-              <line x1="14" y1="20" x2="24" y2="20" stroke="currentColor" strokeWidth="1.2" strokeDasharray="6 2" />
-              <line x1="14" y1="24" x2="26" y2="24" stroke="currentColor" strokeWidth="1.2" strokeDasharray="8 2" />
-              <line x1="14" y1="28" x2="20" y2="28" stroke="currentColor" strokeWidth="1.2" strokeDasharray="4 2" />
-            </svg>
-            <div className="glow-circle"></div>
-          </div>
-          <span className="trust-text">Homemade Recipe</span>
-        </div>
-
-        {/* Item 03: No Preservatives */}
-        <div className="trust-item">
-          <div className="trust-icon-wrapper">
-            <svg className="trust-icon-svg" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-              {/* Natural Seal outline */}
-              <circle cx="20" cy="20" r="14" fill="none" stroke="currentColor" strokeWidth="1.8" />
-              <circle cx="20" cy="20" r="11" fill="none" stroke="currentColor" strokeWidth="1" strokeDasharray="3 2" />
-              {/* Branch inside */}
-              <path d="M16 25 Q20 22 24 15" fill="none" stroke="currentColor" strokeWidth="1.5" />
-              <path d="M20 20 Q24 20 23 18" fill="none" stroke="currentColor" strokeWidth="1.2" />
-              <path d="M18 22 Q14 20 16 18" fill="none" stroke="currentColor" strokeWidth="1.2" />
-            </svg>
-            <div className="glow-circle"></div>
-          </div>
-          <span className="trust-text">No Preservatives</span>
-        </div>
-
-        {/* Item 04: Bihar Inspired */}
-        <div className="trust-item">
-          <div className="trust-icon-wrapper">
-            <svg className="trust-icon-svg" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-              {/* Madhubani-inspired Sun symbol */}
-              <circle cx="20" cy="20" r="7" fill="none" stroke="currentColor" strokeWidth="1.8" />
-              <circle cx="20" cy="20" r="4" fill="currentColor" />
-              {/* Sun rays */}
-              {[...Array(8)].map((_, i) => {
-                const angle = (i * 360) / 8;
-                const rad = (angle * Math.PI) / 180;
-                const x1 = 20 + 9 * Math.cos(rad);
-                const y1 = 20 + 9 * Math.sin(rad);
-                const x2 = 20 + 13 * Math.cos(rad);
-                const y2 = 20 + 13 * Math.sin(rad);
-                return (
-                  <line key={i} x1={x1} y1={y1} x2={x2} y2={y2} stroke="currentColor" strokeWidth="1.5" />
-                );
-              })}
-            </svg>
-            <div className="glow-circle"></div>
-          </div>
-          <span className="trust-text">Bihar Inspired</span>
-        </div>
-
-        {/* Item 05: Fast Delivery */}
-        <div className="trust-item">
-          <div className="trust-icon-wrapper">
-            <svg className="trust-icon-svg" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
-              {/* Traditional wooden delivery cart sketch */}
-              <path d="M8 20 L28 20 L32 14 L36 14" fill="none" stroke="currentColor" strokeWidth="1.8" /> {/* Frame / handle */}
-              <path d="M12 20 L12 12 L26 12 L26 20" fill="none" stroke="currentColor" strokeWidth="1.5" /> {/* Cargo Box */}
-              {/* Wheels */}
-              <circle cx="16" cy="26" r="5" fill="none" stroke="currentColor" strokeWidth="1.5" />
-              <circle cx="16" cy="26" r="1" fill="currentColor" />
-              <circle cx="26" cy="26" r="5" fill="none" stroke="currentColor" strokeWidth="1.5" />
-              <circle cx="26" cy="26" r="1" fill="currentColor" />
-            </svg>
-            <div className="glow-circle"></div>
-          </div>
-          <span className="trust-text">Fast Delivery</span>
-        </div>
-
-      </div>
-    </div>
+    </section>
   );
 }
 

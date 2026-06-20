@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
 import './App.css';
 import { supabase } from './supabaseClient';
 import Header from './Header';
 import TrustBar from './TrustBar';
-import Section2 from './Section2';
-import StorytellingSection from './StorytellingSection';
 import CategoriesSection from './CategoriesSection';
 import ProductsSection from './ProductsSection';
-import DealSection from './DealSection';
 import ProcessSection from './ProcessSection';
-import SignatureExperienceSection from './SignatureExperienceSection';
-import BenefitsSection from './BenefitsSection';
 import ComboOfferSection from './ComboOfferSection';
 import SocialProofSection from './SocialProofSection';
-import RecipePairingSection from './RecipePairingSection';
-import GallerySection from './GallerySection';
+import FinalCTASection from './FinalCTASection';
 import ShopPage from './ShopPage';
 import ProductDetailsPage from './ProductDetailsPage';
 import AboutPage from './AboutPage';
@@ -294,57 +289,59 @@ function App() {
         <ProductDetailsPage slug={currentPage.substring('product-'.length)} onNavigate={handleNavigate} addToCart={addToCart} />
       ) : (
         <>
+          {/* ─── Hero Section ─── */}
           <div className="hero-section">
             <div className="hero-bg-overlay"></div>
-            <div className="hero-content">
-              <span className="hero-eyebrow">~ Sun-Cured & Small Batch ~</span>
-              
+            <motion.div
+              className="hero-content"
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            >
+              <span className="hero-eyebrow">Sun-Cured & Small Batch</span>
+
               <h1 className="hero-headline">
                 Taste the <em>Heritage</em> <br/>of Bihar in Every Bite
               </h1>
-              
+
               <p className="hero-subtext">
-                Handcrafted inside traditional clay pots, slow-aged under direct summer sunlight, and steeped in raw cold-pressed mustard oil. Welcome to the gold standard of Bihari pickles.
+                Handcrafted in traditional clay pots, slow-aged under the summer sun, and steeped in raw cold-pressed mustard oil. The gold standard of Bihari pickles — now at your doorstep.
               </p>
-              
+
               <div className="cta-group">
-                <button className="primary-cta" onClick={() => handleNavigate('shop')}>Shop Collection</button>
-                <button className="secondary-cta" onClick={() => handleNavigate('shop')}>Our Story ➔</button>
+                <button className="primary-cta" onClick={() => handleNavigate('shop')}>Shop Best Sellers</button>
+                <button className="secondary-cta" onClick={() => handleNavigate('about')}>Our Story</button>
               </div>
-              
+
               <div className="trust-indicators">
                 <div className="rating-container">
                   <span className="stars">★★★★★</span>
                   <span className="rating-text">Loved by 10,000+ Families (4.9/5 Rating)</span>
                 </div>
-                
+
                 <div className="indicator-list">
                   <div className="indicator-item">
-                    <span className="ind-bullet">✦</span> 100% Organic Spices
+                    <span className="ind-bullet"></span> 100% Organic Spices
                   </div>
                   <div className="indicator-item">
-                    <span className="ind-bullet">✦</span> Aged in Earthen Martabans
+                    <span className="ind-bullet"></span> Aged in Earthen Martabans
                   </div>
                   <div className="indicator-item">
-                    <span className="ind-bullet">✦</span> Preservative & Chemical Free
+                    <span className="ind-bullet"></span> No Preservatives or Chemicals
                   </div>
                 </div>
               </div>
-            </div>
+            </motion.div>
           </div>
+
+          {/* ─── 7-Section Sales Funnel ─── */}
           <TrustBar />
-          <Section2 />
-          <StorytellingSection />
-          <CategoriesSection />
-          <ProductsSection />
-          <DealSection />
+          <ProductsSection onNavigate={handleNavigate} addToCart={addToCart} />
+          <CategoriesSection onNavigate={handleNavigate} />
           <ProcessSection />
-          <SignatureExperienceSection />
-          <BenefitsSection />
-          <ComboOfferSection />
+          <ComboOfferSection onNavigate={handleNavigate} addToCart={addToCart} />
           <SocialProofSection />
-          <RecipePairingSection />
-          <GallerySection />
+          <FinalCTASection onNavigate={handleNavigate} />
         </>
       )}
 

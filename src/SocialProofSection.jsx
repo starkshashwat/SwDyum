@@ -1,292 +1,166 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useAnimation, useInView } from 'framer-motion';
 import './SocialProofSection.css';
 
-// Custom CountUp Component triggered on viewport intersection
-function CountUp({ end, duration = 2.5 }) {
+function CountUp({ end, suffix = '', duration = 2 }) {
   const [count, setCount] = useState(0);
-  const [hasAnimated, setHasAnimated] = useState(false);
-  const elementRef = useRef(null);
+  const ref = useRef(null);
+  const isInView = useInView(ref, { once: true, margin: "-50px" });
 
   useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !hasAnimated) {
-          setHasAnimated(true);
-          let startTimestamp = null;
-          // Extract numeric value and decimal indicator
-          const targetNum = parseFloat(end.replace(/[^0-9.]/g, ''));
-          const isDecimal = end.includes('.');
-          
-          const step = (timestamp) => {
-            if (!startTimestamp) startTimestamp = timestamp;
-            const progress = Math.min((timestamp - startTimestamp) / (duration * 1000), 1);
-            
-            // Ease out cubic progress curve
-            const easeProgress = 1 - Math.pow(1 - progress, 3);
-            const currentVal = easeProgress * targetNum;
-            
-            if (isDecimal) {
-              setCount(currentVal.toFixed(1));
-            } else {
-              setCount(Math.floor(currentVal).toLocaleString());
-            }
+    if (isInView) {
+      let startTimestamp = null;
+      const targetNum = parseFloat(end.toString().replace(/[^0-9.]/g, ''));
+      const isDecimal = end.toString().includes('.');
 
-            if (progress < 1) {
-              window.requestAnimationFrame(step);
-            } else {
-              // Lock to final formatting
-              setCount(isDecimal ? targetNum.toFixed(1) : targetNum.toLocaleString());
-            }
-          };
+      const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / (duration * 1000), 1);
+        const easeProgress = 1 - Math.pow(1 - progress, 3);
+        const currentVal = easeProgress * targetNum;
+
+        setCount(isDecimal ? currentVal.toFixed(1) : Math.floor(currentVal));
+
+        if (progress < 1) {
           window.requestAnimationFrame(step);
+        } else {
+          setCount(isDecimal ? targetNum.toFixed(1) : targetNum);
         }
-      },
-      { threshold: 0.1 }
-    );
-
-    if (elementRef.current) {
-      observer.observe(elementRef.current);
+      };
+      window.requestAnimationFrame(step);
     }
+  }, [end, duration, isInView]);
 
-    return () => {
-      if (elementRef.current) {
-        observer.unobserve(elementRef.current);
-      }
-    };
-  }, [end, duration, hasAnimated]);
-
-  // Extract non-numeric suffix/prefix symbols (+, ★, %)
-  const suffix = end.replace(/[0-9.]/g, '');
-
-  return (
-    <span ref={elementRef} className="counter-number">
-      {count}{suffix}
-    </span>
-  );
+  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
 }
 
-// Testimonials details
 const testimonials = [
   {
     id: 1,
-    name: "Preeti Mishra",
-    city: "Patna",
-    avatar: "/team_chef.png",
-    videoBg: "/gal_mix.png",
-    quote: "“Tastes exactly like the achar my grandmother used to make. The mustard oil aroma is so pure!”"
+    name: "Preeti M.",
+    location: "Patna",
+    quote: "Tastes exactly like the achar my grandmother used to make. The mustard oil aroma is so pure and authentic!",
+    rating: 5
   },
   {
     id: 2,
-    name: "Anand Verma",
-    city: "New Delhi",
-    avatar: "/team_founder.png",
-    videoBg: "/deal_scatter.png",
-    quote: "“The stuffed red chili pickle is incredibly rich and full. Perfect with a warm paratha.”"
+    name: "Anand V.",
+    location: "New Delhi",
+    quote: "The stuffed red chili pickle is incredibly rich and full. Perfect with a warm paratha. Definitely ordering again.",
+    rating: 5
   },
   {
     id: 3,
-    name: "Kiran Devi",
-    city: "Ranchi",
-    avatar: "/team_farmer.png",
-    videoBg: "/about_us.png",
-    quote: "“Authentic taste without any chemical preservatives. Swadyum is now a permanent part of our table.”"
+    name: "Kiran D.",
+    location: "Ranchi",
+    quote: "Authentic taste without any chemical preservatives. Swadyum is now a permanent part of our dining table.",
+    rating: 5
   },
   {
     id: 4,
-    name: "Rajesh Ranjan",
-    city: "Bengaluru",
-    avatar: "/team_chef.png",
-    videoBg: "/gal_cut.png",
-    quote: "“The mango pickle slices are firm, sun-dried, and seasoned perfectly. Bringing back childhood summer memories.”"
-  }
-];
-
-// Reels details
-const reels = [
-  {
-    id: 1,
-    image: "/gal_mix.png",
-    views: "14.8K",
-    title: "Sun-drying in earthen courtyard jars ☀️"
+    name: "Rajesh R.",
+    location: "Bengaluru",
+    quote: "The mango pickle slices are firm, sun-dried, and seasoned perfectly. Bringing back childhood summer memories.",
+    rating: 5
   },
   {
-    id: 2,
-    image: "/gal_cut.png",
-    views: "32.4K",
-    title: "Artisanal slicing of freshly harvested mangoes 🔪"
-  },
-  {
-    id: 3,
-    image: "/deal_scatter.png",
-    views: "9.6K",
-    title: "Hand-grinding natural spices 🌾"
-  },
-  {
-    id: 4,
-    image: "/about_us.png",
-    views: "21.5K",
-    title: "Master blend preparation 👩‍🍳"
+    id: 5,
+    name: "Neha S.",
+    location: "Mumbai",
+    quote: "Tried the Garlic pickle. Just the right amount of spice and tanginess. Best I've had outside of Bihar.",
+    rating: 4
   }
 ];
 
 function SocialProofSection() {
-  const carouselRef = useRef(null);
-  const [width, setWidth] = useState(0);
+  const scrollRef = useRef(null);
+  const controls = useAnimation();
 
+  // Auto-scrolling logic for the marquee
   useEffect(() => {
-    if (carouselRef.current) {
-      setWidth(carouselRef.current.scrollWidth - carouselRef.current.offsetWidth);
-    }
-  }, []);
+    controls.start({
+      x: "-50%",
+      transition: {
+        ease: "linear",
+        duration: 30,
+        repeat: Infinity,
+      }
+    });
+  }, [controls]);
+
+  // Duplicate testimonials for seamless looping
+  const doubledTestimonials = [...testimonials, ...testimonials];
 
   return (
-    <section className="social-proof-section">
-      
-      <div className="sp-container">
+    <section className="social-proof-section section-padding">
+      <div className="section-container">
         
-        {/* SECTION INTRO */}
-        <div className="sp-intro">
-          <span className="section-subtitle">~ Loved by Thousands ~</span>
-          <h2 className="section-headline">
-            The Flavor Families<br />
-            Keep Coming Back For
-          </h2>
-          <p className="sp-subtext">
-            Authentic recipes, unforgettable taste, and a growing community of customers who call Swadyum a part of their dining table.
-          </p>
-        </div>
-
-        {/* DRAGGABLE CAROUSEL FOR TESTIMONIALS */}
-        <div className="sp-carousel-container">
-          <span className="drag-helper-text">← Drag to scroll reviews →</span>
-          <motion.div ref={carouselRef} className="sp-carousel" whileTap={{ cursor: "grabbing" }}>
-            <motion.div 
-              drag="x" 
-              dragConstraints={{ right: 0, left: -width }} 
-              className="sp-carousel-inner"
-            >
-              {testimonials.map((t) => (
-                <div key={t.id} className="testimonial-card">
-                  
-                  {/* Customer video testimonial preview */}
-                  <div className="card-video-preview">
-                    <img src={t.videoBg} alt={`${t.name}'s testimonial video preview`} className="video-bg-img" />
-                    <div className="video-overlay"></div>
-                    
-                    {/* Play Badge */}
-                    <div className="video-play-badge">
-                      <svg className="play-icon" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                      <span className="play-label">Play Review</span>
-                    </div>
-                  </div>
-
-                  {/* Testimonial Quote details */}
-                  <div className="card-review-content">
-                    <blockquote className="review-quote">{t.quote}</blockquote>
-                    
-                    <div className="review-identity-row">
-                      <div className="avatar-wrapper">
-                        <img src={t.avatar} alt={t.name} />
-                      </div>
-                      <div className="identity-text">
-                        <h4 className="customer-name">{t.name}</h4>
-                        <span className="customer-city">{t.city} • Verified Customer</span>
-                      </div>
-                      <span className="star-rating">★★★★★</span>
-                    </div>
-                  </div>
-
-                </div>
-              ))}
-            </motion.div>
+        <div className="sp-header text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-80px" }}
+            transition={{ duration: 0.5 }}
+          >
+            <span className="section-eyebrow">Real Reviews</span>
+            <h2 className="section-title">Loved by <em>10,000+</em> Families</h2>
           </motion.div>
         </div>
 
-        {/* ANIMATED COUNTERS / TRUST METRICS */}
-        <div className="sp-trust-metrics">
-          
-          <div className="metric-box">
-            <CountUp end="10000+" />
-            <h4 className="metric-title">Happy Customers</h4>
-            <p className="metric-desc">Celebrating traditional tastes</p>
-          </div>
-
-          <div className="metric-box">
-            <CountUp end="4.9★" />
-            <h4 className="metric-title">Average Rating</h4>
-            <p className="metric-desc">Based on verified reviews</p>
-          </div>
-
-          <div className="metric-box">
-            <CountUp end="95%" />
-            <h4 className="metric-title">Repeat Orders</h4>
-            <p className="metric-desc">Customers returning for more</p>
-          </div>
-
-          <div className="metric-box">
-            <CountUp end="50000+" />
-            <h4 className="metric-title">Jars Delivered</h4>
-            <p className="metric-desc">Shipped with love across India</p>
-          </div>
-
+        {/* Animated Counters */}
+        <div className="sp-metrics-grid">
+          <motion.div className="sp-metric-box" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}>
+            <h3 className="sp-metric-number"><CountUp end="10000" suffix="+" /></h3>
+            <p className="sp-metric-label">Happy Customers</p>
+          </motion.div>
+          <motion.div className="sp-metric-box" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}>
+            <h3 className="sp-metric-number"><CountUp end="4.9" suffix="★" /></h3>
+            <p className="sp-metric-label">Average Rating</p>
+          </motion.div>
+          <motion.div className="sp-metric-box" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }}>
+            <h3 className="sp-metric-number"><CountUp end="95" suffix="%" /></h3>
+            <p className="sp-metric-label">Repeat Orders</p>
+          </motion.div>
+          <motion.div className="sp-metric-box" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.4 }}>
+            <h3 className="sp-metric-number"><CountUp end="50000" suffix="+" /></h3>
+            <p className="sp-metric-label">Jars Delivered</p>
+          </motion.div>
         </div>
 
-        {/* INSTAGRAM REELS WALL */}
-        <div className="sp-reels-section">
-          <div className="reels-header">
-            <span className="section-subtitle">~ Community Journal ~</span>
-            <h2 className="section-headline">Moments From Our Instagram</h2>
-          </div>
+        {/* Testimonial Carousel */}
+        <div className="sp-carousel-wrapper" ref={scrollRef}>
+          <div className="sp-carousel-fade-left"></div>
+          <div className="sp-carousel-fade-right"></div>
           
-          <div className="reels-grid">
-            {reels.map((r) => (
-              <div key={r.id} className="reel-card">
-                <div className="reel-image-wrapper">
-                  <img src={r.image} alt={r.title} />
-                  <div className="reel-overlay"></div>
-                  
-                  {/* Reel play and stats indicators */}
-                  <div className="reel-indicators">
-                    <span className="reel-views">
-                      <svg className="reel-views-icon" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z" />
-                      </svg>
-                      {r.views}
-                    </span>
-                    <div className="reel-play-circle">
-                      <svg className="reel-play-icon" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M8 5v14l11-7z" />
-                      </svg>
-                    </div>
-                  </div>
+          <motion.div 
+            className="sp-carousel-track"
+            animate={controls}
+            onHoverStart={() => controls.stop()}
+            onHoverEnd={() => controls.start({ x: "-50%", transition: { ease: "linear", duration: 30, repeat: Infinity } })}
+          >
+            {doubledTestimonials.map((t, idx) => (
+              <div className="sp-testimonial-card" key={`${t.id}-${idx}`}>
+                <div className="sp-stars">
+                  {[...Array(5)].map((_, i) => (
+                    <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill={i < t.rating ? 'var(--color-accent)' : 'none'} stroke={i < t.rating ? 'var(--color-accent)' : 'var(--color-muted-light)'} strokeWidth="2">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    </svg>
+                  ))}
                 </div>
-                
-                <div className="reel-details">
-                  <span className="reel-tag">@Swadyum</span>
-                  <p className="reel-caption">{r.title}</p>
+                <blockquote className="sp-quote">"{t.quote}"</blockquote>
+                <div className="sp-customer-info">
+                  <div className="sp-avatar">{t.name.charAt(0)}</div>
+                  <div>
+                    <div className="sp-name">{t.name}</div>
+                    <div className="sp-location">{t.location} • Verified Buyer</div>
+                  </div>
                 </div>
               </div>
             ))}
-          </div>
+          </motion.div>
         </div>
 
       </div>
-
-      {/* TRUST BAR: Scrolling Marquee */}
-      <div className="sp-trust-marquee-bar">
-        <div className="marquee-wrapper">
-          <div className="marquee-content">
-            <span>Verified Reviews • Real Families • Authentic Taste • Homemade Recipes • Traditional Bihar Heritage • </span>
-            <span>Verified Reviews • Real Families • Authentic Taste • Homemade Recipes • Traditional Bihar Heritage • </span>
-            <span>Verified Reviews • Real Families • Authentic Taste • Homemade Recipes • Traditional Bihar Heritage • </span>
-            <span>Verified Reviews • Real Families • Authentic Taste • Homemade Recipes • Traditional Bihar Heritage • </span>
-          </div>
-        </div>
-      </div>
-
     </section>
   );
 }

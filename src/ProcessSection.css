@@ -1,316 +1,96 @@
+/* ─── Process Section (Why Swadyum) ──────────────────────────────────────── */
 .process-section {
-  width: 100vw;
-  /* Warm cream base with a subtle handmade paper texture SVG */
-  background-color: var(--cream);
-  background-image: 
-    linear-gradient(rgba(248, 245, 240, 0.98), rgba(248, 245, 240, 0.98)),
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
-  padding: 10rem 0 12rem 0;
-  position: relative;
-  overflow: hidden;
+  background-color: var(--color-warm-bg);
 }
 
-/* Subtle Decorative Elements (Spice Particles & Mustard Seeds) */
-.process-pattern {
-  position: absolute;
-  width: 300px;
-  height: 300px;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='20' cy='20' r='1.5' fill='%23D87A1D'/%3E%3Ccircle cx='50' cy='10' r='1' fill='%23C79A3B'/%3E%3Ccircle cx='80' cy='30' r='2' fill='%232F5E3B'/%3E%3Ccircle cx='30' cy='80' r='1.5' fill='%231F1F1F'/%3E%3Ccircle cx='70' cy='70' r='1' fill='%23D87A1D'/%3E%3Cpath d='M10 50 Q20 40 30 50 T50 50' fill='none' stroke='%23C79A3B' stroke-width='0.5'/%3E%3C/svg%3E");
-  opacity: 0.03; /* 3% opacity as requested */
-  pointer-events: none;
-  z-index: 0;
+.process-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-8);
+  margin-top: var(--space-12);
 }
 
-.p-pattern-1 { top: 10%; left: 5%; }
-.p-pattern-2 { top: 40%; right: 5%; transform: rotate(45deg); }
-.p-pattern-3 { bottom: 15%; left: 15%; transform: rotate(-30deg); }
-
-
-.process-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 0 5%;
-  position: relative;
-  z-index: 1;
-}
-
-/* Section Title Area */
-.process-header {
+.process-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-10) var(--space-8);
   text-align: center;
-  margin-bottom: 8rem;
-}
-
-.process-eyebrow {
-  font-family: var(--font-family);
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--premium-gold);
-  text-transform: uppercase;
-  letter-spacing: 6px;
-  margin-bottom: 2rem;
-  display: block;
-}
-
-.process-headline {
-  font-family: var(--font-family);
-  font-size: 56px;
-  font-weight: 800;
-  color: var(--dark-text);
-  line-height: 1.2;
-  margin-bottom: 2.5rem;
-}
-
-.process-subtext {
-  font-family: var(--font-family);
-  font-size: 20px;
-  color: var(--muted-text);
-  line-height: 1.8;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-/* Process Journey */
-.process-journey {
-  position: relative;
-  margin-bottom: 10rem;
-}
-
-/* Flowing Organic Path */
-.process-path-container {
-  position: absolute;
-  top: 100px; /* Align with center of circles */
-  left: 5%;
-  right: 5%;
-  height: 100px;
-  z-index: 0;
-  display: none; /* Hide on mobile */
-}
-
-@media (min-width: 1024px) {
-  .process-path-container {
-    display: block;
-  }
-}
-
-.process-path {
-  width: 100%;
-  height: 100%;
-}
-
-.path-line {
-  stroke-dasharray: 2000;
-  stroke-dashoffset: 2000;
-  transition: stroke-dashoffset 3s cubic-bezier(0.4, 0, 0.2, 1) 0.5s;
-}
-
-.process-section.visible .path-line {
-  stroke-dashoffset: 0;
-}
-
-/* Process Steps */
-.process-steps {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  position: relative;
-  z-index: 1;
-}
-
-.process-step {
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
-  width: 18%; /* Space for 5 steps */
+  gap: var(--space-4);
+  transition: all var(--duration-normal) var(--ease-out);
 }
 
-/* Stagger vertically to make it organic */
-.step-1 { transform: translateY(0); }
-.step-2 { transform: translateY(40px); }
-.step-3 { transform: translateY(-20px); }
-.step-4 { transform: translateY(30px); }
-.step-5 { transform: translateY(-10px); }
-
-.process-step-img-container {
-  width: 160px;
-  height: 160px;
-  border-radius: 50%;
-  overflow: hidden;
-  margin-bottom: 2rem;
-  background-color: #fff;
-  border: 4px solid var(--cream);
-  box-shadow: 0 15px 35px rgba(0,0,0,0.06);
-  position: relative;
-  
-  /* Initial state for all animations */
-  opacity: 0;
+.process-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--color-primary);
 }
 
-.process-step-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+.process-icon-wrapper {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(47, 94, 59, 0.08), rgba(47, 94, 59, 0.03));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  transition: all var(--duration-normal) var(--ease-out);
 }
 
-/* Step 1: Fade Up */
-.anim-fade-up {
-  transform: translateY(30px);
-  transition: opacity 1s ease, transform 1s ease;
-}
-.process-section.visible .step-1 .anim-fade-up {
-  opacity: 1;
-  transform: translateY(0);
+.process-card:hover .process-icon-wrapper {
+  background: var(--color-primary);
+  color: #FFFFFF;
 }
 
-/* Step 2: Gently Rotate */
-.anim-rotate {
-  transform: rotate(-45deg) scale(0.9);
-  transition: opacity 1s ease 0.5s, transform 1.5s cubic-bezier(0.2, 0.8, 0.2, 1) 0.5s;
-}
-.process-section.visible .step-2 .anim-rotate {
-  opacity: 1;
-  transform: rotate(0deg) scale(1);
+.process-card-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-foreground);
 }
 
-/* Step 3: Reveal (clip path or blur) */
-.anim-reveal {
-  filter: blur(10px);
-  transform: scale(0.95);
-  transition: opacity 1s ease 1s, filter 1s ease 1s, transform 1s ease 1s;
-}
-.process-section.visible .step-3 .anim-reveal {
-  opacity: 1;
-  filter: blur(0);
-  transform: scale(1);
+.process-card-desc {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  line-height: 1.7;
 }
 
-/* Step 4: Glow */
-.anim-glow {
-  box-shadow: 0 0 0 rgba(199, 154, 59, 0);
-  transition: opacity 1s ease 1.5s, box-shadow 2s ease 1.5s;
-}
-.process-section.visible .step-4 .anim-glow {
-  opacity: 1;
-  box-shadow: 0 0 40px rgba(199, 154, 59, 0.4);
-}
-
-/* Step 5: Scale In elegantly */
-.anim-scale-in {
-  transform: scale(0.5);
-  transition: opacity 1s ease 2s, transform 1.5s cubic-bezier(0.34, 1.56, 0.64, 1) 2s;
-}
-.process-section.visible .step-5 .anim-scale-in {
-  opacity: 1;
-  transform: scale(1);
-}
-
-/* Content */
-.process-step-content {
-  opacity: 0;
-  transform: translateY(10px);
-  transition: opacity 0.8s ease, transform 0.8s ease;
-}
-
-/* Stagger content appearance */
-.process-section.visible .step-1 .process-step-content { opacity: 1; transform: translateY(0); transition-delay: 0.3s; }
-.process-section.visible .step-2 .process-step-content { opacity: 1; transform: translateY(0); transition-delay: 0.8s; }
-.process-section.visible .step-3 .process-step-content { opacity: 1; transform: translateY(0); transition-delay: 1.3s; }
-.process-section.visible .step-4 .process-step-content { opacity: 1; transform: translateY(0); transition-delay: 1.8s; }
-.process-section.visible .step-5 .process-step-content { opacity: 1; transform: translateY(0); transition-delay: 2.3s; }
-
-.process-step-num {
-  font-family: var(--font-family);
-  font-size: 14px;
-  font-weight: 800;
-  color: var(--mango-accent);
-  margin-bottom: 0.5rem;
-  display: block;
-}
-
-.process-step-title {
-  font-family: var(--font-family);
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--dark-text);
-  margin-bottom: 1rem;
-  line-height: 1.3;
-}
-
-.process-step-desc {
-  font-family: var(--font-family);
-  font-size: 14px;
-  color: var(--muted-text);
-  line-height: 1.6;
-}
-
-/* Premium End Block */
-.process-end-block {
-  text-align: center;
-  max-width: 800px;
-  margin: 0 auto;
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 1.5s ease 3s, transform 1.5s ease 3s; /* Animates in last */
-}
-
-.process-section.visible .process-end-block {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.gold-divider {
-  width: 60px;
-  height: 3px;
-  background-color: var(--premium-gold);
-  margin: 0 auto 3rem auto;
-}
-
-.end-statement {
-  font-family: var(--font-family);
-  font-size: 32px;
-  font-weight: 800;
-  color: var(--dark-text);
-  line-height: 1.4;
-}
-
-/* Responsive */
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
 @media (max-width: 1024px) {
-  .process-steps {
-    flex-direction: column;
-    align-items: center;
-    gap: 4rem;
-  }
-  
-  .process-step {
-    width: 100%;
-    max-width: 400px;
-    flex-direction: row;
-    text-align: left;
-    gap: 2rem;
-    transform: none; /* Remove staggered vertical positioning */
-  }
-  
-  .process-step-img-container {
-    width: 120px;
-    height: 120px;
-    margin-bottom: 0;
-    flex-shrink: 0;
-  }
-
-  /* Redefine horizontal path for mobile, but prompt said vertical flow, so no horizontal path */
-  
-  .process-headline {
-    font-size: 42px;
+  .process-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-6);
   }
 }
 
 @media (max-width: 600px) {
-  .process-step {
-    flex-direction: column;
-    text-align: center;
-    gap: 1rem;
+  .process-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
   }
-  .end-statement {
-    font-size: 24px;
+
+  .process-card {
+    padding: var(--space-8) var(--space-6);
+    flex-direction: row;
+    text-align: left;
+    gap: var(--space-5);
+  }
+
+  .process-icon-wrapper {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+  }
+
+  .process-card-title {
+    font-size: var(--text-lg);
+  }
+
+  .process-card-desc {
+    font-size: var(--text-xs);
   }
 }

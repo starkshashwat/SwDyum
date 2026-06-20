@@ -18,79 +18,94 @@ function Footer({ onNavigate }) {
   };
 
   return (
-    <footer className="global-footer">
+    <footer className="site-footer">
       <div className="footer-container">
         
-        {/* Column 1: Brand & Social */}
-        <div className="footer-column brand-column">
+        {/* Brand & Mission */}
+        <div className="footer-brand-col">
           <div className="footer-logo">
-            <img src="/logo-01.png" alt="Swadyum Logo" className="footer-logo-img" />
+            <img src="/logo-01.png" alt="Swadyum" className="footer-logo-img" />
           </div>
-          <p className="footer-tagline">
-            Bringing the authentic taste, sun-cured heritage, and traditional spice secrets of Bihar straight to your modern dining table.
+          <p className="footer-mission">
+            Bringing the authentic taste, sun-cured heritage, and traditional spice secrets of Bihar straight to your dining table.
           </p>
-          <div className="footer-socials">
-            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Instagram">
-              <span>📸</span>
+          <div className="footer-social">
+            <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+              </svg>
             </a>
-            <a href="https://whatsapp.com" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="WhatsApp">
-              <span>💬</span>
+            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" aria-label="Facebook">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"></path>
+              </svg>
             </a>
-            <a href="https://facebook.com" target="_blank" rel="noopener noreferrer" className="social-icon" aria-label="Facebook">
-              <span>👤</span>
+            <a href="https://wa.me/" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+              </svg>
             </a>
           </div>
         </div>
 
-        {/* Column 2: Quick Links */}
-        <div className="footer-column links-column">
-          <h4 className="footer-title">Quick Links</h4>
-          <ul className="footer-links-list">
+        {/* Quick Links */}
+        <div className="footer-links-col">
+          <h4 className="footer-heading">Quick Links</h4>
+          <ul className="footer-list">
             <li><a href="/" onClick={(e) => handleLinkClick('home', e)}>Home</a></li>
-            <li><a href="/shop" onClick={(e) => handleLinkClick('shop', e)}>Shop Pickles</a></li>
+            <li><a href="/shop" onClick={(e) => handleLinkClick('shop', e)}>Shop Best Sellers</a></li>
             <li><a href="/about" onClick={(e) => handleLinkClick('about', e)}>Our Story</a></li>
-            <li><a href="/reviews" onClick={(e) => handleLinkClick('reviews', e)}>Reviews</a></li>
-            <li><a href="/blog" onClick={(e) => handleLinkClick('blog', e)}>Culinary Blog</a></li>
+            <li><a href="/blog" onClick={(e) => handleLinkClick('blog', e)}>Recipes & Blog</a></li>
             <li><a href="/contact" onClick={(e) => handleLinkClick('contact', e)}>Contact Us</a></li>
           </ul>
         </div>
 
-        {/* Column 3: Categories */}
-        <div className="footer-column links-column">
-          <h4 className="footer-title">Our Categories</h4>
-          <ul className="footer-links-list">
-            <li><a href="/pickles" onClick={(e) => handleLinkClick('category-pickles', e)}>All Pickles</a></li>
-            <li><a href="/mango-pickle" onClick={(e) => handleLinkClick('category-mango-pickle', e)}>Mango Pickles</a></li>
-            <li><a href="/garlic-pickle" onClick={(e) => handleLinkClick('category-garlic-pickle', e)}>Garlic Pickles</a></li>
-            <li><a href="/lemon-pickle" onClick={(e) => handleLinkClick('category-lemon-pickle', e)}>Lemon Pickles</a></li>
-            <li><a href="/green-chilli-pickle" onClick={(e) => handleLinkClick('category-green-chilli-pickle', e)}>Green Chilli</a></li>
+        {/* Categories */}
+        <div className="footer-links-col">
+          <h4 className="footer-heading">Shop By Flavour</h4>
+          <ul className="footer-list">
+            <li><a href="/category-mango-pickle" onClick={(e) => handleLinkClick('category-mango-pickle', e)}>Mango Pickles</a></li>
+            <li><a href="/category-garlic-pickle" onClick={(e) => handleLinkClick('category-garlic-pickle', e)}>Garlic Pickles</a></li>
+            <li><a href="/category-lemon-pickle" onClick={(e) => handleLinkClick('category-lemon-pickle', e)}>Lemon Pickles</a></li>
+            <li><a href="/category-green-chilli-pickle" onClick={(e) => handleLinkClick('category-green-chilli-pickle', e)}>Green Chilli</a></li>
+            <li><a href="/shop" onClick={(e) => handleLinkClick('shop', e)}>All Products</a></li>
           </ul>
         </div>
 
-        {/* Column 4: Newsletter */}
-        <div className="footer-column newsletter-column">
-          <h4 className="footer-title">Newsletter</h4>
-          <p className="newsletter-text">
-            Subscribe to get heritage Bihari cooking tips, traditional recipes, and announcements of seasonal small batches.
+        {/* Newsletter */}
+        <div className="footer-newsletter-col">
+          <h4 className="footer-heading">Join the Family</h4>
+          <p className="footer-newsletter-text">
+            Subscribe for heritage recipes, exclusive offers, and updates on new batches.
           </p>
           
           {subscribed ? (
-            <div className="footer-subscribe-success">
-              <span>✓</span> Subscribed successfully!
+            <div className="footer-success">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+              </svg>
+              Welcome to the Swadyum family!
             </div>
           ) : (
-            <form onSubmit={handleSubscribe} className="footer-newsletter-form">
-              <input 
-                type="email" 
-                placeholder="Enter your email" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="footer-email-input"
-                required
-              />
-              <button type="submit" className="footer-subscribe-btn">
-                Subscribe
-              </button>
+            <form onSubmit={handleSubscribe} className="footer-form">
+              <div className="footer-input-group">
+                <input 
+                  type="email" 
+                  placeholder="Your email address" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="footer-input"
+                  required
+                />
+                <button type="submit" className="footer-submit" aria-label="Subscribe">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                    <polyline points="12 5 19 12 12 19"></polyline>
+                  </svg>
+                </button>
+              </div>
             </form>
           )}
         </div>
@@ -98,14 +113,16 @@ function Footer({ onNavigate }) {
       </div>
 
       <div className="footer-bottom">
-        <div className="footer-bottom-container">
-          <p className="copyright-text">
-            &copy; {new Date().getFullYear()} Swadyum Foods Private Limited. All Rights Reserved.
+        <div className="footer-bottom-inner">
+          <p className="footer-copyright">
+            &copy; {new Date().getFullYear()} Swadyum Foods Pvt. Ltd. All Rights Reserved.
           </p>
-          <div className="footer-policies">
+          <div className="footer-legal">
             <a href="/privacy" onClick={(e) => e.preventDefault()}>Privacy Policy</a>
-            <span className="policy-divider">|</span>
+            <span className="footer-dot">•</span>
             <a href="/terms" onClick={(e) => e.preventDefault()}>Terms of Service</a>
+            <span className="footer-dot">•</span>
+            <a href="/shipping" onClick={(e) => e.preventDefault()}>Shipping Policy</a>
           </div>
         </div>
       </div>

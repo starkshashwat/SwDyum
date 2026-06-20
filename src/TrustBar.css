@@ -1,152 +1,95 @@
-.trust-bar-section {
-  width: 100vw;
-  height: 120px;
-  background-color: #F5EFE6;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  z-index: 10;
-  border-top: 1.5px solid rgba(199, 154, 59, 0.2);
-  border-bottom: 1.5px solid rgba(199, 154, 59, 0.2);
+/* ─── Trust Bar Marquee ──────────────────────────────────────────────────── */
+.trust-bar {
+  background-color: var(--color-foreground);
+  padding: var(--space-4) 0;
   overflow: hidden;
+  position: relative;
 }
 
-/* Subtle background decorative motifs (3% opacity) */
-.trust-bar-bg-decor {
+.trust-bar::before,
+.trust-bar::after {
+  content: '';
   position: absolute;
   top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  bottom: 0;
+  width: 80px;
+  z-index: 2;
   pointer-events: none;
-  z-index: 1;
 }
 
-.trust-seed-svg {
-  position: absolute;
-  bottom: 8px;
-  right: 5%;
-  width: 180px;
-  height: auto;
-  color: var(--premium-gold);
-  opacity: 0.03;
+.trust-bar::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--color-foreground), transparent);
 }
 
-.trust-border-decor {
-  position: absolute;
-  top: 0;
-  left: 5%;
-  right: 5%;
-  height: 100%;
-  border-left: 1px dashed rgba(199, 154, 59, 0.04);
-  border-right: 1px dashed rgba(199, 154, 59, 0.04);
+.trust-bar::after {
+  right: 0;
+  background: linear-gradient(-90deg, var(--color-foreground), transparent);
 }
 
-/* Container spacing */
-.trust-bar-container {
-  max-width: 1300px;
-  width: 100%;
-  padding: 0 5%;
+.trust-bar-track {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: relative;
-  z-index: 2;
+  gap: var(--space-12);
+  animation: marquee 40s linear infinite;
+  width: max-content;
 }
 
-/* Trust Pillar Items */
-.trust-item {
+.trust-bar-item {
   display: flex;
   align-items: center;
-  gap: 1rem;
-  cursor: pointer;
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  gap: var(--space-3);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.trust-icon-wrapper {
-  position: relative;
-  width: 44px;
-  height: 44px;
+.trust-bar-icon {
   display: flex;
-  justify-content: center;
   align-items: center;
-  color: var(--primary-green);
+  color: var(--color-accent-light);
 }
 
-.trust-icon-svg {
-  width: 32px;
-  height: 32px;
-  z-index: 2;
-  transition: color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-/* Icon Glow background */
-.glow-circle {
-  position: absolute;
-  width: 40px;
-  height: 40px;
-  background-color: var(--premium-gold);
-  border-radius: 50%;
-  opacity: 0;
-  transform: scale(0.8);
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: 1;
-  filter: blur(4px);
-}
-
-.trust-text {
-  font-family: var(--font-family);
-  font-size: 16px;
+.trust-bar-text {
+  font-size: var(--text-sm);
   font-weight: 600;
-  color: var(--dark-text);
-  letter-spacing: -0.2px;
-  transition: color 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
-/* HOVER MICRO INTERACTIONS */
-.trust-item:hover {
-  transform: translateY(-3px);
-}
-
-.trust-item:hover .trust-icon-svg {
-  color: var(--premium-gold);
-}
-
-.trust-item:hover .trust-text {
-  color: var(--primary-green);
-}
-
-.trust-item:hover .glow-circle {
-  opacity: 0.2;
-  transform: scale(1.15);
-}
-
-
-/* RESPONSIVENESS */
-
-@media (max-width: 1024px) {
-  .trust-text {
-    font-size: 14px;
+@keyframes marquee {
+  0% {
+    transform: translateX(0);
   }
-  .trust-icon-svg {
-    width: 28px;
-    height: 28px;
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .trust-bar-track {
+    animation: none;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--space-6);
   }
 }
 
 @media (max-width: 768px) {
-  .trust-bar-section {
-    height: auto;
-    padding: 2.5rem 0;
+  .trust-bar {
+    padding: var(--space-3) 0;
   }
-  .trust-bar-container {
-    flex-direction: column;
-    gap: 1.8rem;
-    align-items: flex-start;
-    padding-left: 15%;
+
+  .trust-bar-text {
+    font-size: var(--text-xs);
   }
-  .trust-item {
-    gap: 1.2rem;
+
+  .trust-bar-track {
+    gap: var(--space-8);
+    animation-duration: 30s;
+  }
+
+  .trust-bar::before,
+  .trust-bar::after {
+    width: 40px;
   }
 }

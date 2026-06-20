@@ -1,114 +1,68 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import './CategoriesSection.css';
 
-function CategoriesSection() {
-  const categories = [
-    {
-      id: 1,
-      title: 'Mango Pickle',
-      subtitle: 'The timeless favorite.',
-      image: '/cat_mango.png',
-      cta: 'Explore Collection',
-      class: 'cat-mango-hero'
-    },
-    {
-      id: 2,
-      title: 'Garlic Pickle',
-      subtitle: 'Bold and aromatic.',
-      image: '/cat_garlic.png',
-      cta: 'Explore Collection',
-      class: 'cat-garlic'
-    },
-    {
-      id: 3,
-      title: 'Lemon Pickle',
-      subtitle: 'Tangy and refreshing.',
-      image: '/prod_lemon.png',
-      cta: 'Explore Collection',
-      class: 'cat-lemon'
-    },
-    {
-      id: 4,
-      title: 'Green Chilli Pickle',
-      subtitle: 'For spice lovers.',
-      image: '/prod_chili.png',
-      cta: 'Explore Collection',
-      class: 'cat-chili'
-    },
-    {
-      id: 5,
-      title: 'Mixed Pickle',
-      subtitle: 'A celebration of flavors.',
-      image: '/cat_mixed.png',
-      cta: 'Explore Collection',
-      class: 'cat-mixed'
-    },
-    {
-      id: 6,
-      title: 'Bihar Heritage Collection',
-      subtitle: 'Authentic flavors from Bihar.',
-      image: '/deal_scatter.png',
-      cta: 'Explore Collection',
-      class: 'cat-heritage-full'
-    }
-  ];
+const categories = [
+  { slug: 'mango-pickle', title: 'Mango Pickle', subtitle: 'The timeless favorite', image: '/cat_mango.png' },
+  { slug: 'garlic-pickle', title: 'Garlic Pickle', subtitle: 'Bold & aromatic', image: '/cat_garlic.png' },
+  { slug: 'lemon-pickle', title: 'Lemon Pickle', subtitle: 'Tangy & refreshing', image: '/prod_lemon.png' },
+  { slug: 'green-chilli-pickle', title: 'Green Chilli', subtitle: 'For spice lovers', image: '/prod_chili.png' },
+];
 
+const cardVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: (i) => ({
+    opacity: 1,
+    y: 0,
+    transition: { delay: i * 0.1, duration: 0.5, ease: [0.16, 1, 0.3, 1] },
+  }),
+};
+
+function CategoriesSection({ onNavigate }) {
   return (
-    <section className="categories-section">
-      <div className="categories-container">
-        
-        {/* SECTION INTRO */}
-        <div className="categories-intro">
-          <span className="section-subtitle">~ Featured Collections ~</span>
-          <h2 className="section-headline">
-            Discover Bihar's<br />
-            Most Loved Flavors
-          </h2>
-          <p className="categories-subtext">
-            Crafted from traditional recipes and premium ingredients, each collection celebrates a different taste of Bihar.
-          </p>
-        </div>
+    <section className="categories-section section-padding">
+      <div className="section-container text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-80px" }}
+          transition={{ duration: 0.5 }}
+        >
+          <span className="section-eyebrow">Explore by Flavour</span>
+          <h2 className="section-title">Find Your Favourite</h2>
+        </motion.div>
 
-        {/* ASYMMETRICAL EDITORIAL GRID */}
-        <div className="categories-grid-magazine">
-          {categories.map((cat) => (
-            <div className={`category-magazine-card ${cat.class}`} key={cat.id}>
-              
-              {/* Card visual elements */}
-              <div className="cat-card-visual">
-                <img src={cat.image} alt={cat.title} className="cat-card-img" />
-                <div className="cat-card-gradient"></div>
-                <div className="cat-card-highlight"></div> {/* Golden spotlight overlay */}
+        <div className="cat-grid">
+          {categories.map((cat, i) => (
+            <motion.div
+              className="cat-card"
+              key={cat.slug}
+              custom={i}
+              variants={cardVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-50px" }}
+              onClick={() => onNavigate && onNavigate(`category-${cat.slug}`)}
+              role="button"
+              tabIndex={0}
+              onKeyDown={(e) => { if (e.key === 'Enter') onNavigate && onNavigate(`category-${cat.slug}`); }}
+              aria-label={`Browse ${cat.title}`}
+            >
+              <div className="cat-card-img-wrap">
+                <img src={cat.image} alt={cat.title} className="cat-card-img" loading="lazy" />
               </div>
-
-              {/* Card text and CTA buttons */}
-              <div className="cat-card-info">
-                <div className="cat-card-text">
-                  <span className="cat-card-subtitle">{cat.subtitle}</span>
-                  <h3 className="cat-card-title">{cat.title}</h3>
-                </div>
-                
-                <div className="cat-card-cta-wrapper">
-                  <button className="cat-card-explore-btn">
-                    {cat.cta}
-                    <svg className="cta-icon-arrow" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                    </svg>
-                  </button>
-                </div>
+              <div className="cat-card-content">
+                <h3 className="cat-card-title">{cat.title}</h3>
+                <span className="cat-card-subtitle">{cat.subtitle}</span>
+                <span className="cat-card-arrow" aria-hidden="true">
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </svg>
+                </span>
               </div>
-
-            </div>
+            </motion.div>
           ))}
         </div>
-
-        {/* BOTTOM GLOBAL CTA */}
-        <div className="categories-footer">
-          <button className="explore-all-gold-btn">
-            Explore All Collections
-          </button>
-        </div>
-
       </div>
     </section>
   );
