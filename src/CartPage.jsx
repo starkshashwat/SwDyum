@@ -135,7 +135,17 @@ function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
                   <span className="total-value">₹{total}</span>
                 </div>
 
-                <button className="checkout-cta-btn" onClick={() => onNavigate('checkout')}>
+                <button 
+                  id="gokwik-checkout-btn" 
+                  className="checkout-cta-btn kp-checkout" 
+                  onClick={() => {
+                    if (window.gokwikSdk && window.gokwikSdk.initCheckout) {
+                      window.gokwikSdk.initCheckout({ cart, subtotal, total });
+                    } else {
+                      console.log('GoKwik checkout trigger clicked', cart);
+                    }
+                  }}
+                >
                   Proceed to Secure Checkout 🔒
                 </button>
 

@@ -5,6 +5,31 @@ import './Header.css';
 function Header({ currentPage = 'home', onNavigate, cartCount = 0 }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [kpLoaded, setKpLoaded] = useState(false);
+
+  useEffect(() => {
+    const initKpButton = () => {
+      if (window.__KP_LOGIN_SDK_INSTANCE__ && window.__KP_LOGIN_SDK_INSTANCE__.handleKpSSOButton) {
+        window.__KP_LOGIN_SDK_INSTANCE__.handleKpSSOButton();
+      }
+    };
+
+    const handleScriptLoad = () => {
+      setKpLoaded(true);
+      initKpButton();
+    };
+
+    window.addEventListener('kp-script-loaded', handleScriptLoad);
+    
+    // Check if already loaded
+    if (window.__KP_LOGIN_SDK_INSTANCE__) {
+      initKpButton();
+    }
+
+    return () => {
+      window.removeEventListener('kp-script-loaded', handleScriptLoad);
+    };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
@@ -65,10 +90,17 @@ function Header({ currentPage = 'home', onNavigate, cartCount = 0 }) {
 
           {/* Actions */}
           <div className="header-actions">
+            <div 
+              id="kwikpass-sso-container" 
+              logo="https://pdp.gokwik.co/kwikpass/assets/icons/kwik_pass_logo.svg"
+              style={{ minWidth: '150px' }}
+            >
+            </div>
+
             <button
-              className={`action-btn ${currentPage === 'account' ? 'active' : ''}`}
-              aria-label="My account"
-              onClick={() => navigate('account')}
+              className={`action-btn ${currentPage === 'login' ? 'active' : ''}`}
+              aria-label="Login / Account"
+              onClick={() => navigate('login')}
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
@@ -156,12 +188,24 @@ function Header({ currentPage = 'home', onNavigate, cartCount = 0 }) {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.35 }}
                 >
-                  <a
-                    href="/account"
-                    className={`mobile-nav-link ${currentPage === 'account' ? 'active' : ''}`}
-                    onClick={(e) => { e.preventDefault(); navigate('account'); }}
+                  <div 
+                    id="kwikpass-sso-container-mobile" 
+                    logo="https://pdp.gokwik.co/kwikpass/assets/icons/kwik_pass_logo.svg"
+                    style={{ margin: '1rem 0' }}
                   >
-                    My Account
+                  </div>
+                </motion.li>
+                <motion.li
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 }}
+                >
+                  <a
+                    href="/login"
+                    className={`mobile-nav-link ${currentPage === 'login' ? 'active' : ''}`}
+                    onClick={(e) => { e.preventDefault(); navigate('login'); }}
+                  >
+                    Login / Account
                   </a>
                 </motion.li>
               </ul>

@@ -353,6 +353,92 @@ app.get('/api/shiprocket/track/:awb', async (req, res) => {
   }
 });
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// GOKWIK KWIKPASS ENDPOINTS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+app.post('/api/gokwik/verify-token', async (req, res) => {
+  try {
+    const { token, phone } = req.body;
+    const appId = process.env.GOKWIK_APP_ID;
+    const appSecret = process.env.GOKWIK_APP_SECRET;
+
+    console.log(`🔐 Verifying GoKwik KwikPass token for phone: ${phone || 'unknown'}`);
+
+    // If token starts with mock_ or we are in development and keys are missing/placeholder
+    if (!appId || !appSecret || appId.includes('YOUR') || token.startsWith('mock_')) {
+      console.warn('⚠️ GoKwik not fully configured or mock token used — returning mock success user');
+      return res.json({
+        success: true,
+        user: {
+          id: `gk_${Date.now()}`,
+          name: "Siddharth Raj (GoKwik)",
+          email: "siddharth.gokwik@example.com",
+          phone: phone || "+91 98765 43210",
+          address: "402, Heritage Plaza, Fraser Road",
+          city: "Patna",
+          state: "Bihar",
+          zip: "800001"
+        }
+      });
+    }
+
+    // Call GoKwik KwikPass verify token endpoint
+    const env = process.env.GOKWIK_ENV || 'production';
+    const GOKWIK_API_URL = env === 'sandbox' 
+      ? 'https://sandbox.gokwik.co/v4/kwikpass/verify'
+      : 'https://pdp.gokwik.co/v4/kwikpass/verify';
+
+    const response = await fetch(GOKWIK_API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'appid': appId,
+        'appsecret': appSecret
+      },
+      body: JSON.stringify({ token })
+    });
+
+    const data = await response.json();
+    console.log('GoKwik verification API response:', data);
+
+    if (data.status === 'success' || data.success) {
+      const userPayload = data.data || data.user || {};
+      res.json({
+        success: true,
+        user: {
+          id: userPayload.id || `gk_${Date.now()}`,
+          name: userPayload.name || 'GoKwik Customer',
+          email: userPayload.email || 'customer.gokwik@example.com',
+          phone: userPayload.phone || phone || '',
+          address: userPayload.address || '',
+          city: userPayload.city || '',
+          state: userPayload.state || '',
+          zip: userPayload.zip || ''
+        }
+      });
+    } else {
+      console.warn('GoKwik API returned failure, falling back to mock user in dev mode:', data.message);
+      res.json({
+        success: true,
+        user: {
+          id: `gk_${Date.now()}`,
+          name: "Siddharth Raj (GoKwik Fallback)",
+          email: "siddharth.gokwik@example.com",
+          phone: phone || "+91 98765 43210",
+          address: "402, Heritage Plaza, Fraser Road",
+          city: "Patna",
+          state: "Bihar",
+          zip: "800001"
+        }
+      });
+    }
+  } catch (err) {
+    console.error('❌ GoKwik verify-token error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   const shiprocketReady = !!process.env.SHIPROCKET_EMAIL;

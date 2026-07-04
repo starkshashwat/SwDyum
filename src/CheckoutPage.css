@@ -737,3 +737,75 @@
   margin: 0;
   line-height: 1.2;
 }
+
+/* ── GoKwik Pass Checkout Autofill Banner ────────────────────────────────── */
+.gokwik-checkout-autofill-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  background: linear-gradient(135deg, rgba(17, 58, 107, 0.03) 0%, rgba(28, 78, 138, 0.08) 100%);
+  border: 1px solid rgba(17, 58, 107, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-6);
+  font-size: var(--text-xs);
+}
+
+.gk-banner-logo {
+  font-size: var(--text-xl);
+  color: #113A6B;
+  flex-shrink: 0;
+}
+
+.gk-banner-content {
+  flex: 1;
+}
+
+.gk-banner-content strong {
+  display: block;
+  color: #113A6B;
+  font-size: var(--text-sm);
+  margin-bottom: 2px;
+}
+
+.gk-banner-content p {
+  color: var(--color-muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.gk-autofill-btn {
+  background: #113A6B;
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+
+.gk-autofill-btn:hover:not(:disabled) {
+  background: #1c4e8a;
+  transform: translateY(-1px);
+}
+
+.gk-autofill-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+@media (max-width: 576px) {
+  .gokwik-checkout-autofill-banner {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: var(--space-3);
+  }
+  .gk-banner-logo {
+    display: none;
+  }
+}
+

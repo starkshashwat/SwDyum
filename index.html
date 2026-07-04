@@ -14,5 +14,34 @@
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
+    
+    <!-- GoKwik KwikPass Integration -->
+    <script id="kwikpass-init">  
+      window.merchantInfo = {
+        ...window.merchantInfo,
+        mid: "19ainsljv6e7",
+        environment: "production",
+        type: "merchantInfo"
+      };
+    </script>
+    <script>
+      (function () {
+        window.__KP_LOGIN_SDK_INSTANCE__ = window.__KP_LOGIN_SDK_INSTANCE__ || {};
+        window.__KP_LOGIN_SDK_INSTANCE__.logEvents = window.__KP_LOGIN_SDK_INSTANCE__.logEvents || function(event){
+          window.kpqueue = window.kpqueue || [];
+          window.kpqueue.push(event);
+        };
+        var s = document.createElement('script');
+        s.type = 'text/javascript';
+        s.defer = true;
+        s.src = 'https://pdp.gokwik.co/kwikpass/plugin/build/kp-custom-merchant.js';
+        s.onload = function() {
+          console.log("KwikPass SDK script loaded successfully!");
+          window.dispatchEvent(new CustomEvent('kp-script-loaded'));
+        };
+        var x = document.getElementsByTagName('script')[0];
+        x.parentNode.insertBefore(s, x);
+      })();
+    </script>
   </body>
 </html>

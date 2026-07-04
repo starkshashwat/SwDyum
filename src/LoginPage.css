@@ -194,3 +194,59 @@
   color: var(--dark-text);
   text-decoration: underline;
 }
+
+/* ─── KwikPass Button & Divider ─────────────────────────────────────────── */
+.login-divider-text {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--muted-text);
+  font-size: 0.85rem;
+  margin: 1.5rem 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.login-divider-text::before,
+.login-divider-text::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.login-divider-text:not(:empty)::before {
+  margin-right: .75em;
+}
+
+.login-divider-text:not(:empty)::after {
+  margin-left: .75em;
+}
+
+.gokwik-pass-btn {
+  background: linear-gradient(135deg, #113A6B 0%, #1c4e8a 100%);
+  color: #ffffff;
+  border: 1px solid #113A6B;
+  width: 100%;
+  padding: 14px 20px;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(17, 58, 107, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.gokwik-pass-btn:hover {
+  background: linear-gradient(135deg, #1c4e8a 0%, #113A6B 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(17, 58, 107, 0.35);
+}
+
+.gokwik-pass-btn:active {
+  transform: translateY(0);
+}
+
