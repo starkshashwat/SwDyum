@@ -1,7 +1,8 @@
 // Swadyum — Shiprocket API Frontend Helper
 // Calls our local proxy server at localhost:3001 to avoid CORS issues
 
-const PROXY_BASE = 'http://localhost:3001/api/shiprocket';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
+const PROXY_BASE = `${API_BASE}/shiprocket`;
 
 // Small delay helper
 const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
