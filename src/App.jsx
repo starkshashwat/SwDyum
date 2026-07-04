@@ -28,6 +28,10 @@ import AccountPage from './AccountPage';
 import OrderDetailsPage from './OrderDetailsPage';
 import SalesPop from './SalesPop';
 import ExitIntentPop from './ExitIntentPop';
+import PrivacyPolicyPage from './PrivacyPolicyPage';
+import ShippingPolicyPage from './ShippingPolicyPage';
+import ReturnPolicyPage from './ReturnPolicyPage';
+import TermsPage from './TermsPage';
 
 function App() {
   const parsePath = (path) => {
@@ -40,6 +44,10 @@ function App() {
       return `blog-${slug}`;
     }
     if (path === '/reviews') return 'reviews';
+    if (path === '/privacy-policy') return 'privacy-policy';
+    if (path === '/shipping-policy') return 'shipping-policy';
+    if (path === '/return-policy') return 'return-policy';
+    if (path === '/terms') return 'terms';
     if (path === '/cart') return 'cart';
     if (path === '/checkout') return 'checkout';
     if (path === '/login') return 'login';
@@ -233,6 +241,10 @@ function App() {
       path = `/blog/${slug}`;
     }
     else if (targetPage === 'reviews') path = '/reviews';
+    else if (targetPage === 'privacy-policy') path = '/privacy-policy';
+    else if (targetPage === 'shipping-policy') path = '/shipping-policy';
+    else if (targetPage === 'return-policy') path = '/return-policy';
+    else if (targetPage === 'terms') path = '/terms';
     else if (targetPage === 'cart') path = '/cart';
     else if (targetPage === 'checkout') path = '/checkout';
     else if (targetPage === 'login') path = '/login';
@@ -272,6 +284,14 @@ function App() {
         <BlogDetailsPage blogSlug={currentPage.substring('blog-'.length)} onNavigate={handleNavigate} />
       ) : currentPage === 'reviews' ? (
         <ReviewsPage onNavigate={handleNavigate} />
+      ) : currentPage === 'privacy-policy' ? (
+        <PrivacyPolicyPage onNavigate={handleNavigate} />
+      ) : currentPage === 'shipping-policy' ? (
+        <ShippingPolicyPage onNavigate={handleNavigate} />
+      ) : currentPage === 'return-policy' ? (
+        <ReturnPolicyPage onNavigate={handleNavigate} />
+      ) : currentPage === 'terms' ? (
+        <TermsPage onNavigate={handleNavigate} />
       ) : currentPage === 'cart' ? (
         <CartPage cart={cart} updateCartQty={updateCartQty} removeFromCart={removeFromCart} onNavigate={handleNavigate} />
       ) : currentPage === 'checkout' ? (

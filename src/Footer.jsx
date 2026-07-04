@@ -118,11 +118,13 @@ function Footer({ onNavigate }) {
             &copy; {new Date().getFullYear()} Swadyum Foods Pvt. Ltd. All Rights Reserved.
           </p>
           <div className="footer-legal">
-            <a href="/privacy" onClick={(e) => e.preventDefault()}>Privacy Policy</a>
+            <a href="/privacy-policy" onClick={(e) => handleLinkClick('privacy-policy', e)}>Privacy Policy</a>
             <span className="footer-dot">•</span>
-            <a href="/terms" onClick={(e) => e.preventDefault()}>Terms of Service</a>
+            <a href="/terms" onClick={(e) => handleLinkClick('terms', e)}>Terms of Service</a>
             <span className="footer-dot">•</span>
-            <a href="/shipping" onClick={(e) => e.preventDefault()}>Shipping Policy</a>
+            <a href="/shipping-policy" onClick={(e) => handleLinkClick('shipping-policy', e)}>Shipping Policy</a>
+            <span className="footer-dot">•</span>
+            <a href="/return-policy" onClick={(e) => handleLinkClick('return-policy', e)}>Return & Refund Policy</a>
           </div>
         </div>
       </div>

@@ -41,7 +41,7 @@ function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
       }
     } catch (err) {
       console.error('Fastrr error:', err);
-      alert('Network error during checkout initialization.');
+      alert(`Checkout initialization failed: ${err.message || 'Network error'}`);
     } finally {
       setIsCheckoutLoading(false);
     }
