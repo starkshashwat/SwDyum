@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import './CheckoutPage.css';
 import { mockDb } from './mockDb';
 
@@ -33,107 +33,6 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
   const [processingStep, setProcessingStep] = useState('');
   const [placedOrder, setPlacedOrder] = useState(null);
   const [fulfillError, setFulfillError] = useState(null);
-
-  // Listen to KwikPass events on Checkout page
-  useEffect(() => {
-    const handleKpEvent = async (event) => {
-      console.log('KwikPass Checkout Event Received:', event.detail);
-      const { kpToken, success, error: kpError, phone } = event.detail || {};
-      if (success && kpToken) {
-        setIsProcessing(true);
-        setProcessingStep('Retrieving GoKwik details...');
-        try {
-          const res = await fetch('http://localhost:3001/api/gokwik/verify-token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: kpToken, phone }),
-          });
-          const data = await res.json();
-          setIsProcessing(false);
-          setProcessingStep('');
-          if (data.success && data.user) {
-            const user = data.user;
-            setFormData(prev => ({
-              ...prev,
-              name: user.name || prev.name,
-              email: user.email || prev.email,
-              phone: user.phone || prev.phone || phone || '',
-              address: user.address || prev.address,
-              city: user.city || prev.city,
-              state: user.state || prev.state,
-              zip: user.zip || prev.zip,
-            }));
-          } else {
-            setFulfillError(data.error || 'Failed to retrieve GoKwik details.');
-          }
-        } catch (err) {
-          setIsProcessing(false);
-          setProcessingStep('');
-          setFulfillError('GoKwik Pass authentication failed.');
-        }
-      } else if (kpError) {
-        setFulfillError(kpError || 'GoKwik Pass login failed.');
-      }
-    };
-
-    window.addEventListener('kp-data-sent', handleKpEvent);
-    return () => {
-      window.removeEventListener('kp-data-sent', handleKpEvent);
-    };
-  }, []);
-
-  const handleKwikPassCheckout = () => {
-    if (window.KwikPass) {
-      try {
-        if (typeof window.KwikPass.open === 'function') {
-          window.KwikPass.open();
-        } else if (typeof window.KwikPass.login === 'function') {
-          window.KwikPass.login();
-        } else if (typeof window.KwikPass.init === 'function') {
-          window.KwikPass.init();
-        } else {
-          simulateKwikPassCheckout();
-        }
-      } catch (err) {
-        simulateKwikPassCheckout();
-      }
-    } else {
-      simulateKwikPassCheckout();
-    }
-  };
-
-  const simulateKwikPassCheckout = () => {
-    setIsProcessing(true);
-    setProcessingStep('Retrieving GoKwik details...');
-    setTimeout(async () => {
-      try {
-        const res = await fetch('http://localhost:3001/api/gokwik/verify-token', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token: 'mock_token_checkout', phone: '+91 98765 43210' }),
-        });
-        const data = await res.json();
-        setIsProcessing(false);
-        setProcessingStep('');
-        if (data.success && data.user) {
-          const user = data.user;
-          setFormData(prev => ({
-            ...prev,
-            name: user.name || prev.name,
-            email: user.email || prev.email,
-            phone: user.phone || prev.phone,
-            address: user.address || prev.address,
-            city: user.city || prev.city,
-            state: user.state || prev.state,
-            zip: user.zip || prev.zip,
-          }));
-        }
-      } catch (err) {
-        setIsProcessing(false);
-        setProcessingStep('');
-      }
-    }, 1200);
-  };
 
   // Cart totals
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -434,23 +333,6 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
             {/* ── Left: Form ──────────────────────────────────────────── */}
             <div className="checkout-form-section">
               <form onSubmit={handleSubmit} className="premium-form">
-
-                {/* GoKwik Pass Quick Login/Autofill Banner */}
-                <div className="gokwik-checkout-autofill-banner">
-                  <div className="gk-banner-logo">⚡</div>
-                  <div className="gk-banner-content">
-                    <strong>1-Click Checkout with GoKwik Pass</strong>
-                    <p>Autofill your address details instantly using OTP.</p>
-                  </div>
-                  <button
-                    type="button"
-                    className="gk-autofill-btn"
-                    onClick={handleKwikPassCheckout}
-                    disabled={isProcessing}
-                  >
-                    Auto-Fill Address
-                  </button>
-                </div>
 
                 <h3 className="form-section-title">1. Shipping Address</h3>
 

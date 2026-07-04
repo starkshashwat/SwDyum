@@ -20,7 +20,12 @@ import ReviewsPage from './ReviewsPage';
 import CategoryPage from './CategoryPage';
 import Footer from './Footer';
 import CartPage from './CartPage';
+import CheckoutPage from './CheckoutPage';
 import LoginPage from './LoginPage';
+import SignupPage from './SignupPage';
+import ForgotPasswordPage from './ForgotPasswordPage';
+import AccountPage from './AccountPage';
+import OrderDetailsPage from './OrderDetailsPage';
 import SalesPop from './SalesPop';
 import ExitIntentPop from './ExitIntentPop';
 
@@ -36,7 +41,15 @@ function App() {
     }
     if (path === '/reviews') return 'reviews';
     if (path === '/cart') return 'cart';
+    if (path === '/checkout') return 'checkout';
     if (path === '/login') return 'login';
+    if (path === '/signup') return 'signup';
+    if (path === '/forgot-password') return 'forgot-password';
+    if (path === '/account') return 'account';
+    if (path.startsWith('/account/orders/')) {
+      const orderId = path.substring('/account/orders/'.length);
+      return `order-details-${orderId}`;
+    }
     if (path === '/pickles') return 'category-pickles';
     if (path === '/mango-pickle') return 'category-mango-pickle';
     if (path === '/lemon-pickle') return 'category-lemon-pickle';
@@ -70,27 +83,70 @@ function App() {
   }, [currentUser]);
 
   useEffect(() => {
-    const handleKwikpassLogin = (event) => {
-      // The kpToken is received here.
-      const token = event.detail?.kpToken;
-      console.log('Received KwikPass token:', token);
-      
-      // Usually, you'd send this token to your backend to decrypt it securely 
-      // with the secret key and get the user's phone/email.
-      // For now, we will set a placeholder user to show the logged-in state.
-      if (token) {
-        setCurrentUser({
-          id: 'kp_user_id',
-          name: 'KwikPass User',
-          token: token
-        });
+    const fetchSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profile) {
+            setCurrentUser(profile);
+          } else {
+            setCurrentUser({
+              id: session.user.id,
+              name: session.user.user_metadata?.name || 'Valued Customer',
+              email: session.user.email,
+              phone: session.user.user_metadata?.phone || '',
+              address: '',
+              city: '',
+              state: '',
+              zip: ''
+            });
+          }
+        } catch (e) {
+          // Keep cached local profile if any
+        }
       }
     };
+    fetchSession();
 
-    window.addEventListener('kwikpass-sso', handleKwikpassLogin);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        try {
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+
+          if (profile) {
+            setCurrentUser(profile);
+          } else {
+            setCurrentUser({
+              id: session.user.id,
+              name: session.user.user_metadata?.name || 'Valued Customer',
+              email: session.user.email,
+              phone: session.user.user_metadata?.phone || '',
+              address: '',
+              city: '',
+              state: '',
+              zip: ''
+            });
+          }
+        } catch (e) {
+          // fallback
+        }
+      } else {
+        setCurrentUser(null);
+      }
+    });
 
     return () => {
-      window.removeEventListener('kwikpass-sso', handleKwikpassLogin);
+      subscription.unsubscribe();
     };
   }, []);
 
@@ -159,7 +215,12 @@ function App() {
   }, []);
 
   const handleNavigate = (page) => {
+    // Authentication guard check
     let targetPage = page;
+    if ((page === 'account' || page.startsWith('order-details-')) && !currentUser) {
+      setRedirectPath(page);
+      targetPage = 'login';
+    }
 
     setCurrentPage(targetPage);
     let path = '/';
@@ -173,7 +234,15 @@ function App() {
     }
     else if (targetPage === 'reviews') path = '/reviews';
     else if (targetPage === 'cart') path = '/cart';
+    else if (targetPage === 'checkout') path = '/checkout';
     else if (targetPage === 'login') path = '/login';
+    else if (targetPage === 'signup') path = '/signup';
+    else if (targetPage === 'forgot-password') path = '/forgot-password';
+    else if (targetPage === 'account') path = '/account';
+    else if (targetPage.startsWith('order-details-')) {
+      const orderId = targetPage.substring('order-details-'.length);
+      path = `/account/orders/${orderId}`;
+    }
     else if (targetPage === 'category-pickles') path = '/pickles';
     else if (targetPage === 'category-mango-pickle') path = '/mango-pickle';
     else if (targetPage === 'category-lemon-pickle') path = '/lemon-pickle';
@@ -205,8 +274,18 @@ function App() {
         <ReviewsPage onNavigate={handleNavigate} />
       ) : currentPage === 'cart' ? (
         <CartPage cart={cart} updateCartQty={updateCartQty} removeFromCart={removeFromCart} onNavigate={handleNavigate} />
+      ) : currentPage === 'checkout' ? (
+        <CheckoutPage cart={cart} clearCart={clearCart} onNavigate={handleNavigate} currentUser={currentUser} />
       ) : currentPage === 'login' ? (
         <LoginPage onNavigate={handleNavigate} onLogin={setCurrentUser} redirectPath={redirectPath} setRedirectPath={setRedirectPath} />
+      ) : currentPage === 'signup' ? (
+        <SignupPage onNavigate={handleNavigate} onSignup={setCurrentUser} redirectPath={redirectPath} setRedirectPath={setRedirectPath} />
+      ) : currentPage === 'forgot-password' ? (
+        <ForgotPasswordPage onNavigate={handleNavigate} />
+      ) : currentPage === 'account' ? (
+        <AccountPage onNavigate={handleNavigate} currentUser={currentUser} setCurrentUser={setCurrentUser} />
+      ) : currentPage.startsWith('order-details-') ? (
+        <OrderDetailsPage onNavigate={handleNavigate} orderId={currentPage.substring('order-details-'.length)} currentUser={currentUser} />
       ) : currentPage.startsWith('category-') ? (
         <CategoryPage categorySlug={currentPage.substring('category-'.length)} onNavigate={handleNavigate} addToCart={addToCart} />
       ) : currentPage.startsWith('product-') ? (
