@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { supabase } from './supabaseClient';
 import './CartPage.css';
 
 function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
@@ -18,26 +19,25 @@ function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
         quantity: item.quantity
       }));
 
-      const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
-      const res = await fetch(`${API_BASE}/fastrr/access-token`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('fastrr-checkout', {
+        body: {
           cart_data: { items: fastrrItems },
           redirect_url: window.location.origin
-        })
+        }
       });
 
-      const data = await res.json();
+      if (error) {
+        throw error;
+      }
 
-      if (data.token) {
+      if (data && data.token) {
         if (window.HeadlessCheckout) {
           window.HeadlessCheckout.addToCart(e, data.token, { fallbackUrl: window.location.origin });
         } else {
           alert('Shiprocket Fastrr Checkout SDK not loaded. Check console.');
         }
       } else {
-        alert(data.error || 'Failed to initialize Fastrr Checkout.');
+        alert(data?.error || 'Failed to initialize Fastrr Checkout.');
       }
     } catch (err) {
       console.error('Fastrr error:', err);
