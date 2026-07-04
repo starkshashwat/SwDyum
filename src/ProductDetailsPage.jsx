@@ -1,582 +1,420 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import './ProductDetailsPage.css';
+import { getProductBySlug, getRelatedProducts } from './data/products';
 
-// Rich Product-specific Dataset mapping slugs to their details
-const productDetailsData = {
-  "mango-pickle": {
-    name: "Swadyum Mango Pickle",
-    tagline: "Tangy, Sun-dried Raw Mango Delight",
-    description: "Authentic homemade mango pickle inspired by traditional Bihar recipes. Crafted from firm raw green mangoes cut into generous slices, cured slowly under the sunlight, and steeped in cold-pressed mustard oil with hand-ground spices.",
-    prices: { "250g": 289, "500g": 489, "1kg": 799 },
-    rating: 4.9,
-    reviewsCount: 148,
-    images: ["/prod_mango.png", "/deal_scatter.png", "/gal_mix.png"],
-    story: {
-      headline: "A Recipe Passed Through Generations",
-      narrative: "During the sweltering Bihar summers, the courtyards of our grandmothers' homes bloomed with the aroma of drying mangoes. Sliced by hand using traditional cutters, the mango pieces were seasoned in clay pots and set out on linen sheets to absorb the hot sun. This recipe remains untouched today, preserving that exact generational comfort."
-    },
-    ingredients: ["Raw Green Mango", "Cold-Pressed Mustard Oil", "Kalonji & Saunf (Fennel)", "Red Chili Powder", "Traditional Spice Blend"],
-    nutrition: {
-      calories: "145 kcal",
-      protein: "1.2g",
-      carbohydrates: "8.5g",
-      fats: "12.4g",
-      servingSize: "15g (1 Tablespoon)"
-    },
-    benefits: ["Sun-Cured", "No Preservatives", "Handmade", "Small Batch Crafted", "Authentic Bihar Recipe"],
-    related: ["garlic-pickle", "mixed-pickle", "combo-box"]
-  },
-  "garlic-pickle": {
-    name: "Swadyum Garlic Pickle",
-    tagline: "Pungent & Robust Artisanal Garlic",
-    description: "Authentic homemade garlic pickle inspired by traditional Bihar recipes. Plump cloves of mountain garlic cured to absolute tenderness in mustard oil and loaded with natural heat.",
-    prices: { "250g": 299, "500g": 499, "1kg": 819 },
-    rating: 4.8,
-    reviewsCount: 96,
-    images: ["/prod_garlic.png", "/deal_scatter.png", "/about_us.png"],
-    story: {
-      headline: "The Warmth of Bihari Hospitality",
-      narrative: "Garlic pickle is a cornerstone of Bihari winter comfort. Harvested from regional farms, the garlic bulbs are carefully hand-peeled, cured, and combined with stone-ground mustard seeds. This savory companion brings robust flavor to plain rice, dal, and warm rotis."
-    },
-    ingredients: ["Plump Garlic Cloves", "Mustard Seed Oil", "Turmeric & Salt", "Red Chili Powder", "Amchur (Mango Powder)"],
-    nutrition: {
-      calories: "160 kcal",
-      protein: "2.4g",
-      carbohydrates: "10.2g",
-      fats: "11.8g",
-      servingSize: "15g (1 Tablespoon)"
-    },
-    benefits: ["Sun-Cured", "No Preservatives", "Handmade", "Small Batch Crafted", "Authentic Bihar Recipe"],
-    related: ["mango-pickle", "green-chilli", "combo-box"]
-  },
-  "lemon-pickle": {
-    name: "Swadyum Lemon Pickle",
-    tagline: "Oil-Free Sweet & Sour Zesty Lemon",
-    description: "Authentic homemade lemon pickle inspired by traditional Bihar recipes. Prepared without a drop of oil, sun-matured lemon halves cured slowly with sugar, salt, and spices.",
-    prices: { "250g": 279, "500g": 479, "1kg": 789 },
-    rating: 4.7,
-    reviewsCount: 64,
-    images: ["/prod_lemon.png", "/deal_scatter.png", "/gal_cut.png"],
-    story: {
-      headline: "The Art of Oil-Free Sun Curing",
-      narrative: "Our lemon pickle utilizes a time-honored oil-free maturation technique. Sunning the jars for over forty days allows the lemon skins to soften naturally, building a complex sweet-and-sour glaze that settles beautifully on the tongue."
-    },
-    ingredients: ["Fresh Lemon Halves", "Salt & Sugar", "Ajwain (Carom Seeds)", "Kala Namak", "Traditional Spice Blend"],
-    nutrition: {
-      calories: "110 kcal",
-      protein: "0.8g",
-      carbohydrates: "24.5g",
-      fats: "0.2g",
-      servingSize: "15g (1 Tablespoon)"
-    },
-    benefits: ["Sun-Cured", "No Preservatives", "Handmade", "Small Batch Crafted", "Authentic Bihar Recipe"],
-    related: ["mango-pickle", "mixed-pickle", "green-chilli"]
-  },
-  "green-chilli": {
-    name: "Swadyum Stuffed Green Chilli",
-    tagline: "Fiery Stuffed Chili Pickle",
-    description: "Authentic homemade green chili pickle inspired by traditional Bihar recipes. Sturdy local green chilies hand-stuffed with roasted spice blends and cold-pressed mustard oil.",
-    prices: { "250g": 289, "500g": 489, "1kg": 799 },
-    rating: 4.9,
-    reviewsCount: 112,
-    images: ["/prod_chili.png", "/deal_scatter.png", "/gal_mix.png"],
-    story: {
-      headline: "An Intense Flavor Legacy",
-      narrative: "Each green chili is slit precisely by our master spice artisans, stuffed with a blend of ground dry mango and yellow mustard seeds, and gently lowered into earthen jars. A punchy pickle designed for the true spice enthusiast."
-    },
-    ingredients: ["Fresh Green Chilies", "Cold-Pressed Mustard Oil", "Amchur Powder", "Fennel Seeds", "Traditional Spice Blend"],
-    nutrition: {
-      calories: "135 kcal",
-      protein: "1.0g",
-      carbohydrates: "7.8g",
-      fats: "12.0g",
-      servingSize: "15g (1 Tablespoon)"
-    },
-    benefits: ["Sun-Cured", "No Preservatives", "Handmade", "Small Batch Crafted", "Authentic Bihar Recipe"],
-    related: ["mango-pickle", "garlic-pickle", "mixed-pickle"]
-  },
-  "mixed-pickle": {
-    name: "Swadyum Assorted Mixed Pickle",
-    tagline: "The Harmony of Bihar's Harvest",
-    description: "Authentic homemade mixed pickle inspired by traditional Bihar recipes. A blend of handpicked green mangoes, lemons, carrots, and garlic cloves matured together.",
-    prices: { "250g": 299, "500g": 499, "1kg": 819 },
-    rating: 4.8,
-    reviewsCount: 88,
-    images: ["/cat_mixed.png", "/deal_scatter.png", "/about_us.png"],
-    story: {
-      headline: "A Colorful Kitchen Celebration",
-      narrative: "Mixed pickle represents the culinary diversity of a Bihari kitchen. In one jar, the tartness of raw mangoes balances the zesty sweet lemon, crisp carrots, and aromatic garlic, building a beautiful multi-layered texture."
-    },
-    ingredients: ["Mango, Carrots & Lemon", "Mustard Seed Oil", "Garlic Cloves", "Turmeric & Salt", "Traditional Spice Blend"],
-    nutrition: {
-      calories: "140 kcal",
-      protein: "1.1g",
-      carbohydrates: "9.5g",
-      fats: "12.1g",
-      servingSize: "15g (1 Tablespoon)"
-    },
-    benefits: ["Sun-Cured", "No Preservatives", "Handmade", "Small Batch Crafted", "Authentic Bihar Recipe"],
-    related: ["mango-pickle", "lemon-pickle", "combo-box"]
-  },
-  "combo-box": {
-    name: "Bestseller Bihar Special Combo Box",
-    tagline: "Four Signature Flavors in One Box",
-    description: "Authentic homemade pickle gift box inspired by traditional Bihar recipes. Features four of our bestselling varieties in premium 250g rigid jars.",
-    prices: { "4x250g": 899 },
-    rating: 5.0,
-    reviewsCount: 220,
-    images: ["/deal_scatter.png", "/prod_mango.png", "/prod_garlic.png"],
-    story: {
-      headline: "The Ultimate Bihari Culinary Gift",
-      narrative: "Designed to share and celebrate heritage. This bestseller box brings the heart of Bihar's food culture straight to your dining table or into the hands of your loved ones, packaged beautifully in a rigid gold-gilt box."
-    },
-    ingredients: ["Mango Pickle (250g)", "Garlic Pickle (250g)", "Lemon Pickle (250g)", "Green Chilli Achar (250g)"],
-    nutrition: {
-      calories: "140 kcal avg",
-      protein: "1.3g avg",
-      carbohydrates: "9.8g avg",
-      fats: "11.6g avg",
-      servingSize: "15g per jar variety"
-    },
-    benefits: ["Sun-Cured", "No Preservatives", "Handmade", "Small Batch Crafted", "Authentic Bihar Recipe"],
-    related: ["mango-pickle", "garlic-pickle", "mixed-pickle"]
-  },
-  "festive-box": {
-    name: "Festive Heritage Assortment Box",
-    tagline: "A Grand Premium Gifting Chest",
-    description: "Authentic homemade festive chest inspired by traditional Bihar recipes. Features two signature pickle jars, stone-ground spices, and organic sattu flour.",
-    prices: { "Set": 999 },
-    rating: 4.9,
-    reviewsCount: 45,
-    images: ["/about_us.png", "/deal_scatter.png", "/prod_mango.png"],
-    story: {
-      headline: "Festive Joy Sourced with Care",
-      narrative: "A premium wooden chest celebrating the culinary heritage of Bihar. Ideal for festivals, weddings, and special events, showcasing the finest handcrafted items from local farms."
-    },
-    ingredients: ["Mango Pickle (250g)", "Garlic Pickle (250g)", "Organic Sattu Flour (500g)", "Traditional Spice Pack"],
-    nutrition: {
-      calories: "135 kcal avg",
-      protein: "2.1g avg",
-      carbohydrates: "12.5g avg",
-      fats: "9.2g avg",
-      servingSize: "Mixed food components"
-    },
-    benefits: ["Sun-Cured", "No Preservatives", "Handmade", "Small Batch Crafted", "Authentic Bihar Recipe"],
-    related: ["combo-box", "mango-pickle", "garlic-pickle"]
+// Helper variants for framer-motion
+const fadeUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
+};
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.15 }
   }
 };
 
 function ProductDetailsPage({ slug, onNavigate, addToCart }) {
-  const p = productDetailsData[slug] || productDetailsData["mango-pickle"];
-  
+  const [p, setP] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
-  const [selectedSize, setSelectedSize] = useState(Object.keys(p.prices)[0]);
+  const [selectedSize, setSelectedSize] = useState('250g');
   const [quantity, setQuantity] = useState(1);
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [openFaq, setOpenFaq] = useState(null);
+  const [openDetail, setOpenDetail] = useState(null);
 
-  // Review states
-  const [reviews, setReviews] = useState([
-    { id: 1, name: "Prerna Singh", rating: 5, date: "June 12, 2026", text: "Tastes exactly like the mango pickle my grandmother used to dry on the terrace. The mustard oil smell is so pure!" },
-    { id: 2, name: "Mayank Sharma", rating: 5, date: "May 28, 2026", text: "The balance of spices is fantastic. It goes perfectly with warm parathas and ghee. Will buy again!" },
-    { id: 3, name: "Aarav K.", rating: 4, date: "May 15, 2026", text: "Incredibly rich garlic pickle. High quality packaging, jars came safely." }
-  ]);
-  const [newReview, setNewReview] = useState({ name: '', rating: 5, text: '' });
-  const [submitted, setSubmitted] = useState(false);
+  const gallery = p ? [p.image, '/editorial_spoon.png', '/gal_mix.png', '/gal_cut.png'] : [];
+  
+  const flavorColumns = [
+    { title: "Tangy", desc: "Sun-dried raw mangoes provide a sharp, bright citrus burst.", texture: "/prod_lemon.png" },
+    { title: "Bold", desc: "A robust blend of regional spices hits the palate with warmth.", texture: "/prod_chili.png" },
+    { title: "Balanced", desc: "Cold-pressed mustard oil rounds out the heat with earthy depth.", texture: "/prod_garlic.png" }
+  ];
 
-  // Reset active tabs on slug change
+  const mealPairings = [
+    { name: "Hot Paratha", image: "/deal_scatter.png", desc: "The ultimate comfort breakfast." },
+    { name: "Dal-Chawal", image: "/gal_mix.png", desc: "A nostalgic, soulful combination." },
+    { name: "Khichdi", image: "/gal_cut.png", desc: "Elevates simple meals instantly." },
+    { name: "Poori Sabzi", image: "/about_us.png", desc: "A festive pairing full of joy." },
+  ];
+
+  const ingredients = [
+    { name: "Raw Mango", img: "/prod_mango.png" },
+    { name: "Mustard Oil", img: "/editorial_spoon.png" },
+    { name: "Fenugreek", img: "/prod_lemon.png" },
+    { name: "Fennel", img: "/prod_garlic.png" }
+  ];
+
+  const timeline = [
+    { step: "01. Selection", img: "/prod_mango.png", text: "Hand-picking the finest regional produce." },
+    { step: "02. Preparation", img: "/gal_cut.png", text: "Traditional cutting and marination." },
+    { step: "03. Resting", img: "/gal_mix.png", text: "Sun-cured on earthen terraces." },
+    { step: "04. Seasoning", img: "/editorial_spoon.png", text: "Tempering with cold-pressed oil." },
+    { step: "05. Packing", img: "/about_us.png", text: "Sealed in glass to preserve heritage." }
+  ];
+
   useEffect(() => {
-    setActiveImageIndex(0);
-    setSelectedSize(Object.keys(p.prices)[0]);
-    setQuantity(1);
-    setSubmitted(false);
-    setNewReview({ name: '', rating: 5, text: '' });
+    const loadProduct = async () => {
+      setLoading(true);
+      const data = await getProductBySlug(slug);
+      if (data) {
+        const related = await getRelatedProducts(data.id, 4);
+        setP({ ...data, related });
+        setSelectedSize(Object.keys(data.prices)[0] || '250g');
+      }
+      setLoading(false);
+      window.scrollTo(0, 0);
+    };
+    loadProduct();
   }, [slug]);
 
-  const handleReviewSubmit = (e) => {
-    e.preventDefault();
-    if (!newReview.name || !newReview.text) return;
-    const dateStr = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-    setReviews([
-      { id: Date.now(), name: newReview.name, rating: newReview.rating, date: dateStr, text: newReview.text },
-      ...reviews
-    ]);
-    setSubmitted(true);
-  };
+  if (loading) return <div className="pdp-loader">Preparing your experience...</div>;
+  if (!p) return <div className="pdp-loader">Product not found.</div>;
 
   return (
-    <div className="product-details-wrapper">
+    <div className="pdp-wrapper">
       
-      {/* HEADER BREADCRUMB */}
-      <div className="details-breadcrumb-container">
-        <div className="details-breadcrumb">
-          <span className="breadcrumb-link" onClick={() => onNavigate('home')}>Home</span>
-          <span className="breadcrumb-separator">/</span>
-          <span className="breadcrumb-link" onClick={() => onNavigate('shop')}>Shop</span>
-          <span className="breadcrumb-separator">/</span>
-          <span className="breadcrumb-current">{p.name}</span>
+      {/* SECTION 1: PRODUCT HERO */}
+      <section className="pdp-hero">
+        <div className="pdp-sticky-breadcrumb">
+          <span onClick={() => onNavigate('home')}>Home</span>
+          <span className="sep">/</span>
+          <span onClick={() => onNavigate('shop')}>Collection</span>
+          <span className="sep">/</span>
+          <span className="current">{p.name}</span>
         </div>
-      </div>
 
-      {/* SECTION 01: PRODUCT HERO */}
-      <section className="product-hero-section">
-        <div className="product-hero-container">
-          
-          {/* Left Side: Image Gallery */}
-          <div className="product-hero-images">
-            <div className="product-thumbnails-list">
-              {p.images.map((img, idx) => (
+        <div className="pdp-hero-grid">
+          {/* Left: Gallery */}
+          <div className="pdp-gallery-col">
+            <div className="pdp-main-image-container">
+              <motion.img 
+                key={activeImageIndex}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6 }}
+                src={gallery[activeImageIndex] || p.image} 
+                alt={p.name} 
+                className="pdp-main-image"
+              />
+            </div>
+            <div className="pdp-thumbnails">
+              {gallery.map((img, idx) => (
                 <div 
                   key={idx} 
-                  className={`thumbnail-item ${activeImageIndex === idx ? 'active' : ''}`}
+                  className={`pdp-thumb ${activeImageIndex === idx ? 'active' : ''}`}
                   onClick={() => setActiveImageIndex(idx)}
                 >
-                  <img src={img} alt={`${p.name} view ${idx + 1}`} />
+                  <img src={img} alt={`View ${idx+1}`} />
                 </div>
               ))}
             </div>
-
-            <div className="product-main-display">
-              <div className="paper-texture-effect"></div>
-              <img src={p.images[activeImageIndex]} alt={p.name} className="main-display-img" />
-              {p.isBestseller && <span className="bestseller-badge">Bestseller</span>}
-            </div>
           </div>
 
-          {/* Right Side: Product Information */}
-          <div className="product-hero-info">
-            <span className="product-meta-category">{p.tagline}</span>
-            <h1 className="product-meta-title">{p.name}</h1>
-            
-            <div className="product-meta-rating-row">
-              <span className="rating-stars-gold">{"★".repeat(Math.floor(p.rating))}</span>
-              <span className="rating-text-value">{p.rating} ({p.reviewsCount} verified reviews)</span>
-            </div>
-
-            <p className="product-meta-desc">{p.description}</p>
-
-            {/* Price Table sizes */}
-            <div className="product-meta-pricing">
-              <span className="pricing-label">Select Size</span>
-              <div className="size-buttons-grid">
-                {Object.keys(p.prices).map((weight) => (
-                  <button
-                    key={weight}
-                    className={`size-btn ${selectedSize === weight ? 'active' : ''}`}
-                    onClick={() => setSelectedSize(weight)}
+          {/* Right: Info */}
+          <div className="pdp-info-col">
+            <div className="pdp-info-sticky">
+              <span className="pdp-eyebrow">Swadyum Collection</span>
+              <h1 className="pdp-title">{p.name}</h1>
+              <div className="pdp-price">₹{p.prices[selectedSize]}</div>
+              
+              <div className="pdp-size-selector">
+                {Object.keys(p.prices).map(size => (
+                  <button 
+                    key={size}
+                    className={`pdp-size-btn ${selectedSize === size ? 'active' : ''}`}
+                    onClick={() => setSelectedSize(size)}
                   >
-                    <span className="size-weight">{weight}</span>
-                    <span className="size-price">₹{p.prices[weight]}</span>
+                    {size}
                   </button>
                 ))}
               </div>
-            </div>
 
-            {/* Purchase Actions */}
-            <div className="product-purchase-actions-container">
-              
-              <div className="quantity-selector-box">
+              <div className="pdp-availability">Ready to ship</div>
+
+              <div className="pdp-actions">
+                <div className="pdp-qty">
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))}>-</button>
+                  <span>{quantity}</span>
+                  <button onClick={() => setQuantity(quantity + 1)}>+</button>
+                </div>
                 <button 
-                  className="qty-btn"
-                  onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
+                  className="pdp-btn-primary"
+                  onClick={() => addToCart({ slug, name: p.name, prices: p.prices, image: p.image }, selectedSize, quantity, 'One Time')}
                 >
-                  -
+                  Add to Cart
                 </button>
-                <span className="qty-number">{quantity}</span>
                 <button 
-                  className="qty-btn"
-                  onClick={() => setQuantity(prev => prev + 1)}
+                  className="pdp-btn-secondary"
+                  onClick={() => {
+                    addToCart({ slug, name: p.name, prices: p.prices, image: p.image }, selectedSize, quantity, 'One Time');
+                    onNavigate('checkout');
+                  }}
                 >
-                  +
+                  Buy Now
                 </button>
               </div>
 
-              <button 
-                className="add-to-cart-action-btn"
-                onClick={() => addToCart({ slug, name: p.name, prices: p.prices, image: p.images[0] }, selectedSize, quantity)}
-              >
-                Add To Cart
-              </button>
- 
-              <button 
-                className="buy-now-action-btn"
-                onClick={() => {
-                  addToCart({ slug, name: p.name, prices: p.prices, image: p.images[0] }, selectedSize, quantity);
-                  onNavigate('checkout');
-                }}
-              >
-                Buy Now
-              </button>
+              <div className="pdp-assurances">
+                <span>Secure Checkout</span>
+                <span className="dot">•</span>
+                <span>Fast Delivery</span>
+                <span className="dot">•</span>
+                <span>Easy Returns</span>
+              </div>
 
-              <button 
-                className={`wishlist-action-btn ${isWishlisted ? 'active' : ''}`}
-                onClick={() => setIsWishlisted(!isWishlisted)}
-                aria-label="Add to Wishlist"
-              >
-                {isWishlisted ? "❤️" : "🖤"}
-              </button>
-
+              <hr className="pdp-divider" />
+              
+              <p className="pdp-short-story">
+                "The jar opened before every meal begins. Bright regional produce, bold spices and slow preparation come together to create the flavour every table waits for."
+              </p>
             </div>
-
-            {/* Trust Badges Summary */}
-            <div className="product-trust-pillars-strip">
-              <div className="trust-pill-item"><span className="tp-icon">🌱</span> 100% Organic Ingredients</div>
-              <div className="trust-pill-item"><span className="tp-icon">🏺</span> Aged in Earthen Jars</div>
-              <div className="trust-pill-item"><span className="tp-icon">🚚</span> Shipped Safely Pan-India</div>
-            </div>
-
-          </div>
-
-        </div>
-      </section>
-
-      {/* SECTION 02: STORY SECTION */}
-      <section className="product-story-section">
-        <div className="product-story-container">
-          <div className="product-story-card">
-            <span className="section-subtitle">~ Heritage Story ~</span>
-            <h2 className="section-headline">{p.story.headline}</h2>
-            <p className="story-narrative-text">{p.story.narrative}</p>
           </div>
         </div>
       </section>
 
-      {/* SECTION 03: INGREDIENTS SECTION */}
-      <section className="product-ingredients-section">
-        <div className="ingredients-container">
-          <div className="ingredients-header">
-            <span className="section-subtitle">~ Sourced with Care ~</span>
-            <h2 className="section-headline">Natural Ingredients</h2>
-          </div>
-
-          <div className="ingredients-visual-grid">
-            {p.ingredients.map((ing, idx) => (
-              <div key={idx} className="ingredient-visual-card">
-                <div className="ingredient-circle-icon">
-                  <span className="ingredient-bullet">✦</span>
+      {/* SECTION 2: FLAVOUR EXPERIENCE */}
+      <section className="pdp-flavor-exp">
+        <motion.div 
+          className="pdp-container"
+          initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }}
+          variants={staggerContainer}
+        >
+          <motion.h2 variants={fadeUp} className="pdp-section-title text-center">The moment every bite changes.</motion.h2>
+          <div className="pdp-flavor-grid">
+            {flavorColumns.map((col, idx) => (
+              <motion.div key={idx} variants={fadeUp} className="flavor-col">
+                <div className="flavor-texture">
+                  <img src={col.texture} alt={col.title} />
                 </div>
-                <h4 className="ingredient-card-name">{ing}</h4>
-                <p className="ingredient-card-note">100% natural, locally sourced</p>
+                <h3 className="flavor-title">{col.title}</h3>
+                <p className="flavor-desc">{col.desc}</p>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+      </section>
+
+      {/* SECTION 3: BEST WITH */}
+      <section className="pdp-best-with">
+        <div className="pdp-container">
+          <motion.h2 
+            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            className="pdp-section-title"
+          >
+            Perfect Pairings
+          </motion.h2>
+          <div className="pdp-pairing-container">
+            {mealPairings.map((meal, idx) => (
+              <div key={idx} className="pairing-card">
+                <img src={meal.image} alt={meal.name} className="pairing-bg" />
+                <div className="pairing-overlay">
+                  <h3 className="pairing-name">{meal.name}</h3>
+                  <p className="pairing-desc">{meal.desc}</p>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* SECTION 04: NUTRITIONAL INFORMATION */}
-      <section className="product-nutrition-section">
-        <div className="nutrition-container">
-          <div className="nutrition-header">
-            <span className="section-subtitle">~ Lab Certified ~</span>
-            <h2 className="section-headline">Nutritional Facts</h2>
+      {/* SECTION 4: INSIDE THE JAR */}
+      <section className="pdp-inside-jar">
+        <motion.div 
+          className="pdp-container"
+          initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }}
+          variants={staggerContainer}
+        >
+          <motion.h2 variants={fadeUp} className="pdp-section-title">Inside the Jar</motion.h2>
+          <div className="pdp-ingredients-grid">
+            {ingredients.map((ing, idx) => (
+              <motion.div key={idx} variants={fadeUp} className="ing-card">
+                <div className="ing-img-wrap">
+                  <img src={ing.img} alt={ing.name} />
+                </div>
+                <h4 className="ing-name">{ing.name}</h4>
+              </motion.div>
+            ))}
           </div>
+        </motion.div>
+      </section>
 
-          <div className="nutrition-table-box">
-            <table className="premium-nutrition-table">
-              <thead>
-                <tr>
-                  <th>Nutrient</th>
-                  <th>Amount per Serving</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td><strong>Serving Size</strong></td>
-                  <td>{p.nutrition.servingSize}</td>
-                </tr>
-                <tr>
-                  <td>Calories</td>
-                  <td>{p.nutrition.calories}</td>
-                </tr>
-                <tr>
-                  <td>Protein</td>
-                  <td>{p.nutrition.protein}</td>
-                </tr>
-                <tr>
-                  <td>Carbohydrates</td>
-                  <td>{p.nutrition.carbohydrates}</td>
-                </tr>
-                <tr>
-                  <td>Fats</td>
-                  <td>{p.nutrition.fats}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+      {/* SECTION 5: MADE WITH TIME */}
+      <section className="pdp-timeline-section">
+        <div className="pdp-container">
+          <h2 className="pdp-section-title">Made With Time</h2>
+        </div>
+        <div className="pdp-timeline-scroll">
+          {timeline.map((step, idx) => (
+            <div key={idx} className="timeline-item">
+              <div className="timeline-img-wrap">
+                <img src={step.img} alt={step.step} />
+              </div>
+              <h4 className="timeline-step">{step.step}</h4>
+              <p className="timeline-text">{step.text}</p>
+            </div>
+          ))}
         </div>
       </section>
 
-      {/* SECTION 05: BENEFITS SECTION */}
-      <section className="product-benefits-section">
-        <div className="benefits-container">
-          <div className="benefits-header">
-            <span className="section-subtitle">~ Why Swadyum ~</span>
-            <h2 className="section-headline">Our Core Promises</h2>
-          </div>
-
-          <div className="benefits-list-row">
-            {p.benefits.map((benefit, idx) => (
-              <div key={idx} className="benefit-list-card">
-                <span className="benefit-star">✦</span>
-                <span className="benefit-label">{benefit}</span>
+      {/* SECTION 6: PRODUCT DETAILS ACCORDION */}
+      <section className="pdp-details-accordion">
+        <div className="pdp-container-narrow">
+          <h2 className="pdp-section-title text-center">Product Information</h2>
+          <div className="accordion-wrapper">
+            {['Storage', 'Weight', 'Shelf Life', 'Nutrition'].map((detail, idx) => (
+              <div key={idx} className="accordion-item">
+                <button 
+                  className="accordion-trigger" 
+                  onClick={() => setOpenDetail(openDetail === idx ? null : idx)}
+                >
+                  {detail}
+                  <span className="accordion-icon">{openDetail === idx ? '−' : '+'}</span>
+                </button>
+                <AnimatePresence>
+                  {openDetail === idx && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="accordion-content"
+                    >
+                      <div className="accordion-inner">
+                        For {detail.toLowerCase()}, please store in a cool, dry place. Best consumed within 12 months of opening. Use a clean, dry spoon.
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* SECTION 06: REVIEWS */}
-      <section className="product-reviews-section">
-        <div className="reviews-container">
-          
-          <div className="reviews-grid-split">
-            
-            {/* Left Column: Rating breakdown and Customer submissions */}
-            <div className="reviews-summary-column">
-              <span className="section-subtitle">~ Verified Ratings ~</span>
-              <h2 className="section-headline">Customer Feedbacks</h2>
-
-              <div className="ratings-breakdown-box">
-                <div className="large-rating-num">{p.rating}</div>
-                <div className="stars-row">★★★★★</div>
-                <div className="rating-desc-label">Based on {p.reviewsCount} reviews</div>
+      {/* SECTION 7: CUSTOMER MOMENTS */}
+      <section className="pdp-customer-moments">
+        <div className="pdp-container">
+          <h2 className="pdp-section-title text-center">Customer Moments</h2>
+          <div className="masonry-grid">
+            <div className="masonry-col">
+              <img src="/banner.png" alt="Customer dining" className="masonry-item" />
+              <div className="masonry-review masonry-item">
+                <div className="stars">★★★★★</div>
+                <p>"Absolutely stunning packaging and the flavor took me straight back to my childhood."</p>
+                <span className="author">— Nisha M.</span>
               </div>
-
-              {/* Review Submission Form */}
-              <div className="review-submission-form-box">
-                <h3 className="form-title">Write a Review</h3>
-                
-                {submitted ? (
-                  <div className="form-submit-success">
-                    <span className="success-icon">✓</span>
-                    <p>Thank you! Your verified review has been submitted.</p>
-                  </div>
-                ) : (
-                  <form onSubmit={handleReviewSubmit} className="review-form">
-                    <div className="form-row">
-                      <input 
-                        type="text" 
-                        placeholder="Your Name" 
-                        value={newReview.name}
-                        onChange={(e) => setNewReview(prev => ({ ...prev, name: e.target.value }))}
-                        className="form-input"
-                        required
-                      />
-                    </div>
-                    <div className="form-row">
-                      <select 
-                        value={newReview.rating} 
-                        onChange={(e) => setNewReview(prev => ({ ...prev, rating: Number(e.target.value) }))}
-                        className="form-select"
-                      >
-                        <option value="5">5 Stars (Excellent)</option>
-                        <option value="4">4 Stars (Good)</option>
-                        <option value="3">3 Stars (Average)</option>
-                        <option value="2">2 Stars (Poor)</option>
-                        <option value="1">1 Star (Very Poor)</option>
-                      </select>
-                    </div>
-                    <div className="form-row">
-                      <textarea 
-                        placeholder="Share your kitchen experience with this achar..." 
-                        rows="4"
-                        value={newReview.text}
-                        onChange={(e) => setNewReview(prev => ({ ...prev, text: e.target.value }))}
-                        className="form-textarea"
-                        required
-                      ></textarea>
-                    </div>
-                    <button type="submit" className="submit-review-btn">
-                      Submit Review
-                    </button>
-                  </form>
-                )}
-              </div>
-
             </div>
-
-            {/* Right Column: Visual reviews and feedback lists */}
-            <div className="reviews-list-column">
-              
-              {/* Media reviews files */}
-              <div className="reviews-media-block">
-                <span className="media-section-title">Customer Photos & Video Clips</span>
-                <div className="media-thumbnails-grid">
-                  <div className="media-thumb-item">
-                    <img src="/gal_mix.png" alt="Customer shared pickle jar" />
-                    <span className="photo-play-overlay">📸</span>
-                  </div>
-                  <div className="media-thumb-item">
-                    <img src="/deal_scatter.png" alt="Customer shared unboxing combo" />
-                    <span className="photo-play-overlay">📸</span>
-                  </div>
-                  <div className="media-thumb-item video-item">
-                    <img src="/gal_cut.png" alt="Customer sharing recipe clip" />
-                    <span className="video-play-overlay">▶</span>
-                  </div>
-                </div>
+            <div className="masonry-col">
+              <div className="masonry-review masonry-item dark">
+                <div className="stars">★★★★★</div>
+                <p>"I buy this every month. The mustard oil balance is perfection."</p>
+                <span className="author">— Rahul T.</span>
               </div>
-
-              {/* Review Feedbacks List */}
-              <div className="reviews-feedbacks-list">
-                {reviews.map((rev) => (
-                  <div key={rev.id} className="review-feedback-card">
-                    <div className="rf-header">
-                      <span className="rf-author">{rev.name}</span>
-                      <span className="rf-date">{rev.date}</span>
-                    </div>
-                    <div className="rf-rating">{"★".repeat(rev.rating)}</div>
-                    <p className="rf-text">{rev.text}</p>
-                  </div>
-                ))}
-              </div>
-
+              <img src="/deal_scatter.png" alt="Customer food" className="masonry-item" />
             </div>
-
+            <div className="masonry-col">
+              <img src="/gal_mix.png" alt="Customer kitchen" className="masonry-item" />
+              <div className="masonry-review masonry-item">
+                <div className="stars">★★★★☆</div>
+                <p>"Great taste, premium feel. Highly recommended."</p>
+                <span className="author">— Sneha K.</span>
+              </div>
+            </div>
           </div>
-
         </div>
       </section>
 
-      {/* SECTION 07: RELATED PRODUCTS */}
-      <section className="product-related-section">
-        <div className="related-container">
-          <div className="related-header">
-            <span className="section-subtitle">~ Perfect Pairings ~</span>
-            <h2 className="section-headline">Recommended Cross-Sells</h2>
+      {/* SECTION 8: YOU MAY ALSO LIKE */}
+      <section className="pdp-related">
+        <div className="pdp-container">
+          <h2 className="pdp-section-title">You May Also Like</h2>
+          <div className="pdp-carousel">
+            {p.related.map((rel, idx) => (
+              <div key={idx} className="pdp-carousel-card" onClick={() => onNavigate('product-' + rel.slug)}>
+                <div className="rel-img-wrap">
+                  <img src={rel.image} alt={rel.name} />
+                </div>
+                <h4 className="rel-name">{rel.name}</h4>
+                <div className="rel-price">₹{rel.base_price}</div>
+              </div>
+            ))}
           </div>
+        </div>
+      </section>
 
-          <div className="related-grid">
-            {p.related.map((slug) => {
-              const rel = productDetailsData[slug];
-              if (!rel) return null;
-              return (
-                <div 
-                  key={slug} 
-                  className="related-product-card"
-                  onClick={() => onNavigate('product-' + slug)}
+      {/* SECTION 9: RECENTLY VIEWED (Simplified Row) */}
+      <section className="pdp-recently-viewed">
+        <div className="pdp-container">
+          <h3 className="pdp-small-title">Recently Viewed</h3>
+          <div className="recent-row">
+            {p.related.slice(0, 2).map((rel, idx) => (
+              <div key={idx} className="recent-item" onClick={() => onNavigate('product-' + rel.slug)}>
+                <img src={rel.image} alt={rel.name} />
+                <span className="recent-name">{rel.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SECTION 10: FAQ */}
+      <section className="pdp-faq">
+        <div className="pdp-container-narrow">
+          <h2 className="pdp-section-title text-center">Frequently Asked Questions</h2>
+          <div className="accordion-wrapper">
+            {['Are preservatives used?', 'Is the packaging eco-friendly?', 'How long does shipping take?'].map((q, idx) => (
+              <div key={idx} className="accordion-item">
+                <button 
+                  className="accordion-trigger" 
+                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
                 >
-                  <img src={rel.images[0]} alt={rel.name} className="related-img" />
-                  <h4 className="related-title">{rel.name}</h4>
-                  <span className="related-price">From ₹{Object.values(rel.prices)[0]}</span>
-                  <button className="related-view-btn">View Details</button>
-                </div>
-              );
-            })}
+                  {q}
+                  <span className="accordion-icon">{openFaq === idx ? '−' : '+'}</span>
+                </button>
+                <AnimatePresence>
+                  {openFaq === idx && (
+                    <motion.div 
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className="accordion-content"
+                    >
+                      <div className="accordion-inner">
+                        We pride ourselves on using 100% natural ingredients with no artificial preservatives. Our glass jars are fully recyclable. Shipping typically takes 3-5 business days across India.
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* SECTION 08: STICKY MOBILE CTA BAR */}
-      <div className="product-sticky-mobile-cta">
-        <div className="mobile-cta-price-info">
-          <span className="m-title">{p.name}</span>
-          <span className="m-price">₹{p.prices[selectedSize]}</span>
+      {/* SECTION 11: FINAL CTA */}
+      <section className="pdp-final-cta">
+        <div className="pdp-final-bg">
+          <img src="/banner.png" alt="Dining Table" />
+          <div className="pdp-final-overlay"></div>
         </div>
-        <div className="mobile-cta-buttons">
-          <button className="mobile-add-cart-btn">Add To Cart</button>
-          <button className="mobile-buy-btn">Buy Now</button>
+        <div className="pdp-final-content">
+          <motion.h2 
+            initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 1 }} viewport={{ once: true }}
+            className="pdp-final-headline"
+          >
+            One more reason to gather around the table.
+          </motion.h2>
+          <motion.button 
+            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 1, delay: 0.3 }} viewport={{ once: true }}
+            className="pdp-btn-primary large"
+            onClick={() => onNavigate('shop')}
+          >
+            Explore Collection
+          </motion.button>
         </div>
-      </div>
+      </section>
 
     </div>
   );

@@ -2,106 +2,16 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import './ShopPage.css';
 
-// Products Listing Data
-const productsData = [
-  {
-    id: 1,
-    name: "Swadyum Mango Pickle",
-    slug: "mango-pickle",
-    category: "Traditional Achar",
-    filterTag: "Mango",
-    description: "Deeply tangy, raw green mangoes cured slowly under the Bihar sun with handmade ground mustard and red chili blends.",
-    image: "/prod_mango.png",
-    prices: { "250g": 289, "500g": 489, "1kg": 799 },
-    rating: 4.9,
-    reviewsCount: 148,
-    isBestseller: true
-  },
-  {
-    id: 2,
-    name: "Swadyum Garlic Pickle",
-    slug: "garlic-pickle",
-    category: "Traditional Achar",
-    filterTag: "Garlic",
-    description: "Whole plump garlic bulbs matured in cold-pressed mustard oil with generational spice mixtures for a bold, pungent flavor.",
-    image: "/prod_garlic.png",
-    prices: { "250g": 299, "500g": 499, "1kg": 819 },
-    rating: 4.8,
-    reviewsCount: 96,
-    isBestseller: true
-  },
-  {
-    id: 3,
-    name: "Swadyum Lemon Pickle",
-    slug: "lemon-pickle",
-    category: "Traditional Achar",
-    filterTag: "Lemon",
-    description: "Refreshing sweet-and-sour lemon chunks cured natural-style without oil. Brings a zesty comfort to light meals.",
-    image: "/prod_lemon.png",
-    prices: { "250g": 279, "500g": 479, "1kg": 789 },
-    rating: 4.7,
-    reviewsCount: 64,
-    isBestseller: false
-  },
-  {
-    id: 4,
-    name: "Swadyum Stuffed Green Chilli",
-    slug: "green-chilli",
-    category: "Traditional Achar",
-    filterTag: "Green Chilli",
-    description: "Thick green chilies slit lengthwise and stuffed with amchur, mustard powder, and local spices. For authentic spice lovers.",
-    image: "/prod_chili.png",
-    prices: { "250g": 289, "500g": 489, "1kg": 799 },
-    rating: 4.9,
-    reviewsCount: 112,
-    isBestseller: false
-  },
-  {
-    id: 5,
-    name: "Swadyum Assorted Mixed Pickle",
-    slug: "mixed-pickle",
-    category: "Traditional Achar",
-    filterTag: "Mixed",
-    description: "A colorful garden assortment of mangoes, carrots, lemons, and garlic cloves cured together for a complex, layered tang.",
-    image: "/cat_mixed.png",
-    prices: { "250g": 299, "500g": 499, "1kg": 819 },
-    rating: 4.8,
-    reviewsCount: 88,
-    isBestseller: true
-  },
-  {
-    id: 6,
-    name: "Bestseller Bihar Special Combo Box",
-    slug: "combo-box",
-    category: "Heritage Gift Box",
-    filterTag: "Gift Boxes",
-    description: "A beautifully curated rigid collection box containing four 250g jars of our most loved traditional Bihari pickles.",
-    image: "/deal_scatter.png",
-    prices: { "4x250g": 899 },
-    rating: 5.0,
-    reviewsCount: 220,
-    isBestseller: true
-  },
-  {
-    id: 7,
-    name: "Festive Heritage Assortment Box",
-    slug: "festive-box",
-    category: "Heritage Gift Box",
-    filterTag: "Gift Boxes",
-    description: "A premium wooden gift chest featuring two signature pickles, organic sattu flour, and stone-ground spices.",
-    image: "/about_us.png",
-    prices: { "Set": 999 },
-    rating: 4.9,
-    reviewsCount: 45,
-    isBestseller: false
-  }
-];
+import { fetchProducts } from './data/products';
 
 function ShopPage({ onNavigate, addToCart }) {
+  const [productsData, setProductsData] = useState([]);
+  const [loading, setLoading] = useState(true);
+
   const [filter, setFilter] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('default');
-  const [priceRange, setPriceRange] = useState(1000);
+  const [priceRange, setPriceRange] = useState(1500);
   const [onlyBestsellers, setOnlyBestsellers] = useState(false);
   const [onlyGiftBoxes, setOnlyGiftBoxes] = useState(false);
   const [selectedWeights, setSelectedWeights] = useState({});
@@ -109,25 +19,36 @@ function ShopPage({ onNavigate, addToCart }) {
   const carouselRef = useRef(null);
   const [carouselWidth, setCarouselWidth] = useState(0);
 
+  useEffect(() => {
+    const loadProducts = async () => {
+      setLoading(true);
+      const data = await fetchProducts();
+      setProductsData(data);
+      setLoading(false);
+    };
+    loadProducts();
+  }, []);
+
   // Initialize carousel scroll width constraints
   useEffect(() => {
     if (carouselRef.current) {
       setCarouselWidth(carouselRef.current.scrollWidth - carouselRef.current.offsetWidth);
     }
-  }, [filter, searchQuery, sortBy]);
+  }, [filter, searchQuery, sortBy, productsData]);
 
   const handleWeightSelect = (productId, weight) => {
     setSelectedWeights(prev => ({ ...prev, [productId]: weight }));
   };
 
   const getActiveWeight = (product) => {
-    return selectedWeights[product.id] || Object.keys(product.prices)[0];
+    if (!product.prices) return '250g';
+    return selectedWeights[product.id] || Object.keys(product.prices)[0] || '250g';
   };
 
   // Filter & Search Logic
   const filteredProducts = productsData.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          p.description.toLowerCase().includes(searchQuery.toLowerCase());
+                          (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()));
     
     // Category pill matching
     let matchesCategory = true;
@@ -135,7 +56,7 @@ function ShopPage({ onNavigate, addToCart }) {
       if (filter === 'Gift Boxes') {
         matchesCategory = p.category === 'Heritage Gift Box';
       } else {
-        matchesCategory = p.filterTag === filter;
+        matchesCategory = p.category === filter || (p.categories && p.categories.includes(filter));
       }
     }
 
@@ -144,8 +65,7 @@ function ShopPage({ onNavigate, addToCart }) {
     const matchesGiftBoxes = !onlyGiftBoxes || p.category === 'Heritage Gift Box';
 
     // Price matching
-    const activeWeight = getActiveWeight(p);
-    const price = p.prices[activeWeight];
+    const price = p.base_price || 0;
     const matchesPrice = price <= priceRange;
 
     return matchesSearch && matchesCategory && matchesBestseller && matchesGiftBoxes && matchesPrice;
@@ -153,17 +73,15 @@ function ShopPage({ onNavigate, addToCart }) {
 
   // Sort Logic
   const sortedProducts = [...filteredProducts].sort((a, b) => {
-    const aWeight = getActiveWeight(a);
-    const bWeight = getActiveWeight(b);
-    const aPrice = a.prices[aWeight];
-    const bPrice = b.prices[bWeight];
+    const aPrice = a.base_price || 0;
+    const bPrice = b.base_price || 0;
 
     if (sortBy === 'price-low') {
       return aPrice - bPrice;
     } else if (sortBy === 'price-high') {
       return bPrice - aPrice;
     } else if (sortBy === 'rating') {
-      return b.rating - a.rating;
+      return (b.rating || 0) - (a.rating || 0);
     }
     return 0; // Default ordering
   });
@@ -177,7 +95,7 @@ function ShopPage({ onNavigate, addToCart }) {
           
           {/* Left: Editorial Texts */}
           <div className="shop-hero-content">
-            <span className="section-subtitle">~ Shop Swadyum ~</span>
+            <span className="section-eyebrow">Shop Swadyum</span>
             <h1 className="shop-hero-headline section-headline">
               Discover Bihar's<br />
               Finest Homemade Pickles
@@ -201,105 +119,29 @@ function ShopPage({ onNavigate, addToCart }) {
         </div>
       </section>
 
-      {/* SECTION 02: SEARCH & DISCOVERY BAR */}
+      {/* SECTION 02: Simple 2-Tab Toggle — sized for a 4-product brand */}
       <section className="shop-filter-bar-section">
         <div className="shop-filter-bar-container">
-          
-          <div className="filter-row-top">
-            {/* Search Input */}
-            <div className="filter-search-box">
-              <svg className="search-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-              </svg>
-              <input 
-                type="text" 
-                placeholder="Search Products..." 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="search-input-field"
-              />
-            </div>
-
-            {/* Sort Selector */}
-            <div className="filter-sort-box">
-              <label className="filter-label">Sort By</label>
-              <select 
-                value={sortBy} 
-                onChange={(e) => setSortBy(e.target.value)} 
-                className="sort-select-dropdown"
-              >
-                <option value="default">Default</option>
-                <option value="price-low">Price: Low to High</option>
-                <option value="price-high">Price: High to Low</option>
-                <option value="rating">Top Rated</option>
-              </select>
-            </div>
-
-            {/* Price Filter range */}
-            <div className="filter-price-box">
-              <div className="price-label-row">
-                <span className="filter-label">Max Price</span>
-                <span className="price-value-tag">₹{priceRange}</span>
-              </div>
-              <input 
-                type="range" 
-                min="200" 
-                max="1000" 
-                step="50"
-                value={priceRange} 
-                onChange={(e) => setPriceRange(Number(e.target.value))} 
-                className="price-range-slider"
-              />
-            </div>
+          <div className="shop-tabs">
+            <button
+              className={`shop-tab-btn ${filter === 'All' ? 'active' : ''}`}
+              onClick={() => setFilter('All')}
+            >
+              All Flavours
+            </button>
+            <button
+              className={`shop-tab-btn ${filter === 'Gift Boxes' ? 'active' : ''}`}
+              onClick={() => setFilter('Gift Boxes')}
+            >
+              Combos
+            </button>
           </div>
-
-          <div className="filter-row-bottom">
-            {/* Categories pills */}
-            <div className="filter-categories-pills">
-              {['All', 'Mango', 'Garlic', 'Lemon', 'Green Chilli', 'Mixed', 'Gift Boxes'].map((pill) => (
-                <button
-                  key={pill}
-                  className={`shop-pill-btn ${filter === pill ? 'active' : ''}`}
-                  onClick={() => setFilter(pill)}
-                >
-                  {pill}
-                </button>
-              ))}
-            </div>
-
-            {/* Feature Toggle Badges */}
-            <div className="filter-toggle-badges">
-              <label className="toggle-badge-item">
-                <input 
-                  type="checkbox" 
-                  checked={onlyBestsellers} 
-                  onChange={(e) => setOnlyBestsellers(e.target.checked)} 
-                  className="hidden-checkbox"
-                />
-                <span className={`toggle-pill-label ${onlyBestsellers ? 'active' : ''}`}>✦ Bestsellers Only</span>
-              </label>
-
-              <label className="toggle-badge-item">
-                <input 
-                  type="checkbox" 
-                  checked={onlyGiftBoxes} 
-                  onChange={(e) => setOnlyGiftBoxes(e.target.checked)} 
-                  className="hidden-checkbox"
-                />
-                <span className={`toggle-pill-label ${onlyGiftBoxes ? 'active' : ''}`}>🎁 Gift Boxes Only</span>
-              </label>
-            </div>
-          </div>
-
         </div>
       </section>
 
       {/* SECTION 03: PRODUCT GRID */}
       <section className="shop-product-grid-section">
         <div className="shop-grid-container">
-          <div className="grid-meta-row">
-            <span className="products-found-label">Showing {sortedProducts.length} artisanal products</span>
-          </div>
 
           {sortedProducts.length === 0 ? (
             <div className="no-products-found">

@@ -1,0 +1,96 @@
+/* ─── Process Section (Why Swadyum) ──────────────────────────────────────── */
+.process-section {
+  background-color: var(--color-warm-bg);
+}
+
+.process-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-8);
+  margin-top: var(--space-12);
+}
+
+.process-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-10) var(--space-8);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.process-card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-card-hover);
+  border-color: var(--color-primary);
+}
+
+.process-icon-wrapper {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(47, 94, 59, 0.08), rgba(47, 94, 59, 0.03));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-primary);
+  transition: all var(--duration-normal) var(--ease-out);
+}
+
+.process-card:hover .process-icon-wrapper {
+  background: var(--color-primary);
+  color: #FFFFFF;
+}
+
+.process-card-title {
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  color: var(--color-foreground);
+}
+
+.process-card-desc {
+  font-size: var(--text-sm);
+  color: var(--color-muted);
+  line-height: 1.7;
+}
+
+/* ─── Responsive ─────────────────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .process-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-6);
+  }
+}
+
+@media (max-width: 600px) {
+  .process-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .process-card {
+    padding: var(--space-8) var(--space-6);
+    flex-direction: row;
+    text-align: left;
+    gap: var(--space-5);
+  }
+
+  .process-icon-wrapper {
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+  }
+
+  .process-card-title {
+    font-size: var(--text-lg);
+  }
+
+  .process-card-desc {
+    font-size: var(--text-xs);
+  }
+}

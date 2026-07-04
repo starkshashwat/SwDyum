@@ -66,8 +66,15 @@ function ContactPage({ onNavigate }) {
             <div className="contact-info-column">
               <span className="section-subtitle">~ Connect ~</span>
               <h2 className="section-headline">Reach Our Kitchens</h2>
-              <p className="contact-intro-text">Our administrative office and packaging boutique are located in Patna, Bihar. Drop us a line or connect instantly on WhatsApp.</p>
+              <p className="contact-intro-text">Our packaging boutique is located in Patna, Bihar. Connect instantly on WhatsApp or drop us a line below.</p>
               
+              {/* WhatsApp-First CTA — Primary Contact Method */}
+              <div className="whatsapp-box">
+                <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="contact-whatsapp-btn">
+                  <span className="wa-icon">💬</span> Chat instantly on WhatsApp
+                </a>
+              </div>
+
               <div className="contact-cards-list">
                 
                 <div className="info-card">
@@ -107,13 +114,6 @@ function ContactPage({ onNavigate }) {
                   </div>
                 </div>
 
-              </div>
-
-              {/* WhatsApp Button */}
-              <div className="whatsapp-box">
-                <a href="https://wa.me/919876543210" target="_blank" rel="noopener noreferrer" className="contact-whatsapp-btn">
-                  <span className="wa-icon">💬</span> Chat instantly on WhatsApp
-                </a>
               </div>
 
             </div>

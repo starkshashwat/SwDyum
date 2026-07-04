@@ -1,0 +1,190 @@
+.deal-section {
+  width: 100vw;
+  background-color: #fcfcfc;
+  padding: 6rem 0;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Subtle leaf pattern background can be achieved with a pseudo-element if needed, 
+   but for now we'll keep it clean as per Apple-style minimalism */
+
+.deal-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Left Side: Content */
+.deal-content {
+  flex: 1;
+  max-width: 500px;
+  z-index: 2;
+}
+
+.deal-subtitle {
+  color: var(--primary-green);
+  font-size: 24px;
+  font-family: 'Brush Script MT', cursive, sans-serif;
+  font-style: italic;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.deal-headline {
+  font-size: 48px;
+  font-weight: 800;
+  color: var(--dark-text);
+  line-height: 1.2;
+  margin-bottom: 2.5rem;
+}
+
+/* Countdown Timer */
+.countdown-timer {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  margin-bottom: 3rem;
+}
+
+.time-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.time-value {
+  background-color: var(--primary-green);
+  color: #fff;
+  font-size: 36px;
+  font-weight: 800;
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  box-shadow: 0 10px 20px rgba(47, 94, 59, 0.2);
+}
+
+.time-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--muted-text);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.time-separator {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--dark-text);
+  margin-top: 10px;
+}
+
+.deal-btn {
+  margin-top: 1rem;
+  border-radius: 30px;
+}
+
+/* Right Side: Image */
+.deal-image-side {
+  flex: 1;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.deal-image-wrapper {
+  position: relative;
+  width: 100%;
+  max-width: 700px;
+  height: auto;
+}
+
+.deal-img {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 20px 30px rgba(0,0,0,0.1));
+}
+
+/* Floating Badges */
+.floating-badge {
+  position: absolute;
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background-color: #fff;
+  border: 1px solid var(--primary-green);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  z-index: 3;
+}
+
+.badge-text {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--dark-text);
+  line-height: 1.2;
+}
+
+.badge-arrow {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  z-index: -1;
+}
+
+.badge-1 {
+  top: 10%;
+  right: 10%;
+}
+
+.arrow-1 {
+  top: 100%;
+  right: 50%;
+}
+
+.badge-2 {
+  bottom: 30%;
+  left: 0%;
+}
+
+.arrow-2 {
+  bottom: 50%;
+  left: 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .deal-container {
+    flex-direction: column;
+    text-align: center;
+    gap: 4rem;
+  }
+  .countdown-timer {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .deal-headline {
+    font-size: 36px;
+  }
+  .time-value {
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
+  }
+  .floating-badge {
+    display: none; /* Hide badges on small screens for clarity */
+  }
+}

@@ -5,23 +5,23 @@ function AboutPage({ onNavigate }) {
   const teamMembers = [
     {
       id: 1,
-      name: 'Nora Bell',
-      role: 'Founder & Head Artisan',
-      desc: 'Dedicated to preserving ancestral Bihari cooking methods and supporting smallholder organic farms.',
+      name: 'The Founders',
+      role: 'Swadyum Foods',
+      desc: 'Dedicated to preserving ancestral Bihari cooking methods and supporting smallholder organic farms across Bihar.',
       image: '/team_founder.png'
     },
     {
       id: 2,
-      name: 'Robert Leo',
-      role: 'Master Spice Blender',
-      desc: 'With over three decades of spice chemistry experience, he hand-selects every batch of mustard and fennel.',
+      name: 'Our Master Blenders',
+      role: 'Spice Artisans',
+      desc: 'With decades of spice chemistry experience, our team hand-selects every batch of mustard seed and fennel.',
       image: '/team_chef.png'
     },
     {
       id: 3,
-      name: 'Alisa Lisa',
-      role: 'Lead Sourcer & Farmer Liaison',
-      desc: 'Builds direct partnerships with farmer cooperatives in Mithila and Champaran to source premium raw green mangoes.',
+      name: 'Our Sourcing Team',
+      role: 'Farmer Liaisons',
+      desc: 'Building direct partnerships with farmer cooperatives in Mithila and Champaran to source premium raw green mangoes.',
       image: '/team_farmer.png'
     }
   ];
@@ -43,21 +43,21 @@ function AboutPage({ onNavigate }) {
         <div className="founder-story-container">
           <div className="founder-grid">
             <div className="founder-img-box">
-              <img src="/team_founder.png" alt="Nora Bell" className="founder-img" />
+              <img src="/team_founder.png" alt="Swadyum Foods Team" className="founder-img" />
               <div className="founder-gold-border"></div>
             </div>
             <div className="founder-content">
-              <span className="section-subtitle">~ The Visionary ~</span>
-              <h2 className="section-headline">A Message From Nora Bell</h2>
+              <span className="section-subtitle">~ The Vision ~</span>
+              <h2 className="section-headline">A Message From Swadyum Foods</h2>
               <p className="founder-narrative">
-                "Growing up in Patna, summers meant one thing: the rooftops lined with linen sheets and rows of clay jars. Making achar wasn't a chore; it was a communal festival. Grandmothers, mothers, and daughters gathered, gossiped, and shared spice secrets under the summer sun. 
+                "Growing up in Patna, summers meant one thing: rooftops lined with linen sheets and rows of clay jars. Making achar wasn't a chore; it was a communal festival. Grandmothers, mothers, and daughters gathered, gossiped, and shared spice secrets under the summer sun. 
               </p>
               <p className="founder-narrative-sub">
-                When I looked at store shelves today, I saw mass-produced, chemically-stabilized pickles that tasted like vinegar rather than heritage. Swadyum was born out of a simple promise: to restore the pure, sun-cured, oil-steeped comfort of home-cooked pickles to Indian tables."
+                When we looked at store shelves today, we saw mass-produced, chemically-stabilized pickles that tasted like vinegar rather than heritage. Swadyum was born out of a simple promise: to restore the pure, sun-cured, oil-steeped comfort of home-cooked pickles to Indian tables."
               </p>
               <div className="signature-box">
-                <span className="sig-name">Nora Bell</span>
-                <span className="sig-title">Founder, Swadyum Foods</span>
+                <span className="sig-name">Swadyum Foods</span>
+                <span className="sig-title">Patna, Bihar — Since 2020</span>
               </div>
             </div>
           </div>

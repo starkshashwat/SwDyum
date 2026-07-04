@@ -1,0 +1,647 @@
+/* ==========================================
+   ABOUT US PAGE STYLING
+   ========================================== */
+.about-page-wrapper {
+  background-color: var(--cream);
+  width: 100%;
+  min-height: 100vh;
+  padding-top: 100px; /* Offset for sticky header */
+}
+
+/* Centered Header Helper */
+.origin-header-centered,
+.process-header-centered,
+.team-header-centered {
+  text-align: center;
+  margin-bottom: 4.5rem;
+}
+
+/* 1. Hero Story */
+.about-hero-section {
+  height: 520px;
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  text-align: center;
+  position: relative;
+}
+
+.about-hero-container {
+  max-width: 900px;
+  padding: 0 5%;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.about-hero-subtitle {
+  font-family: 'Brush Script MT', cursive, sans-serif;
+  font-size: 38px;
+  color: var(--premium-gold);
+  margin-bottom: 1rem;
+}
+
+.about-hero-title {
+  font-size: 58px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+  text-shadow: 0 4px 15px rgba(0,0,0,0.5);
+}
+
+.about-hero-desc {
+  font-size: 18px;
+  line-height: 1.7;
+  max-width: 680px;
+  color: #F0EDE5;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+}
+
+@media (max-width: 768px) {
+  .about-hero-section {
+    height: 420px;
+  }
+  .about-hero-title {
+    font-size: 36px;
+  }
+  .about-hero-desc {
+    font-size: 15px;
+  }
+}
+
+/* 2. Founder Story */
+.founder-story-section {
+  padding: 8rem 0;
+  background-color: white;
+  border-bottom: 1px solid #EAE5DB;
+}
+
+.founder-story-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 5%;
+}
+
+.founder-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1.3fr;
+  gap: 5rem;
+  align-items: center;
+}
+
+@media (max-width: 992px) {
+  .founder-grid {
+    grid-template-columns: 1fr;
+    gap: 3.5rem;
+  }
+}
+
+.founder-img-box {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  margin: 0 auto;
+  aspect-ratio: 4/5;
+}
+
+.founder-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+  z-index: 2;
+  position: relative;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+}
+
+.founder-gold-border {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: -20px;
+  bottom: -20px;
+  border: 2px solid var(--premium-gold);
+  border-radius: 20px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.founder-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.founder-narrative {
+  font-size: 20px;
+  line-height: 1.8;
+  color: var(--dark-text);
+  font-style: italic;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+}
+
+.founder-narrative-sub {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--muted-text);
+  margin-bottom: 2rem;
+}
+
+.signature-box {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid #EAE5DB;
+  padding-top: 1.5rem;
+}
+
+.sig-name {
+  font-family: 'Brush Script MT', cursive, sans-serif;
+  font-size: 32px;
+  color: var(--primary-green);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.sig-title {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  color: var(--premium-gold);
+}
+
+/* 3. How Swadyum Started */
+.story-origin-section {
+  padding: 8rem 0;
+}
+
+.origin-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 5%;
+}
+
+.origin-columns {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 2.5rem;
+}
+
+@media (max-width: 992px) {
+  .origin-columns {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+}
+
+.origin-col {
+  background: white;
+  border: 1px solid #EAE5DB;
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+  transition: all 0.3s ease;
+}
+
+.origin-col:hover {
+  transform: translateY(-5px);
+  border-color: var(--premium-gold);
+  box-shadow: 0 20px 40px rgba(199, 154, 59, 0.05);
+}
+
+.origin-col h3 {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--primary-green);
+  margin-bottom: 1rem;
+}
+
+.origin-col p {
+  font-size: 15px;
+  color: var(--muted-text);
+  line-height: 1.7;
+}
+
+/* 4. Traditional Family Recipes */
+.traditional-recipes-section {
+  padding: 8rem 0;
+  background-color: white;
+  border-top: 1px solid #EAE5DB;
+  border-bottom: 1px solid #EAE5DB;
+}
+
+.recipes-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 5%;
+}
+
+.recipes-split-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 5rem;
+  align-items: center;
+}
+
+@media (max-width: 992px) {
+  .recipes-split-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+}
+
+.recipes-content p {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--muted-text);
+  margin-bottom: 1.8rem;
+}
+
+.recipes-bullets {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.recipes-bullets li {
+  font-size: 15px;
+  color: var(--dark-text);
+  position: relative;
+  padding-left: 1.8rem;
+}
+
+.recipes-bullets li::before {
+  content: '✦';
+  position: absolute;
+  left: 0;
+  color: var(--premium-gold);
+  font-size: 16px;
+}
+
+.recipes-image-box {
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+  aspect-ratio: 1;
+  background-color: #FAF9F6;
+  border: 1px solid #EAE5DB;
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  box-shadow: 0 15px 35px rgba(0,0,0,0.03);
+}
+
+.recipes-img {
+  max-width: 90%;
+  max-height: 90%;
+  object-fit: contain;
+}
+
+/* 5. Manufacturing Process */
+.manufacturing-process-section {
+  padding: 8rem 0;
+}
+
+.process-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 5%;
+}
+
+.process-timeline-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.timeline-card {
+  background: white;
+  border: 1px solid #EAE5DB;
+  border-radius: 20px;
+  padding: 3rem 2rem;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+  transition: transform 0.3s;
+}
+
+.timeline-card:hover {
+  transform: translateY(-5px);
+}
+
+.step-num {
+  font-size: 44px;
+  font-weight: 800;
+  color: rgba(47, 94, 59, 0.1);
+  line-height: 1;
+  margin-bottom: 1rem;
+}
+
+.timeline-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--dark-text);
+  margin-bottom: 0.8rem;
+}
+
+.timeline-card p {
+  font-size: 14px;
+  color: var(--muted-text);
+  line-height: 1.6;
+}
+
+/* 6. Quality Promise */
+.quality-promise-section {
+  padding: 6rem 0;
+  background-color: #F6EFE6;
+  border-top: 1px solid #EAE5DB;
+  border-bottom: 1px solid #EAE5DB;
+}
+
+.quality-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 5%;
+}
+
+.quality-card-centered {
+  max-width: 800px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.promises-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+@media (max-width: 576px) {
+  .promises-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}
+
+.promise-box {
+  background: white;
+  border: 1px solid #EAE5DB;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  color: var(--dark-text);
+  font-size: 15px;
+}
+
+.pb-check {
+  color: var(--primary-green);
+  font-size: 18px;
+}
+
+/* 7. Mission & Vision */
+.mission-vision-section {
+  padding: 8rem 0;
+  background-color: white;
+}
+
+.mission-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 5%;
+}
+
+.mission-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3.5rem;
+}
+
+@media (max-width: 768px) {
+  .mission-grid {
+    grid-template-columns: 1fr;
+    gap: 2.5rem;
+  }
+}
+
+.mv-card {
+  border: 2px solid #EAE5DB;
+  border-radius: 24px;
+  padding: 3.5rem 2.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.mv-card:hover {
+  border-color: var(--premium-gold);
+  box-shadow: 0 15px 35px rgba(199, 154, 59, 0.05);
+}
+
+.mv-icon {
+  font-size: 36px;
+  margin-bottom: 1.5rem;
+  display: block;
+}
+
+.mv-card h3 {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--dark-text);
+  margin-bottom: 1rem;
+}
+
+.mv-card p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--muted-text);
+}
+
+/* 8. Bihar Heritage Showcase */
+.heritage-showcase-section {
+  padding: 8rem 0;
+}
+
+.heritage-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 5%;
+}
+
+.heritage-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 1.3fr;
+  gap: 5rem;
+  align-items: center;
+}
+
+@media (max-width: 992px) {
+  .heritage-grid {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+}
+
+.heritage-image-wrapper {
+  background: white;
+  border: 1px solid #EAE5DB;
+  border-radius: 24px;
+  padding: 2.5rem;
+  box-shadow: 0 15px 30px rgba(0,0,0,0.02);
+}
+
+.heritage-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.heritage-content p {
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--muted-text);
+  margin-top: 1rem;
+}
+
+/* 9. Team Section */
+.about-team-section {
+  padding: 8rem 0;
+  background-color: white;
+  border-top: 1px solid #EAE5DB;
+  border-bottom: 1px solid #EAE5DB;
+}
+
+.team-container-box {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 5%;
+}
+
+.team-grid-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 3rem;
+}
+
+.team-card-info {
+  background: var(--cream);
+  border: 1px solid #EAE5DB;
+  border-radius: 24px;
+  padding: 3rem 2rem;
+  text-align: center;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.team-card-info:hover {
+  transform: translateY(-8px);
+  border-color: var(--premium-gold);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+}
+
+.team-img-wrapper {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 0 auto 1.8rem auto;
+  border: 3px solid white;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+}
+
+.team-img-avatar {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.team-name {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--dark-text);
+  margin-bottom: 4px;
+}
+
+.team-role {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--premium-gold);
+  letter-spacing: 1.5px;
+  display: block;
+  margin-bottom: 1rem;
+}
+
+.team-desc {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted-text);
+}
+
+/* 10. CTA */
+.about-cta-section {
+  padding: 8rem 0;
+  background-color: var(--primary-green);
+  color: white;
+  text-align: center;
+}
+
+.about-cta-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 5%;
+}
+
+.cta-subtitle {
+  font-family: 'Brush Script MT', cursive, sans-serif;
+  font-size: 32px;
+  color: var(--premium-gold);
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.about-cta-section h2 {
+  font-size: 48px;
+  font-weight: 800;
+  margin-bottom: 1rem;
+  letter-spacing: -1px;
+}
+
+.about-cta-section p {
+  font-size: 18px;
+  margin-bottom: 2.5rem;
+  color: #D3E2D7;
+}
+
+.about-cta-btn {
+  height: 56px;
+  padding: 0 36px;
+  border: none;
+  background-color: var(--premium-gold);
+  color: white;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.about-cta-btn:hover {
+  background-color: #b58930;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(199, 154, 59, 0.25);
+}

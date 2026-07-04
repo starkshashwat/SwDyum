@@ -18,10 +18,10 @@
   inset: 0;
   background: linear-gradient(
     100deg,
-    rgba(250, 250, 249, 0.97) 0%,
-    rgba(250, 250, 249, 0.92) 30%,
-    rgba(250, 250, 249, 0.65) 55%,
-    rgba(250, 250, 249, 0) 75%
+    rgba(251, 245, 234, 0.97) 0%,
+    rgba(251, 245, 234, 0.92) 30%,
+    rgba(251, 245, 234, 0.65) 55%,
+    rgba(251, 245, 234, 0) 75%
   );
   z-index: 1;
 }
@@ -38,12 +38,13 @@
 }
 
 .hero-eyebrow {
-  font-family: var(--font-accent);
-  font-size: 2rem;
-  color: var(--color-primary);
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  color: var(--color-chili);
   font-weight: 700;
   display: block;
-  letter-spacing: 1px;
+  letter-spacing: 3px;
+  text-transform: uppercase;
 }
 
 .hero-headline {
@@ -51,7 +52,7 @@
   font-size: clamp(2.5rem, 5vw, 4.25rem);
   font-weight: 800;
   line-height: 1.1;
-  color: var(--color-foreground);
+  color: var(--color-ink);
   margin: 0;
   letter-spacing: -1.5px;
 }
@@ -60,7 +61,7 @@
   font-family: var(--font-heading);
   font-style: italic;
   font-weight: 400;
-  color: var(--color-accent);
+  color: var(--color-chili);
 }
 
 .hero-subtext {
@@ -71,85 +72,12 @@
   font-weight: 500;
 }
 
-/* ─── CTA Buttons ────────────────────────────────────────────────────────── */
+/* ─── CTA Group ──────────────────────────────────────────────────────────── */
 .cta-group {
   display: flex;
   gap: var(--space-4);
   align-items: center;
   margin-top: var(--space-2);
-}
-
-.primary-cta {
-  background-color: var(--color-primary);
-  color: #ffffff;
-  padding: 16px 40px;
-  border-radius: var(--radius-lg);
-  font-size: var(--text-base);
-  font-weight: 700;
-  font-family: var(--font-body);
-  border: none;
-  cursor: pointer;
-  transition: all var(--duration-normal) var(--ease-out);
-  box-shadow: 0 4px 14px rgba(47, 94, 59, 0.15);
-  position: relative;
-  overflow: hidden;
-}
-
-.primary-cta::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
-  opacity: 0;
-  transition: opacity var(--duration-normal) var(--ease-out);
-}
-
-.primary-cta:hover {
-  background-color: var(--color-primary-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(47, 94, 59, 0.25);
-}
-
-.primary-cta:hover::after {
-  opacity: 1;
-}
-
-.primary-cta:active {
-  transform: translateY(0);
-}
-
-.primary-cta:focus-visible {
-  outline: 3px solid var(--color-primary);
-  outline-offset: 3px;
-}
-
-.secondary-cta {
-  background-color: transparent;
-  color: var(--color-foreground);
-  padding: 15px 36px;
-  border: 2px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  font-size: var(--text-base);
-  font-weight: 700;
-  font-family: var(--font-body);
-  cursor: pointer;
-  transition: all var(--duration-normal) var(--ease-out);
-}
-
-.secondary-cta:hover {
-  border-color: var(--color-foreground);
-  background-color: var(--color-foreground);
-  color: #ffffff;
-  transform: translateY(-2px);
-}
-
-.secondary-cta:active {
-  transform: translateY(0);
-}
-
-.secondary-cta:focus-visible {
-  outline: 3px solid var(--color-primary);
-  outline-offset: 3px;
 }
 
 /* ─── Trust Indicators (Hero) ────────────────────────────────────────────── */
@@ -170,14 +98,14 @@
 }
 
 .stars {
-  color: var(--color-accent);
+  color: var(--color-mustard);
   font-size: 18px;
   letter-spacing: 2px;
 }
 
 .rating-text {
   font-size: var(--text-sm);
-  color: var(--color-foreground);
+  color: var(--color-ink);
   font-weight: 700;
 }
 
@@ -197,12 +125,12 @@
 }
 
 .ind-bullet {
-  color: var(--color-primary);
+  color: var(--color-leaf);
   font-size: 10px;
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: var(--color-primary);
+  background-color: var(--color-leaf);
   display: inline-block;
   flex-shrink: 0;
 }
@@ -231,9 +159,9 @@
   .hero-bg-overlay {
     background: linear-gradient(
       180deg,
-      rgba(250, 250, 249, 0.95) 0%,
-      rgba(250, 250, 249, 0.88) 50%,
-      rgba(250, 250, 249, 0.7) 100%
+      rgba(251, 245, 234, 0.95) 0%,
+      rgba(251, 245, 234, 0.88) 50%,
+      rgba(251, 245, 234, 0.7) 100%
     );
   }
 
@@ -244,7 +172,7 @@
   }
 
   .hero-eyebrow {
-    font-size: 1.5rem;
+    font-size: 0.6875rem;
   }
 
   .hero-headline {

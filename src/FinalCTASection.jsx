@@ -20,7 +20,7 @@ function FinalCTASection({ onNavigate }) {
           Ready to Taste the <em>Real</em> Bihar?
         </h2>
         <p className="final-cta-subtext">
-          Join 10,000+ families who have rediscovered the authentic flavors of homemade pickles. Every jar is a promise of purity, tradition, and taste.
+          Join 200+ families across India who have rediscovered the authentic flavors of homemade pickles. Every jar is a promise of purity, tradition, and taste.
         </p>
         <div className="final-cta-buttons">
           <button

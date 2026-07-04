@@ -1,77 +1,44 @@
-/* ─── Trust Bar Marquee ──────────────────────────────────────────────────── */
+/* ─── Trust Bar ──────────────────────────────────────────────────────────── */
 .trust-bar {
-  background-color: var(--color-foreground);
-  padding: var(--space-4) 0;
+  background: var(--color-cream);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
   overflow: hidden;
-  position: relative;
-}
-
-.trust-bar::before,
-.trust-bar::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 80px;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.trust-bar::before {
-  left: 0;
-  background: linear-gradient(90deg, var(--color-foreground), transparent);
-}
-
-.trust-bar::after {
-  right: 0;
-  background: linear-gradient(-90deg, var(--color-foreground), transparent);
+  padding: var(--space-4) 0;
 }
 
 .trust-bar-track {
   display: flex;
-  gap: var(--space-12);
-  animation: marquee 40s linear infinite;
+  align-items: center;
+  gap: var(--space-10);
+  animation: trust-scroll 40s linear infinite;
   width: max-content;
 }
 
 .trust-bar-item {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   white-space: nowrap;
   flex-shrink: 0;
 }
 
 .trust-bar-icon {
+  color: var(--color-chili);
   display: flex;
   align-items: center;
-  color: var(--color-accent-light);
 }
 
 .trust-bar-text {
   font-size: var(--text-sm);
   font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
+  color: var(--color-clay);
+  letter-spacing: 0.3px;
 }
 
-@keyframes marquee {
-  0% {
-    transform: translateX(0);
-  }
-  100% {
-    transform: translateX(-50%);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .trust-bar-track {
-    animation: none;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: var(--space-6);
-  }
+@keyframes trust-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
 }
 
 @media (max-width: 768px) {
@@ -79,17 +46,11 @@
     padding: var(--space-3) 0;
   }
 
-  .trust-bar-text {
-    font-size: var(--text-xs);
-  }
-
   .trust-bar-track {
     gap: var(--space-8);
-    animation-duration: 30s;
   }
 
-  .trust-bar::before,
-  .trust-bar::after {
-    width: 40px;
+  .trust-bar-text {
+    font-size: var(--text-xs);
   }
 }

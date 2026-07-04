@@ -1,19 +1,13 @@
 /* ─── Social Proof Section ───────────────────────────────────────────────── */
 .social-proof-section {
   background: var(--color-warm-bg);
-  overflow: hidden;
-}
-
-.social-proof-section .section-title em {
-  font-style: italic;
-  color: var(--color-accent);
 }
 
 .sp-header {
   margin-bottom: var(--space-12);
 }
 
-/* Metrics Grid */
+/* Metrics */
 .sp-metrics-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -22,38 +16,42 @@
 }
 
 .sp-metric-box {
-  background: var(--color-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--space-6) var(--space-4);
   text-align: center;
-  box-shadow: var(--shadow-sm);
+  padding: var(--space-8) var(--space-4);
+  background: var(--color-card);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--color-border);
+  transition: transform var(--duration-normal) var(--ease-out), box-shadow var(--duration-normal);
+}
+
+.sp-metric-box:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
 }
 
 .sp-metric-number {
   font-family: var(--font-heading);
   font-size: var(--text-4xl);
   font-weight: 800;
-  color: var(--color-primary);
+  color: var(--color-chili);
   margin-bottom: var(--space-2);
+  line-height: 1;
 }
 
 .sp-metric-label {
   font-size: var(--text-sm);
-  font-weight: 600;
   color: var(--color-muted);
-  text-transform: uppercase;
+  font-weight: 600;
   letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
 /* Carousel */
 .sp-carousel-wrapper {
   position: relative;
-  width: 100vw;
-  left: 50%;
-  transform: translateX(-50%);
   overflow: hidden;
-  padding: var(--space-4) 0;
+  margin: 0 calc(-1 * var(--space-6));
+  padding: 0 var(--space-6);
 }
 
 .sp-carousel-fade-left,
@@ -61,44 +59,43 @@
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 15vw;
+  width: 80px;
   z-index: 2;
   pointer-events: none;
 }
 
 .sp-carousel-fade-left {
   left: 0;
-  background: linear-gradient(90deg, var(--color-warm-bg) 0%, transparent 100%);
+  background: linear-gradient(90deg, var(--color-warm-bg), transparent);
 }
 
 .sp-carousel-fade-right {
   right: 0;
-  background: linear-gradient(-90deg, var(--color-warm-bg) 0%, transparent 100%);
+  background: linear-gradient(-90deg, var(--color-warm-bg), transparent);
 }
 
 .sp-carousel-track {
   display: flex;
   gap: var(--space-6);
-  width: max-content;
-  padding: 0 var(--space-4);
+  padding: var(--space-4) 0;
 }
 
 .sp-testimonial-card {
-  width: 350px;
+  min-width: 320px;
+  max-width: 360px;
   background: var(--color-card);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
   border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  padding: var(--space-8) var(--space-6);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  box-shadow: var(--shadow-sm);
   transition: box-shadow var(--duration-normal);
   flex-shrink: 0;
 }
 
 .sp-testimonial-card:hover {
-  box-shadow: var(--shadow-md);
+  box-shadow: var(--shadow-lg);
 }
 
 .sp-stars {
@@ -108,18 +105,16 @@
 
 .sp-quote {
   font-size: var(--text-base);
-  color: var(--color-foreground);
-  line-height: 1.6;
-  flex: 1;
-  margin: 0;
+  color: var(--color-ink);
+  line-height: 1.65;
   font-style: italic;
+  flex: 1;
 }
 
 .sp-customer-info {
   display: flex;
   align-items: center;
   gap: var(--space-3);
-  margin-top: var(--space-4);
   padding-top: var(--space-4);
   border-top: 1px solid var(--color-border-light);
 }
@@ -128,20 +123,20 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: var(--color-primary-light);
+  background: linear-gradient(135deg, var(--color-chili), var(--color-mango));
   color: #FFFFFF;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 700;
-  font-size: var(--text-lg);
-  font-family: var(--font-heading);
+  font-size: var(--text-sm);
+  flex-shrink: 0;
 }
 
 .sp-name {
   font-weight: 700;
   font-size: var(--text-sm);
-  color: var(--color-foreground);
+  color: var(--color-ink);
 }
 
 .sp-location {
@@ -150,48 +145,27 @@
 }
 
 /* ─── Responsive ─────────────────────────────────────────────────────────── */
-@media (max-width: 1024px) {
-  .sp-metrics-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
 @media (max-width: 768px) {
   .sp-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--space-4);
-    margin-bottom: var(--space-10);
   }
 
   .sp-metric-box {
-    padding: var(--space-4);
+    padding: var(--space-6) var(--space-3);
   }
 
   .sp-metric-number {
     font-size: var(--text-3xl);
   }
 
-  .sp-metric-label {
-    font-size: var(--text-xs);
-  }
-
   .sp-testimonial-card {
-    width: 300px;
-    padding: var(--space-6);
-  }
-
-  .sp-quote {
-    font-size: var(--text-sm);
+    min-width: 280px;
   }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .sp-carousel-track {
-    animation: none !important;
-    transform: none !important;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  .sp-carousel-wrapper {
-    overflow-x: auto;
+@media (max-width: 480px) {
+  .sp-metric-number {
+    font-size: var(--text-2xl);
   }
 }

@@ -103,27 +103,27 @@ function SocialProofSection() {
             transition={{ duration: 0.5 }}
           >
             <span className="section-eyebrow">Real Reviews</span>
-            <h2 className="section-title">Loved by <em>10,000+</em> Families</h2>
+            <h2 className="section-title">Loved by <em>200+</em> Families Across India</h2>
           </motion.div>
         </div>
 
         {/* Animated Counters */}
         <div className="sp-metrics-grid">
           <motion.div className="sp-metric-box" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }}>
-            <h3 className="sp-metric-number"><CountUp end="10000" suffix="+" /></h3>
-            <p className="sp-metric-label">Happy Customers</p>
+            <h3 className="sp-metric-number"><CountUp end="200" suffix="+" /></h3>
+            <p className="sp-metric-label">Happy Families</p>
           </motion.div>
           <motion.div className="sp-metric-box" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }}>
             <h3 className="sp-metric-number"><CountUp end="4.9" suffix="★" /></h3>
             <p className="sp-metric-label">Average Rating</p>
           </motion.div>
           <motion.div className="sp-metric-box" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.3 }}>
-            <h3 className="sp-metric-number"><CountUp end="95" suffix="%" /></h3>
-            <p className="sp-metric-label">Repeat Orders</p>
+            <h3 className="sp-metric-number"><CountUp end="500" suffix="+" /></h3>
+            <p className="sp-metric-label">Jars Delivered</p>
           </motion.div>
           <motion.div className="sp-metric-box" initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.4 }}>
-            <h3 className="sp-metric-number"><CountUp end="50000" suffix="+" /></h3>
-            <p className="sp-metric-label">Jars Delivered</p>
+            <h3 className="sp-metric-number"><CountUp end="15" suffix="+" /></h3>
+            <p className="sp-metric-label">Cities Served</p>
           </motion.div>
         </div>
 

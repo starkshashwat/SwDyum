@@ -4,10 +4,10 @@ import './App.css';
 import { supabase } from './supabaseClient';
 import Header from './Header';
 import TrustBar from './TrustBar';
-import CategoriesSection from './CategoriesSection';
 import ProductsSection from './ProductsSection';
 import ProcessSection from './ProcessSection';
 import ComboOfferSection from './ComboOfferSection';
+import MadhubaniDivider from './MadhubaniDivider';
 import SocialProofSection from './SocialProofSection';
 import FinalCTASection from './FinalCTASection';
 import ShopPage from './ShopPage';
@@ -26,6 +26,8 @@ import SignupPage from './SignupPage';
 import ForgotPasswordPage from './ForgotPasswordPage';
 import AccountPage from './AccountPage';
 import OrderDetailsPage from './OrderDetailsPage';
+import SalesPop from './SalesPop';
+import ExitIntentPop from './ExitIntentPop';
 
 function App() {
   const parsePath = (path) => {
@@ -158,9 +160,9 @@ function App() {
     localStorage.setItem('swadyum_cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product, weight, qty) => {
+  const addToCart = (product, weight, qty, subscription = 'One Time') => {
     setCart(prev => {
-      const idx = prev.findIndex(item => item.slug === product.slug && item.weight === weight);
+      const idx = prev.findIndex(item => item.slug === product.slug && item.weight === weight && item.subscription === subscription);
       if (idx > -1) {
         const updated = [...prev];
         updated[idx].quantity += qty;
@@ -172,19 +174,20 @@ function App() {
           weight: weight,
           price: product.price || product.prices[weight],
           quantity: qty,
-          image: product.image || product.images[0]
+          image: product.image || product.images[0],
+          subscription: subscription
         }];
       }
     });
   };
 
-  const updateCartQty = (slug, weight, newQty) => {
+  const updateCartQty = (slug, weight, subscription, newQty) => {
     setCart(prev => {
       if (newQty <= 0) {
-        return prev.filter(item => !(item.slug === slug && item.weight === weight));
+        return prev.filter(item => !(item.slug === slug && item.weight === weight && item.subscription === subscription));
       }
       return prev.map(item => {
-        if (item.slug === slug && item.weight === weight) {
+        if (item.slug === slug && item.weight === weight && item.subscription === subscription) {
           return { ...item, quantity: newQty };
         }
         return item;
@@ -192,8 +195,8 @@ function App() {
     });
   };
 
-  const removeFromCart = (slug, weight) => {
-    setCart(prev => prev.filter(item => !(item.slug === slug && item.weight === weight)));
+  const removeFromCart = (slug, weight, subscription) => {
+    setCart(prev => prev.filter(item => !(item.slug === slug && item.weight === weight && item.subscription === subscription)));
   };
 
   const clearCart = () => {
@@ -298,7 +301,7 @@ function App() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
             >
-              <span className="hero-eyebrow">Sun-Cured & Small Batch</span>
+              <span className="hero-eyebrow">Sun-Cured · Small Batch · Since 2020</span>
 
               <h1 className="hero-headline">
                 Taste the <em>Heritage</em> <br/>of Bihar in Every Bite
@@ -316,7 +319,7 @@ function App() {
               <div className="trust-indicators">
                 <div className="rating-container">
                   <span className="stars">★★★★★</span>
-                  <span className="rating-text">Loved by 10,000+ Families (4.9/5 Rating)</span>
+                  <span className="rating-text">Loved by 200+ Families Across India (4.9/5 Rating)</span>
                 </div>
 
                 <div className="indicator-list">
@@ -334,18 +337,23 @@ function App() {
             </motion.div>
           </div>
 
-          {/* ─── 7-Section Sales Funnel ─── */}
+          {/* ─── Sales Funnel — Hero → Trust → Products → Process → Combos → Reviews → CTA ─── */}
           <TrustBar />
+          <MadhubaniDivider variant="floral" />
           <ProductsSection onNavigate={handleNavigate} addToCart={addToCart} />
-          <CategoriesSection onNavigate={handleNavigate} />
+          <MadhubaniDivider variant="sun" />
           <ProcessSection />
+          <MadhubaniDivider variant="fish" />
           <ComboOfferSection onNavigate={handleNavigate} addToCart={addToCart} />
+          <MadhubaniDivider variant="lotus" />
           <SocialProofSection />
           <FinalCTASection onNavigate={handleNavigate} />
         </>
       )}
 
       <Footer onNavigate={handleNavigate} />
+      <SalesPop />
+      <ExitIntentPop onNavigate={handleNavigate} />
     </div>
   );
 }

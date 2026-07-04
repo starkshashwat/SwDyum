@@ -6,7 +6,7 @@ const trustItems = [
   { icon: 'sun', text: 'Sun-Cured Process' },
   { icon: 'shield', text: 'No Preservatives' },
   { icon: 'truck', text: 'Pan-India Delivery' },
-  { icon: 'star', text: '10,000+ Happy Families' },
+  { icon: 'star', text: '200+ Happy Families' },
   { icon: 'heart', text: 'Handcrafted with Love' },
   { icon: 'award', text: 'Premium Quality' },
   { icon: 'check', text: 'FSSAI Approved' },
