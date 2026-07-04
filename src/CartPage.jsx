@@ -1,11 +1,50 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './CartPage.css';
 
 function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
+  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const shippingThreshold = 799;
   const shippingFee = subtotal >= shippingThreshold || subtotal === 0 ? 0 : 60;
   const total = subtotal + shippingFee;
+
+  const handleFastrrCheckout = async (e) => {
+    e.preventDefault();
+    setIsCheckoutLoading(true);
+
+    try {
+      const fastrrItems = cart.map(item => ({
+        variant_id: item.slug, // Pass slug as variant_id
+        quantity: item.quantity
+      }));
+
+      const res = await fetch('http://localhost:3001/api/fastrr/access-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cart_data: { items: fastrrItems },
+          redirect_url: window.location.origin
+        })
+      });
+
+      const data = await res.json();
+
+      if (data.token) {
+        if (window.HeadlessCheckout) {
+          window.HeadlessCheckout.addToCart(e, data.token, { fallbackUrl: window.location.origin });
+        } else {
+          alert('Shiprocket Fastrr Checkout SDK not loaded. Check console.');
+        }
+      } else {
+        alert(data.error || 'Failed to initialize Fastrr Checkout.');
+      }
+    } catch (err) {
+      console.error('Fastrr error:', err);
+      alert('Network error during checkout initialization.');
+    } finally {
+      setIsCheckoutLoading(false);
+    }
+  };
 
   return (
     <div className="cart-page-wrapper">
@@ -135,8 +174,12 @@ function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
                   <span className="total-value">₹{total}</span>
                 </div>
 
-                <button className="checkout-cta-btn" onClick={() => onNavigate('checkout')}>
-                  Proceed to Secure Checkout 🔒
+                <button 
+                  className="checkout-cta-btn" 
+                  onClick={handleFastrrCheckout}
+                  disabled={isCheckoutLoading}
+                >
+                  {isCheckoutLoading ? 'Initializing Secure Checkout...' : 'Proceed to Secure Checkout 🔒'}
                 </button>
 
                 {/* Trust Badges */}

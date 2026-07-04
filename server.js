@@ -353,6 +353,60 @@ app.get('/api/shiprocket/track/:awb', async (req, res) => {
   }
 });
 
+// ═══════════════════════════════════════════════════════════════════════════════
+// SHIPROCKET FASTRR CHECKOUT ENDPOINTS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+app.post('/api/fastrr/access-token', async (req, res) => {
+  try {
+    const { cart_data, redirect_url } = req.body;
+    const apiKey = process.env.FASTRR_API_KEY;
+    const secretKey = process.env.FASTRR_SECRET_KEY;
+
+    if (!apiKey || !secretKey) {
+      return res.status(500).json({ error: 'Fastrr API or Secret Key not configured' });
+    }
+
+    const payload = {
+      cart_data,
+      redirect_url: redirect_url || "http://localhost:5173",
+      timestamp: new Date().toISOString()
+    };
+
+    const payloadStr = JSON.stringify(payload);
+    
+    // Calculate HMAC SHA256 using the Secret Key
+    const hmac = createHmac('sha256', secretKey)
+      .update(payloadStr)
+      .digest('base64');
+
+    console.log(`🚀 Requesting Fastrr Access Token...`);
+
+    const response = await fetch('https://checkout-api.shiprocket.com/api/v1/access-token/checkout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Api-Key': apiKey,
+        'X-Api-HMAC-SHA256': hmac
+      },
+      body: payloadStr
+    });
+
+    const data = await response.json();
+    
+    if (!response.ok) {
+      console.error('❌ Fastrr token error:', data);
+      return res.status(response.status).json({ error: data.message || 'Failed to generate Fastrr token' });
+    }
+
+    console.log(`✅ Fastrr token generated successfully!`);
+    res.json(data);
+  } catch (err) {
+    console.error('❌ Fastrr token error:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ─── Health Check ─────────────────────────────────────────────────────────────
 app.get('/api/health', (req, res) => {
   const shiprocketReady = !!process.env.SHIPROCKET_EMAIL;
@@ -382,6 +436,7 @@ app.listen(PORT, () => {
   console.log(`📍  Pickup Location  : ${PICKUP_LOCATION}`);
   console.log(`🚚  Shiprocket       : ${shiprocketOk ? '✅ ' + process.env.SHIPROCKET_EMAIL : '⚠️  Update SHIPROCKET_EMAIL in .env'}`);
   console.log(`💳  Razorpay         : ${razorpayOk ? '✅ ' + process.env.RAZORPAY_KEY_ID : '⚠️  Update RAZORPAY_KEY_ID in .env (mock mode active)'}`);
+  console.log(`🛒  Fastrr Checkout  : ${process.env.FASTRR_API_KEY ? '✅ Configured' : '⚠️  Not Configured'}`);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log('');
   console.log('  Flow: Razorpay → verify → Shiprocket → AWB → Confirm');
