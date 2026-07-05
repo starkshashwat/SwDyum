@@ -28,8 +28,7 @@ function Header({ currentPage = 'home', onNavigate, cartCount = 0 }) {
     { page: 'home', label: 'Home', path: '/' },
     { page: 'shop', label: 'Shop', path: '/shop' },
     { page: 'about', label: 'About', path: '/about' },
-    { page: 'blog', label: 'Blog', path: '/blog' },
-    { page: 'contact', label: 'Contact', path: '/contact' },
+    { page: 'recipes', label: 'Recipes', path: '/recipes' },
   ];
 
   return (

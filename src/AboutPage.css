@@ -1,591 +1,416 @@
-/* ─── About Us Page ──────────────────────────────────────────────────────── */
-.about-page-wrapper {
-  background-color: var(--color-bg);
+/* ═══════════════════════════════════════════════════════════════════════════
+   About Page — Kasutam-inspired Design (Ara, Bhojpur)
+   ═══════════════════════════════════════════════════════════════════════════ */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+
+.about-page-v2 {
+  background: var(--color-bg);
   width: 100%;
-  min-height: 100vh;
+  overflow-x: hidden;
   padding-top: var(--header-height);
 }
 
-/* Centered Header Helper */
-.origin-header-centered,
-.process-header-centered,
-.team-header-centered {
-  text-align: center;
-  margin-bottom: var(--space-12);
+/* ─── Shared Typography ──────────────────────────────────────────────────── */
+.about-eyebrow {
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-chili);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  display: block;
+  margin-bottom: var(--space-2);
 }
 
-/* ─── 1. Hero Story ──────────────────────────────────────────────────────── */
-.about-hero-section {
-  height: 60vh;
-  min-height: 400px;
-  max-height: 600px;
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
+.about-heading {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 700;
+  color: var(--color-ink);
+  line-height: 1.15;
+  margin: 0 0 var(--space-6) 0;
+}
+
+/* ─── Hero Banner (Matches ShopPage) ─────────────────────────────────────── */
+.about-hero {
+  padding: var(--space-4) var(--space-6);
+}
+
+.about-hero-inner {
   position: relative;
+  max-width: 1400px;
+  margin: 0 auto;
+  border-radius: 24px;
+  overflow: hidden;
+  height: 360px;
 }
 
-.about-hero-container {
-  max-width: var(--max-width);
-  padding: 0 var(--space-6);
+.about-hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.about-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    rgba(30, 22, 12, 0.85) 0%,
+    rgba(30, 22, 12, 0.6) 50%,
+    rgba(30, 22, 12, 0.2) 80%,
+    rgba(30, 22, 12, 0) 100%
+  );
+}
+
+.about-hero-content {
+  position: relative;
   z-index: 2;
   display: flex;
   flex-direction: column;
-  align-items: center;
-}
-
-.about-hero-subtitle {
-  font-family: var(--font-body);
-  font-size: var(--text-xs);
-  color: var(--color-mustard-light);
-  font-weight: 700;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  margin-bottom: var(--space-4);
+  justify-content: center;
+  height: 100%;
+  padding: var(--space-10) clamp(2rem, 5vw, 5rem);
+  max-width: 600px;
+  gap: var(--space-3);
 }
 
 .about-hero-title {
   font-family: var(--font-heading);
-  font-size: clamp(2.5rem, 5vw, 4rem);
-  font-weight: 800;
+  font-size: clamp(2.5rem, 5vw, 3.5rem);
+  font-weight: 700;
+  color: #fffdf8;
   line-height: 1.1;
-  color: #FFFFFF;
-  margin-bottom: var(--space-4);
-  letter-spacing: -1px;
+  margin: 0;
 }
 
-.about-hero-desc {
-  font-size: var(--text-lg);
-  line-height: 1.7;
-  max-width: 680px;
-  color: rgba(255, 255, 255, 0.85);
+.about-hero-title em {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-style: italic;
+  font-weight: 400;
+  color: #f5d88e;
 }
 
-/* ─── 2. Founder Story ───────────────────────────────────────────────────── */
-.founder-story-section {
-  padding: var(--space-24) 0;
-  background-color: var(--color-warm-bg);
+.about-hero-subtitle {
+  font-family: var(--font-body);
+  font-size: clamp(0.95rem, 1.2vw, 1.1rem);
+  color: rgba(255, 253, 248, 0.85);
+  line-height: 1.6;
+  margin: 0;
 }
 
-.founder-story-container {
-  max-width: var(--max-width);
+/* ─── Story Section (Split Layout) ───────────────────────────────────────── */
+.about-story {
+  padding: var(--space-16) var(--space-6);
+  background: #fdf8ef;
+}
+
+.about-story-container {
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 0 var(--space-6);
-}
-
-.founder-grid {
   display: grid;
-  grid-template-columns: 1fr 1.3fr;
-  gap: var(--space-16);
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-12);
   align-items: center;
 }
 
-.founder-img-box {
-  position: relative;
-  width: 100%;
-  aspect-ratio: 4/5;
-}
-
-.founder-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: var(--radius-xl);
-  z-index: 2;
-  position: relative;
-}
-
-.founder-gold-border {
-  position: absolute;
-  inset: var(--space-4) -var(--space-4) -var(--space-4) var(--space-4);
-  border: 2px solid var(--color-mustard);
-  border-radius: var(--radius-xl);
-  z-index: 1;
-}
-
-.founder-content {
-  display: flex;
-  flex-direction: column;
-}
-
-.founder-narrative {
-  font-size: var(--text-xl);
-  line-height: 1.6;
-  color: var(--color-ink);
-  font-family: var(--font-heading);
+.about-decor-branch {
+  width: 180px;
   margin-bottom: var(--space-6);
+  margin-left: -20px;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.05));
 }
 
-.founder-narrative-sub {
-  font-size: var(--text-base);
-  line-height: 1.7;
+.about-story-text {
+  font-size: 1.05rem;
   color: var(--color-muted);
-  margin-bottom: var(--space-8);
+  line-height: 1.7;
+  margin-bottom: var(--space-5);
 }
 
-.signature-box {
+.about-story-text.highlight {
+  font-size: 1.25rem;
+  color: var(--color-ink);
+  font-weight: 600;
+  font-family: var(--font-heading);
+  line-height: 1.5;
+}
+
+.about-signature {
+  margin-top: var(--space-8);
+  padding-top: var(--space-4);
+  border-top: 1px solid #e8dcc8;
   display: flex;
   flex-direction: column;
-  padding-top: var(--space-6);
-  border-top: 1px solid var(--color-border);
+  gap: 4px;
 }
 
-.sig-name {
+.about-signature strong {
   font-family: var(--font-heading);
-  font-size: var(--text-2xl);
-  font-weight: 700;
-  color: var(--color-chili);
-  margin-bottom: var(--space-1);
+  font-size: 1.1rem;
+  color: var(--color-ink);
 }
 
-.sig-title {
-  font-size: var(--text-xs);
+.about-signature span {
+  font-size: 0.85rem;
+  color: var(--color-chili);
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: 700;
-  color: var(--color-mustard);
 }
 
-/* ─── 3. Origin ──────────────────────────────────────────────────────────── */
-.story-origin-section {
-  padding: var(--space-24) 0;
+/* ─── Values Section (Bento Grid) ────────────────────────────────────────── */
+.about-values {
+  padding: var(--space-16) var(--space-6);
 }
 
-.origin-container {
-  max-width: var(--max-width);
+.about-values-container {
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 0 var(--space-6);
 }
 
-.origin-columns {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-8);
+.about-values-header {
+  text-align: center;
+  margin-bottom: var(--space-12);
 }
 
-.origin-col {
-  background: var(--color-card);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  padding: var(--space-10) var(--space-8);
-  transition: all var(--duration-normal) var(--ease-out);
+.about-values-header .about-heading {
+  margin-bottom: 0;
 }
 
-.origin-col:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-  border-color: var(--color-mustard);
-}
-
-.origin-col h3 {
-  font-size: var(--text-lg);
-  font-family: var(--font-heading);
-  color: var(--color-chili);
-  margin-bottom: var(--space-4);
-}
-
-.origin-col p {
-  font-size: var(--text-sm);
-  color: var(--color-muted);
-  line-height: 1.7;
-}
-
-/* ─── 4. Traditional Recipes ─────────────────────────────────────────────── */
-.traditional-recipes-section {
-  padding: var(--space-24) 0;
-  background-color: var(--color-warm-bg);
-}
-
-.recipes-container {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0 var(--space-6);
-}
-
-.recipes-split-grid {
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: var(--space-16);
-  align-items: center;
-}
-
-.recipes-content p {
-  font-size: var(--text-base);
-  color: var(--color-muted);
-  line-height: 1.7;
-  margin-bottom: var(--space-8);
-}
-
-.recipes-bullets {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-}
-
-.recipes-bullets li {
-  position: relative;
-  padding-left: var(--space-8);
-  font-size: var(--text-base);
-  color: var(--color-ink);
-  line-height: 1.6;
-}
-
-.recipes-bullets li::before {
-  content: '✦';
-  position: absolute;
-  left: 0;
-  top: 2px;
-  color: var(--color-mustard);
-  font-size: 14px;
-}
-
-.recipes-image-box {
-  width: 100%;
-  height: 500px;
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  position: relative;
-  background: var(--color-cream);
-}
-
-.recipes-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* ─── 5. Process ─────────────────────────────────────────────────────────── */
-.manufacturing-process-section {
-  padding: var(--space-24) 0;
-}
-
-.process-container {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0 var(--space-6);
-}
-
-.process-timeline-cards {
+.about-values-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: var(--space-6);
 }
 
-.timeline-card {
+.about-value-card {
   background: var(--color-card);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
-  padding: var(--space-8);
-  position: relative;
-  transition: transform var(--duration-normal) var(--ease-out);
+  padding: var(--space-8) var(--space-6);
+  text-align: left;
+  transition: all var(--duration-normal) var(--ease-out);
 }
 
-.timeline-card:hover {
+.about-value-card:hover {
   transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
+  border-color: transparent;
 }
 
-.step-num {
+.value-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(135deg, rgba(193, 64, 43, 0.08), rgba(232, 118, 44, 0.08));
+  color: var(--color-chili);
+  margin-bottom: var(--space-5);
+}
+
+.value-title {
   font-family: var(--font-heading);
-  font-size: var(--text-4xl);
-  font-weight: 800;
-  color: var(--color-mustard);
-  opacity: 0.3;
-  margin-bottom: var(--space-4);
-  line-height: 1;
-}
-
-.timeline-card h3 {
-  font-size: var(--text-lg);
+  font-size: 1.1rem;
+  font-weight: 700;
   color: var(--color-ink);
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-3);
+  line-height: 1.3;
 }
 
-.timeline-card p {
-  font-size: var(--text-sm);
+.value-desc {
+  font-size: 0.9rem;
   color: var(--color-muted);
   line-height: 1.6;
+  margin: 0;
 }
 
-/* ─── 6. Quality ─────────────────────────────────────────────────────────── */
-.quality-promise-section {
-  padding: var(--space-24) 0;
-  background-color: var(--color-clay);
+/* ─── Bottom CTA Banner (Matches ShopPage) ───────────────────────────────── */
+.about-cta {
+  padding: 0 var(--space-6) var(--space-16);
 }
 
-.quality-container {
-  max-width: 900px;
+.about-cta-inner {
+  max-width: 1280px;
   margin: 0 auto;
-  padding: 0 var(--space-6);
-  text-align: center;
 }
 
-.quality-promise-section .section-subtitle {
-  color: var(--color-mustard-light);
+.about-cta-card {
+  display: flex;
+  background: var(--color-chili);
+  border-radius: 20px;
+  overflow: hidden;
 }
 
-.quality-promise-section .section-headline {
-  color: #FFFFFF;
-}
-
-.promises-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-4);
-  margin-top: var(--space-12);
-}
-
-.promise-box {
-  background: rgba(255, 255, 255, 0.1);
-  padding: var(--space-6);
-  border-radius: var(--radius-lg);
+.about-cta-img-side {
+  flex: 0 0 38%;
   display: flex;
   align-items: center;
-  gap: var(--space-4);
-  color: #FFFFFF;
-  font-weight: 600;
-  font-size: var(--text-base);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  justify-content: center;
+  padding: var(--space-6);
+  position: relative;
+  background: rgba(0, 0, 0, 0.08);
 }
 
-.pb-check {
-  color: var(--color-mustard-light);
-  font-size: var(--text-xl);
+.about-cta-img {
+  max-height: 240px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 8px 24px rgba(0, 0, 0, 0.2));
 }
 
-/* ─── 7. Mission ─────────────────────────────────────────────────────────── */
-.mission-vision-section {
-  padding: var(--space-24) 0;
+.about-cta-content {
+  flex: 1;
+  padding: var(--space-10) var(--space-8);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: var(--space-3);
 }
 
-.mission-grid {
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 0 var(--space-6);
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--space-8);
-}
-
-.mv-card {
-  background: var(--color-warm-bg);
-  padding: var(--space-12) var(--space-10);
-  border-radius: var(--radius-xl);
-  text-align: center;
-}
-
-.mv-icon {
-  font-size: 3rem;
-  margin-bottom: var(--space-6);
-  display: block;
-}
-
-.mv-card h3 {
-  font-family: var(--font-heading);
-  font-size: var(--text-2xl);
-  color: var(--color-chili);
-  margin-bottom: var(--space-4);
-}
-
-.mv-card p {
-  color: var(--color-ink);
-  line-height: 1.7;
-  font-size: var(--text-base);
-}
-
-/* ─── 8. Heritage ────────────────────────────────────────────────────────── */
-.heritage-showcase-section {
-  padding: var(--space-24) 0;
-  background-color: var(--color-card);
-}
-
-.heritage-container {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 0 var(--space-6);
-}
-
-.heritage-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--space-16);
-  align-items: center;
-}
-
-.heritage-image-wrapper {
-  border-radius: var(--radius-xl);
-  overflow: hidden;
-  height: 400px;
-}
-
-.heritage-img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.heritage-content p {
-  font-size: var(--text-lg);
-  color: var(--color-muted);
-  line-height: 1.7;
-}
-
-/* ─── 9. Team ────────────────────────────────────────────────────────────── */
-.about-team-section {
-  padding: var(--space-24) 0;
-  background-color: var(--color-warm-bg);
-}
-
-.team-grid-cards {
-  max-width: var(--max-width);
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--space-8);
-  padding: 0 var(--space-6);
-}
-
-.team-card-info {
-  text-align: center;
-  background: var(--color-card);
-  padding: var(--space-10) var(--space-6);
-  border-radius: var(--radius-xl);
-  border: 1px solid var(--color-border);
-}
-
-.team-img-wrapper {
-  width: 160px;
-  height: 160px;
-  margin: 0 auto var(--space-6);
-  border-radius: 50%;
-  overflow: hidden;
-  border: 4px solid var(--color-warm-bg);
-  background: var(--color-cream);
-}
-
-.team-img-avatar {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.team-name {
-  font-family: var(--font-heading);
-  font-size: var(--text-xl);
-  color: var(--color-ink);
-  margin-bottom: var(--space-1);
-}
-
-.team-role {
-  font-size: var(--text-xs);
-  font-weight: 700;
-  color: var(--color-mustard);
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  display: block;
-  margin-bottom: var(--space-4);
-}
-
-.team-desc {
-  font-size: var(--text-sm);
-  color: var(--color-muted);
-  line-height: 1.6;
-}
-
-/* ─── 10. CTA ────────────────────────────────────────────────────────────── */
-.about-cta-section {
-  padding: var(--space-24) var(--space-6);
-  background: linear-gradient(135deg, var(--color-chili), var(--color-chili-dark));
-  text-align: center;
-  color: #FFFFFF;
-}
-
-.cta-subtitle {
+.about-cta-eyebrow {
   font-family: var(--font-body);
-  font-size: var(--text-xs);
+  font-size: 0.75rem;
   font-weight: 700;
-  letter-spacing: 3px;
+  color: rgba(255, 255, 255, 0.6);
   text-transform: uppercase;
-  color: var(--color-mustard-light);
-  display: block;
-  margin-bottom: var(--space-4);
+  letter-spacing: 2px;
 }
 
-.about-cta-section h2 {
+.about-cta-heading {
   font-family: var(--font-heading);
-  font-size: var(--text-4xl);
-  color: #FFFFFF;
-  margin-bottom: var(--space-4);
+  font-size: clamp(1.4rem, 2.5vw, 2.2rem);
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.2;
 }
 
-.about-cta-section p {
-  font-size: var(--text-lg);
-  opacity: 0.9;
-  max-width: 600px;
-  margin: 0 auto var(--space-8);
-  line-height: 1.6;
+.about-cta-desc {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.75);
+  line-height: 1.65;
+  margin: 0;
+  max-width: 480px;
 }
 
 .about-cta-btn {
-  background: var(--color-mustard);
-  color: var(--color-ink);
-  padding: 16px 40px;
+  align-self: flex-start;
+  padding: 14px 36px;
   border-radius: var(--radius-full);
-  font-size: var(--text-base);
-  font-weight: 800;
+  background: #fffdf8;
+  color: var(--color-chili);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  font-weight: 700;
   border: none;
   cursor: pointer;
   transition: all var(--duration-normal) var(--ease-out);
-  font-family: var(--font-body);
+  margin-top: var(--space-2);
 }
 
 .about-cta-btn:hover {
-  background: var(--color-mustard-light);
+  background: #f5d88e;
   transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
 }
 
-/* ─── Responsive ─────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 @media (max-width: 1024px) {
-  .founder-grid,
-  .recipes-split-grid,
-  .heritage-grid {
-    grid-template-columns: 1fr;
-    gap: var(--space-12);
+  .about-story-container {
+    gap: var(--space-8);
   }
 
-  .origin-columns,
-  .team-grid-cards {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .process-timeline-cards {
+  .about-values-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
 @media (max-width: 768px) {
-  .about-hero-section {
-    height: 50vh;
+  .about-hero {
+    padding: var(--space-3) var(--space-4);
   }
-  
-  .promises-grid,
-  .mission-grid,
-  .origin-columns,
-  .team-grid-cards,
-  .process-timeline-cards {
+
+  .about-hero-inner {
+    border-radius: 18px;
+    height: 280px;
+  }
+
+  .about-hero-content {
+    padding: var(--space-8) var(--space-6);
+  }
+
+  .about-story {
+    padding: var(--space-12) var(--space-4);
+  }
+
+  .about-story-container {
     grid-template-columns: 1fr;
+    gap: var(--space-6);
   }
 
-  .founder-gold-border {
-    display: none;
+  .about-decor-branch {
+    width: 140px;
+    margin-bottom: var(--space-4);
   }
 
-  .recipes-image-box,
-  .heritage-image-wrapper {
-    height: 300px;
+  .about-values {
+    padding: var(--space-12) var(--space-4);
+  }
+
+  .about-cta {
+    padding: 0 var(--space-4) var(--space-12);
+  }
+
+  .about-cta-card {
+    flex-direction: column;
+  }
+
+  .about-cta-img-side {
+    flex: none;
+    height: 200px;
+  }
+
+  .about-cta-content {
+    padding: var(--space-6) var(--space-5);
+  }
+}
+
+@media (max-width: 480px) {
+  .about-hero-inner {
+    height: 240px;
+    border-radius: 14px;
+  }
+
+  .about-hero-content {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .about-heading {
+    font-size: 1.6rem;
+  }
+
+  .about-values-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-4);
+  }
+
+  .about-value-card {
+    padding: var(--space-6) var(--space-5);
+  }
+
+  .about-cta-heading {
+    font-size: 1.4rem;
+  }
+
+  .about-cta-desc {
+    font-size: 0.85rem;
   }
 }

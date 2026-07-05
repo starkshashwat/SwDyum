@@ -57,7 +57,7 @@ function Footer({ onNavigate }) {
             <li><a href="/" onClick={(e) => handleLinkClick('home', e)}>Home</a></li>
             <li><a href="/shop" onClick={(e) => handleLinkClick('shop', e)}>Shop Best Sellers</a></li>
             <li><a href="/about" onClick={(e) => handleLinkClick('about', e)}>Our Story</a></li>
-            <li><a href="/blog" onClick={(e) => handleLinkClick('blog', e)}>Recipes & Blog</a></li>
+            <li><a href="/recipes" onClick={(e) => handleLinkClick('recipes', e)}>Recipes</a></li>
             <li><a href="/contact" onClick={(e) => handleLinkClick('contact', e)}>Contact Us</a></li>
           </ul>
         </div>

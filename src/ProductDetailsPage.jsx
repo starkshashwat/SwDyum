@@ -2,19 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './ProductDetailsPage.css';
 import { getProductBySlug, getRelatedProducts } from './data/products';
-
-// Helper variants for framer-motion
-const fadeUp = {
-  hidden: { opacity: 0, y: 30 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } }
-};
-const staggerContainer = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: { staggerChildren: 0.15 }
-  }
-};
+import ReviewSection from './ReviewSection';
 
 function ProductDetailsPage({ slug, onNavigate, addToCart }) {
   const [p, setP] = useState(null);
@@ -22,37 +10,46 @@ function ProductDetailsPage({ slug, onNavigate, addToCart }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [selectedSize, setSelectedSize] = useState('250g');
   const [quantity, setQuantity] = useState(1);
-  const [openFaq, setOpenFaq] = useState(null);
-  const [openDetail, setOpenDetail] = useState(null);
+  const [openDetail, setOpenDetail] = useState('Ingredients'); // Default open section
 
-  const gallery = p ? [p.image, '/editorial_spoon.png', '/gal_mix.png', '/gal_cut.png'] : [];
-  
+  const gallery = p ? [p.image, '/gal_mix.png', '/gal_cut.png', '/editorial_spoon.png'] : [];
+
   const flavorColumns = [
-    { title: "Tangy", desc: "Sun-dried raw mangoes provide a sharp, bright citrus burst.", texture: "/prod_lemon.png" },
-    { title: "Bold", desc: "A robust blend of regional spices hits the palate with warmth.", texture: "/prod_chili.png" },
-    { title: "Balanced", desc: "Cold-pressed mustard oil rounds out the heat with earthy depth.", texture: "/prod_garlic.png" }
+    { title: "Tangy", desc: "Bright citrus burst from the finest regional produce.", texture: "/prod_lemon.png" },
+    { title: "Bold", desc: "A robust blend of traditional spices hits the palate with warmth.", texture: "/prod_chili.png" },
+    { title: "Balanced", desc: "Cold-pressed mustard oil rounds out the heat with deep, earthy notes.", texture: "/prod_garlic.png" }
+  ];
+
+  const processSteps = [
+    { step: "01", title: "Hand-Picking", img: "/prod_mango.png", desc: "Selecting the finest raw ingredients from local farms in Bihar." },
+    { step: "02", title: "Preparation", img: "/making_garlic.png", desc: "Traditional cutting, peeling, and marination using heritage techniques." },
+    { step: "03", title: "Sun-Curing", img: "/making_lemon.png", desc: "Slow-matured on earthen terraces strictly by the heat of the summer sun." },
+    { step: "04", title: "Seasoning", img: "/making_chilli.png", desc: "Generously tempered with cold-pressed mustard oil and aromatic spices." }
   ];
 
   const mealPairings = [
-    { name: "Hot Paratha", image: "/deal_scatter.png", desc: "The ultimate comfort breakfast." },
+    { name: "Hot Paratha", image: "/making_chilli.png", desc: "The ultimate comfort breakfast pairing." },
     { name: "Dal-Chawal", image: "/gal_mix.png", desc: "A nostalgic, soulful combination." },
-    { name: "Khichdi", image: "/gal_cut.png", desc: "Elevates simple meals instantly." },
-    { name: "Poori Sabzi", image: "/about_us.png", desc: "A festive pairing full of joy." },
+    { name: "Poori Sabzi", image: "/about_us.png", desc: "Elevates simple festive meals instantly." },
   ];
 
-  const ingredients = [
-    { name: "Raw Mango", img: "/prod_mango.png" },
-    { name: "Mustard Oil", img: "/editorial_spoon.png" },
-    { name: "Fenugreek", img: "/prod_lemon.png" },
-    { name: "Fennel", img: "/prod_garlic.png" }
-  ];
-
-  const timeline = [
-    { step: "01. Selection", img: "/prod_mango.png", text: "Hand-picking the finest regional produce." },
-    { step: "02. Preparation", img: "/gal_cut.png", text: "Traditional cutting and marination." },
-    { step: "03. Resting", img: "/gal_mix.png", text: "Sun-cured on earthen terraces." },
-    { step: "04. Seasoning", img: "/editorial_spoon.png", text: "Tempering with cold-pressed oil." },
-    { step: "05. Packing", img: "/about_us.png", text: "Sealed in glass to preserve heritage." }
+  const accordionData = [
+    { 
+      title: 'Ingredients', 
+      content: 'Locally sourced raw ingredients, pure cold-pressed mustard oil, turmeric, fenugreek, fennel, red chilli powder, and natural rock salt. 100% free from synthetic colors or chemical preservatives.'
+    },
+    { 
+      title: 'Storage & Shelf Life', 
+      content: 'Store in a cool, dry place. Best consumed within 12 to 18 months of opening. Always use a clean, dry spoon to prevent contamination and retain flavor purity.'
+    },
+    { 
+      title: 'Nutritional Info', 
+      content: 'Rich in probiotics and antioxidants due to the natural fermentation and sun-curing process. Contains healthy fats from pure mustard oil.'
+    },
+    { 
+      title: 'Shipping Details', 
+      content: 'We ship PAN-India in heavy-duty, leak-proof glass jars to ensure chemical-free transit. Deliveries typically arrive within 3-5 business days.'
+    }
   ];
 
   useEffect(() => {
@@ -63,6 +60,8 @@ function ProductDetailsPage({ slug, onNavigate, addToCart }) {
         const related = await getRelatedProducts(data.id, 4);
         setP({ ...data, related });
         setSelectedSize(Object.keys(data.prices)[0] || '250g');
+        setQuantity(1);
+        setActiveImageIndex(0);
       }
       setLoading(false);
       window.scrollTo(0, 0);
@@ -76,213 +75,254 @@ function ProductDetailsPage({ slug, onNavigate, addToCart }) {
   return (
     <div className="pdp-wrapper">
       
-      {/* SECTION 1: PRODUCT HERO */}
-      <section className="pdp-hero">
-        <div className="pdp-sticky-breadcrumb">
-          <span onClick={() => onNavigate('home')}>Home</span>
-          <span className="sep">/</span>
-          <span onClick={() => onNavigate('shop')}>Collection</span>
-          <span className="sep">/</span>
-          <span className="current">{p.name}</span>
-        </div>
-
-        <div className="pdp-hero-grid">
-          {/* Left: Gallery */}
+      {/* ════════════════════════════════════════════
+          1. HERO (PURCHASE AREA)
+      ════════════════════════════════════════════ */}
+      <section className="pdp-hero-section">
+        <div className="pdp-hero-container">
+          
+          {/* Left: Sticky Gallery */}
           <div className="pdp-gallery-col">
-            <div className="pdp-main-image-container">
-              <motion.img 
-                key={activeImageIndex}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6 }}
-                src={gallery[activeImageIndex] || p.image} 
-                alt={p.name} 
-                className="pdp-main-image"
-              />
-            </div>
-            <div className="pdp-thumbnails">
-              {gallery.map((img, idx) => (
-                <div 
-                  key={idx} 
-                  className={`pdp-thumb ${activeImageIndex === idx ? 'active' : ''}`}
-                  onClick={() => setActiveImageIndex(idx)}
-                >
-                  <img src={img} alt={`View ${idx+1}`} />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Right: Info */}
-          <div className="pdp-info-col">
-            <div className="pdp-info-sticky">
-              <span className="pdp-eyebrow">Swadyum Collection</span>
-              <h1 className="pdp-title">{p.name}</h1>
-              <div className="pdp-price">₹{p.prices[selectedSize]}</div>
+            <div className="pdp-gallery-sticky">
+              <motion.div 
+                className="pdp-main-image-container"
+                layoutId={`main-image-${p.id}`}
+              >
+                <motion.img 
+                  key={activeImageIndex}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.4 }}
+                  src={gallery[activeImageIndex] || p.image} 
+                  alt={p.name} 
+                  className="pdp-main-image"
+                />
+              </motion.div>
               
-              <div className="pdp-size-selector">
-                {Object.keys(p.prices).map(size => (
+              <div className="pdp-thumbnails">
+                {gallery.map((img, idx) => (
                   <button 
-                    key={size}
-                    className={`pdp-size-btn ${selectedSize === size ? 'active' : ''}`}
-                    onClick={() => setSelectedSize(size)}
+                    key={idx} 
+                    className={`pdp-thumb ${activeImageIndex === idx ? 'active' : ''}`}
+                    onClick={() => setActiveImageIndex(idx)}
                   >
-                    {size}
+                    <img src={img} alt={`View ${idx+1}`} />
                   </button>
                 ))}
               </div>
+            </div>
+          </div>
 
-              <div className="pdp-availability">Ready to ship</div>
+          {/* Right: Product Info */}
+          <div className="pdp-info-col">
+            <div className="pdp-breadcrumb">
+              <button onClick={() => onNavigate('home')}>Home</button>
+              <span className="sep">/</span>
+              <button onClick={() => onNavigate('shop')}>Shop</button>
+              <span className="sep">/</span>
+              <span className="current">{p.name}</span>
+            </div>
 
-              <div className="pdp-actions">
-                <div className="pdp-qty">
-                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))}>-</button>
+            <motion.h1 
+              className="pdp-title"
+              initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}
+            >
+              {p.name}
+            </motion.h1>
+            
+            <motion.div 
+              className="pdp-price"
+              initial={{ opacity: 0, y: 15 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.1 }}
+            >
+              ₹{p.prices[selectedSize]}
+            </motion.div>
+            
+            <p className="pdp-short-story">
+              The jar opened before every meal begins. Bright regional produce, bold spices, and slow preparation come together to create the authentic flavor every table waits for.
+            </p>
+
+            <div className="pdp-options">
+              <div className="pdp-option-group">
+                <span className="pdp-option-label">Select Weight</span>
+                <div className="pdp-size-selector">
+                  {Object.keys(p.prices).map(size => (
+                    <button 
+                      key={size}
+                      className={`pdp-size-btn ${selectedSize === size ? 'active' : ''}`}
+                      onClick={() => setSelectedSize(size)}
+                    >
+                      {size}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="pdp-option-group">
+                <span className="pdp-option-label">Quantity</span>
+                <div className="pdp-qty-selector">
+                  <button onClick={() => setQuantity(Math.max(1, quantity - 1))} aria-label="Decrease quantity">−</button>
                   <span>{quantity}</span>
-                  <button onClick={() => setQuantity(quantity + 1)}>+</button>
+                  <button onClick={() => setQuantity(quantity + 1)} aria-label="Increase quantity">+</button>
                 </div>
-                <button 
-                  className="pdp-btn-primary"
-                  onClick={() => addToCart({ slug, name: p.name, prices: p.prices, image: p.image }, selectedSize, quantity, 'One Time')}
-                >
-                  Add to Cart
-                </button>
-                <button 
-                  className="pdp-btn-secondary"
-                  onClick={() => {
-                    addToCart({ slug, name: p.name, prices: p.prices, image: p.image }, selectedSize, quantity, 'One Time');
-                    onNavigate('checkout');
-                  }}
-                >
-                  Buy Now
-                </button>
               </div>
-
-              <div className="pdp-assurances">
-                <span>Secure Checkout</span>
-                <span className="dot">•</span>
-                <span>Fast Delivery</span>
-                <span className="dot">•</span>
-                <span>Easy Returns</span>
-              </div>
-
-              <hr className="pdp-divider" />
-              
-              <p className="pdp-short-story">
-                "The jar opened before every meal begins. Bright regional produce, bold spices and slow preparation come together to create the flavour every table waits for."
-              </p>
             </div>
+
+            <div className="pdp-actions">
+              <button 
+                className="pdp-add-btn"
+                onClick={() => addToCart({ slug, name: p.name, prices: p.prices, image: p.image }, selectedSize, quantity, 'One Time')}
+              >
+                Add to Cart
+              </button>
+              <button 
+                className="pdp-buy-btn"
+                onClick={() => {
+                  addToCart({ slug, name: p.name, prices: p.prices, image: p.image }, selectedSize, quantity, 'One Time');
+                  onNavigate('checkout');
+                }}
+              >
+                Buy Now
+              </button>
+            </div>
+
+            <div className="pdp-trust-badges">
+              <div className="trust-badge">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                Secure Checkout
+              </div>
+              <div className="trust-badge">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                Fast PAN-India Delivery
+              </div>
+              <div className="trust-badge">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+                Zero Chemicals
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
 
-      {/* SECTION 2: FLAVOUR EXPERIENCE */}
-      <section className="pdp-flavor-exp">
-        <motion.div 
-          className="pdp-container"
-          initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }}
-          variants={staggerContainer}
-        >
-          <motion.h2 variants={fadeUp} className="pdp-section-title text-center">The moment every bite changes.</motion.h2>
-          <div className="pdp-flavor-grid">
+      {/* ════════════════════════════════════════════
+          2. FLAVOUR BENTO
+      ════════════════════════════════════════════ */}
+      <section className="pdp-flavour-section">
+        <div className="pdp-section-container">
+          <div className="pdp-section-header">
+            <span className="pdp-eyebrow">The Profile</span>
+            <h2 className="pdp-heading">Taste The Authenticity</h2>
+          </div>
+          
+          <div className="pdp-flavour-bento">
             {flavorColumns.map((col, idx) => (
-              <motion.div key={idx} variants={fadeUp} className="flavor-col">
-                <div className="flavor-texture">
-                  <img src={col.texture} alt={col.title} />
+              <motion.div 
+                key={idx} 
+                className="flavour-bento-card"
+                initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-50px' }} transition={{ duration: 0.5, delay: idx * 0.1 }}
+              >
+                <div className="flavour-texture" style={{ backgroundImage: `url(${col.texture})` }}></div>
+                <div className="flavour-content">
+                  <h3>{col.title}</h3>
+                  <p>{col.desc}</p>
                 </div>
-                <h3 className="flavor-title">{col.title}</h3>
-                <p className="flavor-desc">{col.desc}</p>
               </motion.div>
             ))}
           </div>
-        </motion.div>
+        </div>
       </section>
 
-      {/* SECTION 3: BEST WITH */}
-      <section className="pdp-best-with">
-        <div className="pdp-container">
-          <motion.h2 
-            initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            className="pdp-section-title"
-          >
-            Perfect Pairings
-          </motion.h2>
-          <div className="pdp-pairing-container">
+      {/* ════════════════════════════════════════════
+          3. THE MAKING PROCESS (TIMELINE)
+      ════════════════════════════════════════════ */}
+      <section className="pdp-process-section">
+        <div className="pdp-section-container">
+          <div className="pdp-section-header center">
+            <span className="pdp-eyebrow">From Farm To Jar</span>
+            <h2 className="pdp-heading">How It's Formed</h2>
+          </div>
+          
+          <div className="pdp-process-grid">
+            {processSteps.map((step, idx) => (
+              <motion.div 
+                key={idx} 
+                className="pdp-process-step"
+                initial={{ opacity: 0, scale: 0.95 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, margin: '-50px' }} transition={{ duration: 0.5, delay: idx * 0.1 }}
+              >
+                <div className="process-img-wrap">
+                  <img src={step.img} alt={step.title} />
+                  <div className="process-num">{step.step}</div>
+                </div>
+                <div className="process-info">
+                  <h4>{step.title}</h4>
+                  <p>{step.desc}</p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════
+          4. PERFECT PAIRINGS
+      ════════════════════════════════════════════ */}
+      <section className="pdp-pairings-section">
+        <div className="pdp-section-container">
+          <div className="pdp-section-header">
+            <span className="pdp-eyebrow">Complementary Flavours</span>
+            <h2 className="pdp-heading">Perfect Pairings</h2>
+          </div>
+          
+          <div className="pdp-pairings-grid">
             {mealPairings.map((meal, idx) => (
-              <div key={idx} className="pairing-card">
-                <img src={meal.image} alt={meal.name} className="pairing-bg" />
+              <motion.div 
+                key={idx} 
+                className="pairing-card"
+                initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-50px' }} transition={{ duration: 0.5, delay: idx * 0.1 }}
+              >
+                <div className="pairing-bg" style={{ backgroundImage: `url(${meal.image})` }} />
                 <div className="pairing-overlay">
-                  <h3 className="pairing-name">{meal.name}</h3>
-                  <p className="pairing-desc">{meal.desc}</p>
+                  <h4>{meal.name}</h4>
+                  <p>{meal.desc}</p>
                 </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 4: INSIDE THE JAR */}
-      <section className="pdp-inside-jar">
-        <motion.div 
-          className="pdp-container"
-          initial="hidden" whileInView="visible" viewport={{ once: true, margin: "-100px" }}
-          variants={staggerContainer}
-        >
-          <motion.h2 variants={fadeUp} className="pdp-section-title">Inside the Jar</motion.h2>
-          <div className="pdp-ingredients-grid">
-            {ingredients.map((ing, idx) => (
-              <motion.div key={idx} variants={fadeUp} className="ing-card">
-                <div className="ing-img-wrap">
-                  <img src={ing.img} alt={ing.name} />
-                </div>
-                <h4 className="ing-name">{ing.name}</h4>
               </motion.div>
             ))}
           </div>
-        </motion.div>
-      </section>
-
-      {/* SECTION 5: MADE WITH TIME */}
-      <section className="pdp-timeline-section">
-        <div className="pdp-container">
-          <h2 className="pdp-section-title">Made With Time</h2>
-        </div>
-        <div className="pdp-timeline-scroll">
-          {timeline.map((step, idx) => (
-            <div key={idx} className="timeline-item">
-              <div className="timeline-img-wrap">
-                <img src={step.img} alt={step.step} />
-              </div>
-              <h4 className="timeline-step">{step.step}</h4>
-              <p className="timeline-text">{step.text}</p>
-            </div>
-          ))}
         </div>
       </section>
 
-      {/* SECTION 6: PRODUCT DETAILS ACCORDION */}
-      <section className="pdp-details-accordion">
-        <div className="pdp-container-narrow">
-          <h2 className="pdp-section-title text-center">Product Information</h2>
-          <div className="accordion-wrapper">
-            {['Storage', 'Weight', 'Shelf Life', 'Nutrition'].map((detail, idx) => (
-              <div key={idx} className="accordion-item">
+      {/* ════════════════════════════════════════════
+          5. PRODUCT INFORMATION (ACCORDION)
+      ════════════════════════════════════════════ */}
+      <section className="pdp-info-accordion-section">
+        <div className="pdp-section-container narrow">
+          <div className="pdp-section-header center">
+            <h2 className="pdp-heading">Product Information</h2>
+          </div>
+          
+          <div className="pdp-accordion-wrapper">
+            {accordionData.map((item, idx) => (
+              <div key={idx} className="pdp-accordion-item">
                 <button 
-                  className="accordion-trigger" 
-                  onClick={() => setOpenDetail(openDetail === idx ? null : idx)}
+                  className={`pdp-accordion-trigger ${openDetail === item.title ? 'active' : ''}`}
+                  onClick={() => setOpenDetail(openDetail === item.title ? null : item.title)}
                 >
-                  {detail}
-                  <span className="accordion-icon">{openDetail === idx ? '−' : '+'}</span>
+                  {item.title}
+                  <span className="accordion-icon">
+                    {openDetail === item.title ? '−' : '+'}
+                  </span>
                 </button>
                 <AnimatePresence>
-                  {openDetail === idx && (
+                  {openDetail === item.title && (
                     <motion.div 
+                      className="pdp-accordion-content"
                       initial={{ height: 0, opacity: 0 }}
                       animate={{ height: 'auto', opacity: 1 }}
                       exit={{ height: 0, opacity: 0 }}
-                      className="accordion-content"
+                      transition={{ duration: 0.3 }}
                     >
-                      <div className="accordion-inner">
-                        For {detail.toLowerCase()}, please store in a cool, dry place. Best consumed within 12 months of opening. Use a clean, dry spoon.
+                      <div className="pdp-accordion-inner">
+                        {item.content}
                       </div>
                     </motion.div>
                   )}
@@ -293,126 +333,38 @@ function ProductDetailsPage({ slug, onNavigate, addToCart }) {
         </div>
       </section>
 
-      {/* SECTION 7: CUSTOMER MOMENTS */}
-      <section className="pdp-customer-moments">
-        <div className="pdp-container">
-          <h2 className="pdp-section-title text-center">Customer Moments</h2>
-          <div className="masonry-grid">
-            <div className="masonry-col">
-              <img src="/banner.png" alt="Customer dining" className="masonry-item" />
-              <div className="masonry-review masonry-item">
-                <div className="stars">★★★★★</div>
-                <p>"Absolutely stunning packaging and the flavor took me straight back to my childhood."</p>
-                <span className="author">— Nisha M.</span>
-              </div>
-            </div>
-            <div className="masonry-col">
-              <div className="masonry-review masonry-item dark">
-                <div className="stars">★★★★★</div>
-                <p>"I buy this every month. The mustard oil balance is perfection."</p>
-                <span className="author">— Rahul T.</span>
-              </div>
-              <img src="/deal_scatter.png" alt="Customer food" className="masonry-item" />
-            </div>
-            <div className="masonry-col">
-              <img src="/gal_mix.png" alt="Customer kitchen" className="masonry-item" />
-              <div className="masonry-review masonry-item">
-                <div className="stars">★★★★☆</div>
-                <p>"Great taste, premium feel. Highly recommended."</p>
-                <span className="author">— Sneha K.</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* ════════════════════════════════════════════
+          6. REVIEWS
+      ════════════════════════════════════════════ */}
+      <ReviewSection productId={p.id} />
 
-      {/* SECTION 8: YOU MAY ALSO LIKE */}
-      <section className="pdp-related">
-        <div className="pdp-container">
-          <h2 className="pdp-section-title">You May Also Like</h2>
-          <div className="pdp-carousel">
+      {/* ════════════════════════════════════════════
+          7. RELATED PRODUCTS
+      ════════════════════════════════════════════ */}
+      <section className="pdp-related-section">
+        <div className="pdp-section-container">
+          <div className="pdp-section-header">
+            <h2 className="pdp-heading">You May Also Like</h2>
+          </div>
+          
+          <div className="pdp-related-grid">
             {p.related.map((rel, idx) => (
-              <div key={idx} className="pdp-carousel-card" onClick={() => onNavigate('product-' + rel.slug)}>
+              <motion.div 
+                key={idx} 
+                className="pdp-related-card" 
+                onClick={() => onNavigate('product-' + rel.slug)}
+                initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-50px' }} transition={{ duration: 0.5, delay: idx * 0.1 }}
+              >
                 <div className="rel-img-wrap">
                   <img src={rel.image} alt={rel.name} />
                 </div>
-                <h4 className="rel-name">{rel.name}</h4>
-                <div className="rel-price">₹{rel.base_price}</div>
-              </div>
+                <div className="rel-info">
+                  <h4 className="rel-name">{rel.name}</h4>
+                  <div className="rel-price">₹{rel.base_price}</div>
+                </div>
+              </motion.div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* SECTION 9: RECENTLY VIEWED (Simplified Row) */}
-      <section className="pdp-recently-viewed">
-        <div className="pdp-container">
-          <h3 className="pdp-small-title">Recently Viewed</h3>
-          <div className="recent-row">
-            {p.related.slice(0, 2).map((rel, idx) => (
-              <div key={idx} className="recent-item" onClick={() => onNavigate('product-' + rel.slug)}>
-                <img src={rel.image} alt={rel.name} />
-                <span className="recent-name">{rel.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 10: FAQ */}
-      <section className="pdp-faq">
-        <div className="pdp-container-narrow">
-          <h2 className="pdp-section-title text-center">Frequently Asked Questions</h2>
-          <div className="accordion-wrapper">
-            {['Are preservatives used?', 'Is the packaging eco-friendly?', 'How long does shipping take?'].map((q, idx) => (
-              <div key={idx} className="accordion-item">
-                <button 
-                  className="accordion-trigger" 
-                  onClick={() => setOpenFaq(openFaq === idx ? null : idx)}
-                >
-                  {q}
-                  <span className="accordion-icon">{openFaq === idx ? '−' : '+'}</span>
-                </button>
-                <AnimatePresence>
-                  {openFaq === idx && (
-                    <motion.div 
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      exit={{ height: 0, opacity: 0 }}
-                      className="accordion-content"
-                    >
-                      <div className="accordion-inner">
-                        We pride ourselves on using 100% natural ingredients with no artificial preservatives. Our glass jars are fully recyclable. Shipping typically takes 3-5 business days across India.
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 11: FINAL CTA */}
-      <section className="pdp-final-cta">
-        <div className="pdp-final-bg">
-          <img src="/banner.png" alt="Dining Table" />
-          <div className="pdp-final-overlay"></div>
-        </div>
-        <div className="pdp-final-content">
-          <motion.h2 
-            initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} transition={{ duration: 1 }} viewport={{ once: true }}
-            className="pdp-final-headline"
-          >
-            One more reason to gather around the table.
-          </motion.h2>
-          <motion.button 
-            initial={{ opacity: 0 }} whileInView={{ opacity: 1 }} transition={{ duration: 1, delay: 0.3 }} viewport={{ once: true }}
-            className="pdp-btn-primary large"
-            onClick={() => onNavigate('shop')}
-          >
-            Explore Collection
-          </motion.button>
         </div>
       </section>
 

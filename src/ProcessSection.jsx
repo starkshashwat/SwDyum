@@ -1,101 +1,192 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React, { useRef } from 'react';
+import { motion, useScroll, useTransform } from 'framer-motion';
 import './ProcessSection.css';
 
-const processes = [
+const steps = [
   {
-    title: 'Sun-Cured for 21 Days',
-    description: 'Each batch is aged under direct Bihar sunlight, developing deep flavors that no factory shortcut can replicate.',
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="5"/>
-        <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
-        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
-        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
-        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
-      </svg>
-    ),
+    number: 1,
+    title: 'Sourcing Fresh Ingredients',
+    description:
+      'Hand-picked raw mangoes, lemons, green chillies, and garlic are sourced directly from Bihar farms — ensuring peak freshness and flavour.',
+    image: '/process_sourcing_1783263006944.png',
   },
   {
-    title: 'Traditional Clay Pots',
-    description: 'Prepared and matured in handmade earthen martabans — the same method used by Bihari households for generations.',
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M8 2h8l2 4H6l2-4z"/>
-        <path d="M6 6c0 0-2 2-2 6s2 8 8 8 8-4 8-8-2-6-2-6"/>
-        <line x1="10" y1="14" x2="14" y2="14"/>
-      </svg>
-    ),
+    number: 2,
+    title: 'Traditional Spice Grinding',
+    description:
+      'Turmeric, fenugreek, mustard seeds, and red chilli are stone-ground using the age-old silbatta method for a rich, aromatic masala.',
+    image: '/process_grinding_1783263018468.png',
   },
   {
-    title: 'Cold-Pressed Mustard Oil',
-    description: 'We use only raw, cold-pressed mustard oil sourced directly from Bihar farms — the heart of every authentic Bihari pickle.',
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/>
-      </svg>
-    ),
+    number: 3,
+    title: 'Hand-Mixed in Mustard Oil',
+    description:
+      'Every ingredient is hand-mixed with raw cold-pressed mustard oil in brass vessels, infusing deep flavour into every bite.',
+    image: '/process_mixing_1783263028798.png',
   },
   {
-    title: '100% Organic Spices',
-    description: 'Turmeric, fenugreek, fennel, and mustard seeds — all sourced from trusted local farmers, free of chemicals and additives.',
-    icon: (
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-        <path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 1c1 2 2 4.5 2 8 0 5.5-4.8 11-10 11z"/>
-        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
-      </svg>
-    ),
+    number: 4,
+    title: 'Aged in Clay Martabans',
+    description:
+      'The pickle is packed into handmade earthen martabans and left to mature — just as Bihari grandmothers have done for generations.',
+    image: '/process_aging_1783263039730.png',
+  },
+  {
+    number: 5,
+    title: 'Sun-Cured & Sealed Fresh',
+    description:
+      'Each batch is sun-cured for 21 days under direct Bihar sunlight, then carefully sealed and packaged to preserve its authentic taste.',
+    image: '/process_suncured_1783263051169.png',
   },
 ];
 
-const cardVariants = {
-  hidden: { opacity: 0, y: 30 },
+/* ─── Animated step card ─────────────────────────────────────────────────── */
+const stepVariants = {
+  hidden: { opacity: 0, x: 40 },
   visible: (i) => ({
     opacity: 1,
-    y: 0,
+    x: 0,
     transition: {
-      delay: i * 0.1,
-      duration: 0.5,
+      delay: i * 0.12,
+      duration: 0.6,
       ease: [0.16, 1, 0.3, 1],
     },
   }),
 };
 
-function ProcessSection() {
-  return (
-    <section className="process-section section-padding">
-      <div className="section-container text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-80px" }}
-          transition={{ duration: 0.5 }}
-        >
-          <span className="section-eyebrow">Our Process</span>
-          <h2 className="section-title">Why Swadyum?</h2>
-          <p className="section-subtitle-text">
-            Every jar carries centuries of Bihari tradition — no shortcuts, no compromises.
-          </p>
-        </motion.div>
+const numberVariants = {
+  hidden: { opacity: 0, scale: 0.5 },
+  visible: (i) => ({
+    opacity: 1,
+    scale: 1,
+    transition: {
+      delay: i * 0.12 + 0.1,
+      duration: 0.45,
+      type: 'spring',
+      stiffness: 300,
+      damping: 18,
+    },
+  }),
+};
 
-        <div className="process-grid">
-          {processes.map((item, i) => (
+function ProcessSection() {
+  const sectionRef = useRef(null);
+
+  /* ─── Parallax via scroll progress ─── */
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start end', 'end start'],
+  });
+
+  // Decorative elements move at different parallax speeds
+  const branchY = useTransform(scrollYProgress, [0, 1], ['-8%', '12%']);
+  const cowY = useTransform(scrollYProgress, [0, 1], ['15%', '-10%']);
+  const titleY = useTransform(scrollYProgress, [0, 1], ['0%', '-6%']);
+  const timelineScale = useTransform(scrollYProgress, [0, 0.3], [0, 1]);
+
+  return (
+    <section className="process-v2" ref={sectionRef} id="our-process">
+      <div className="process-v2-inner">
+        {/* ════════════════════════════════════════════
+            LEFT COLUMN — Decorative + Title
+        ════════════════════════════════════════════ */}
+        <div className="process-v2-left">
+          {/* Branch + birds illustration (top-left) */}
+          <motion.div
+            className="process-decor-branch"
+            style={{ y: branchY }}
+          >
+            <img
+              src="/branch_birds.png"
+              alt=""
+              aria-hidden="true"
+              className="decor-branch-img"
+            />
+          </motion.div>
+
+          {/* Section title */}
+          <motion.div
+            className="process-v2-title-block"
+            style={{ y: titleY }}
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-80px' }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <h2 className="process-v2-heading">
+              The Traditional<br />
+              Journey Of Our<br />
+              <em>Pickle</em>
+            </h2>
+          </motion.div>
+
+          {/* Cow illustration (bottom-left) */}
+          <motion.div
+            className="process-decor-cow"
+            style={{ y: cowY }}
+          >
+            <img
+              src="/desi_cow.png"
+              alt=""
+              aria-hidden="true"
+              className="decor-cow-img"
+            />
+          </motion.div>
+        </div>
+
+        {/* ════════════════════════════════════════════
+            RIGHT COLUMN — Timeline + Steps
+        ════════════════════════════════════════════ */}
+        <div className="process-v2-right">
+          {/* Dotted timeline line */}
+          <div className="process-timeline-line">
             <motion.div
-              className="process-card"
-              key={i}
-              custom={i}
-              variants={cardVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-50px" }}
-            >
-              <div className="process-icon-wrapper">
-                {item.icon}
+              className="process-timeline-fill"
+              style={{ scaleY: timelineScale }}
+            />
+          </div>
+
+          {/* Steps */}
+          <div className="process-steps-list">
+            {steps.map((step, i) => (
+              <div className="process-step-row" key={step.number}>
+                {/* Number bubble */}
+                <motion.div
+                  className="process-step-number"
+                  custom={i}
+                  variants={numberVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: '-40px' }}
+                >
+                  {step.number}
+                </motion.div>
+
+                {/* Step card */}
+                <motion.div
+                  className="process-step-card"
+                  custom={i}
+                  variants={stepVariants}
+                  initial="hidden"
+                  whileInView="visible"
+                  viewport={{ once: true, margin: '-40px' }}
+                >
+                  <div className="process-step-img-wrap">
+                    <img
+                      src={step.image}
+                      alt={step.title}
+                      className="process-step-img"
+                      loading="lazy"
+                    />
+                  </div>
+                  <div className="process-step-text">
+                    <h3 className="process-step-title">{step.title}</h3>
+                    <p className="process-step-desc">{step.description}</p>
+                  </div>
+                </motion.div>
               </div>
-              <h3 className="process-card-title">{item.title}</h3>
-              <p className="process-card-desc">{item.description}</p>
-            </motion.div>
-          ))}
+            ))}
+          </div>
         </div>
       </div>
     </section>

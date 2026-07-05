@@ -1,241 +1,173 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import './AboutPage.css';
 
+const values = [
+  {
+    title: 'Authentic Bhojpur Recipes',
+    desc: 'Straight from the heart of Ara, Bihar. We use generations-old traditional methods to bring you the truest flavors of our heritage.',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+      </svg>
+    )
+  },
+  {
+    title: 'Premium Raw Ingredients',
+    desc: 'No compromises. We source the finest green mangoes, raw garlic, and cold-pressed mustard oil directly from local farmers.',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M12 2.69l5.66 5.66a8 8 0 11-11.31 0z"/>
+      </svg>
+    )
+  },
+  {
+    title: 'Sun-Cured Perfection',
+    desc: 'Slow-aged under the Bihar sun in traditional clay martabans. No artificial preservatives, no chemical vinegars.',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    )
+  },
+  {
+    title: 'Beyond Pickles',
+    desc: 'We are curating the best of traditional Bihari cuisine. A luxury brand bringing pure, bold, and unapologetic local flavors to your table.',
+    icon: (
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+        <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+      </svg>
+    )
+  }
+];
+
 function AboutPage({ onNavigate }) {
-  const teamMembers = [
-    {
-      id: 1,
-      name: 'The Founders',
-      role: 'Swadyum Foods',
-      desc: 'Dedicated to preserving ancestral Bihari cooking methods and supporting smallholder organic farms across Bihar.',
-      image: '/team_founder.png'
-    },
-    {
-      id: 2,
-      name: 'Our Master Blenders',
-      role: 'Spice Artisans',
-      desc: 'With decades of spice chemistry experience, our team hand-selects every batch of mustard seed and fennel.',
-      image: '/team_chef.png'
-    },
-    {
-      id: 3,
-      name: 'Our Sourcing Team',
-      role: 'Farmer Liaisons',
-      desc: 'Building direct partnerships with farmer cooperatives in Mithila and Champaran to source premium raw green mangoes.',
-      image: '/team_farmer.png'
-    }
-  ];
-
   return (
-    <div className="about-page-wrapper">
-      
-      {/* 1. HERO STORY */}
-      <section className="about-hero-section" style={{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.7)), url('/about_us.png')` }}>
-        <div className="about-hero-container">
-          <span className="about-hero-subtitle">~ Swadyum Story ~</span>
-          <h1 className="about-hero-title">Preserving Bihar's Culinary Heritage</h1>
-          <p className="about-hero-desc">How a humble grandmother's recipe grew into a luxury brand bringing pure, sun-cured comfort into modern kitchens.</p>
+    <div className="about-page-v2">
+
+      {/* ════════════════════════════════════════════
+          HERO BANNER
+      ════════════════════════════════════════════ */}
+      <section className="about-hero">
+        <div className="about-hero-inner">
+          <div className="about-hero-bg" style={{ backgroundImage: 'url(/about_us.png)' }} />
+          <div className="about-hero-overlay" />
+          <motion.div
+            className="about-hero-content"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <h1 className="about-hero-title">The Taste of <br/><em>Ara, Bhojpur</em></h1>
+            <p className="about-hero-subtitle">
+              Bold, authentic, and uncompromising traditional food from the heart of Bihar.
+            </p>
+          </motion.div>
         </div>
       </section>
 
-      {/* 2. FOUNDER STORY */}
-      <section className="founder-story-section">
-        <div className="founder-story-container">
-          <div className="founder-grid">
-            <div className="founder-img-box">
-              <img src="/team_founder.png" alt="Swadyum Foods Team" className="founder-img" />
-              <div className="founder-gold-border"></div>
-            </div>
-            <div className="founder-content">
-              <span className="section-subtitle">~ The Vision ~</span>
-              <h2 className="section-headline">A Message From Swadyum Foods</h2>
-              <p className="founder-narrative">
-                "Growing up in Patna, summers meant one thing: rooftops lined with linen sheets and rows of clay jars. Making achar wasn't a chore; it was a communal festival. Grandmothers, mothers, and daughters gathered, gossiped, and shared spice secrets under the summer sun. 
+      {/* ════════════════════════════════════════════
+          BRAND STORY (SPLIT LAYOUT)
+      ════════════════════════════════════════════ */}
+      <section className="about-story">
+        <div className="about-story-container">
+          
+          <div className="about-story-left">
+            <motion.div
+              initial={{ opacity: 0, x: -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ duration: 0.6 }}
+            >
+              <img src="/branch_birds.png" alt="Decorative branch" className="about-decor-branch" />
+              <span className="about-eyebrow">Our Roots</span>
+              <h2 className="about-heading">
+                Pure Heritage.<br/>
+                No Shortcuts.
+              </h2>
+            </motion.div>
+          </div>
+
+          <div className="about-story-right">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-50px' }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+            >
+              <p className="about-story-text highlight">
+                Swadyum was born in Ara, Bhojpur with a single mission: to deliver the absolute best of traditional Bihari cuisine to the world.
               </p>
-              <p className="founder-narrative-sub">
-                When we looked at store shelves today, we saw mass-produced, chemically-stabilized pickles that tasted like vinegar rather than heritage. Swadyum was born out of a simple promise: to restore the pure, sun-cured, oil-steeped comfort of home-cooked pickles to Indian tables."
+              <p className="about-story-text">
+                We don't do mass production. We don't use chemical vinegars or artificial preservatives. What we do is source the finest raw ingredients directly from local farmers, hand-blend our spices using stone grinders, and age our pickles in clay martabans under the fierce Bihar sun.
               </p>
-              <div className="signature-box">
-                <span className="sig-name">Swadyum Foods</span>
-                <span className="sig-title">Patna, Bihar — Since 2020</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 3. HOW SWADYUM STARTED */}
-      <section className="story-origin-section">
-        <div className="origin-container">
-          <div className="origin-header-centered">
-            <span className="section-subtitle">~ Our Genesis ~</span>
-            <h2 className="section-headline">From a Terrace in Patna to Jars of Gold</h2>
-          </div>
-          <div className="origin-columns">
-            <div className="origin-col">
-              <h3>2020: The First Batch</h3>
-              <p>During the lockdowns of 2020, we shared jars of our grandmother's spiced mangoes with neighbors in Patna. The response was overwhelming; people didn't just love the taste, they felt connected to their childhood homes.</p>
-            </div>
-            <div className="origin-col">
-              <h3>2022: Local Sourcing</h3>
-              <p>We expanded our supply chains to work directly with organic mango orchards in Mithila and garlic farmers in the foothills of Bihar. By avoiding brokers, we ensured fair wages and sourced the absolute finest raw ingredients.</p>
-            </div>
-            <div className="origin-col">
-              <h3>2024: Premium Storefront</h3>
-              <p>Swadyum is now a premium food boutique shipping sun-cured heritage to families across India, proving that tradition and luxury can reside in a single jar.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 4. TRADITIONAL FAMILY RECIPES */}
-      <section className="traditional-recipes-section">
-        <div className="recipes-container">
-          <div className="recipes-split-grid">
-            <div className="recipes-content">
-              <span className="section-subtitle">~ Heritage Formulas ~</span>
-              <h2 className="section-headline">The Spice Secrets of Earthen Jars</h2>
-              <p>Our spice blends aren't bought pre-ground. We select raw seeds (saunf, ajwain, kalonji, mustard, fenugreek), dry-roast them on iron pans, and stone-grind them to preserve natural oils.</p>
-              <ul className="recipes-bullets">
-                <li><strong>Stone-Ground:</strong> Cold grinding prevents spice flavor degradation.</li>
-                <li><strong>Cold-Pressed Mustard Oil:</strong> Only raw, unfiltered oil acts as our preservative.</li>
-                <li><strong>Mithila Salt Curing:</strong> Raw mangoes are salted to naturally release moisture.</li>
-              </ul>
-            </div>
-            <div className="recipes-image-box">
-              <img src="/deal_scatter.png" alt="Spices and ingredients" className="recipes-img" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 5. MANUFACTURING PROCESS */}
-      <section className="manufacturing-process-section">
-        <div className="process-container">
-          <div className="process-header-centered">
-            <span className="section-subtitle">~ Our Method ~</span>
-            <h2 className="section-headline">Slow Cured Under the Bihar Sun</h2>
-          </div>
-
-          <div className="process-timeline-cards">
-            <div className="timeline-card">
-              <div className="step-num">01</div>
-              <h3>Sorting & Washing</h3>
-              <p>Raw mangoes and garlic cloves are sorted by hand and washed in crystal clear spring water.</p>
-            </div>
-            <div className="timeline-card">
-              <h3>Manual Slicing</h3>
-              <div className="step-num">02</div>
-              <p>Fruits are sliced precisely using traditional iron cutters to ensure texture consistency.</p>
-            </div>
-            <div className="timeline-card">
-              <div className="step-num">03</div>
-              <h3>Spice Steeping</h3>
-              <p>Ingredients are coated in dry-roasted spices and left to sweat under shade.</p>
-            </div>
-            <div className="timeline-card">
-              <h3>Jar Aging</h3>
-              <div className="step-num">04</div>
-              <p>Jars are filled with cold-pressed oil and lined up on open roofs to mature under the hot sun for forty days.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 6. QUALITY PROMISE */}
-      <section className="quality-promise-section">
-        <div className="quality-container">
-          <div className="quality-card-centered">
-            <span className="section-subtitle">~ Our Commitment ~</span>
-            <h2 className="section-headline">The Swadyum Purity Guarantee</h2>
-            <div className="promises-grid">
-              <div className="promise-box">
-                <span className="pb-check">✓</span>
-                <span>Zero Chemical Vinegar</span>
-              </div>
-              <div className="promise-box">
-                <span className="pb-check">✓</span>
-                <span>No Artificial Colorings</span>
-              </div>
-              <div className="promise-box">
-                <span className="pb-check">✓</span>
-                <span>Sourced from Certified Farms</span>
-              </div>
-              <div className="promise-box">
-                <span className="pb-check">✓</span>
-                <span>Glass/Ceramic Maturing Only</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 7. MISSION & VISION */}
-      <section className="mission-vision-section">
-        <div className="mission-container">
-          <div className="mission-grid">
-            <div className="mv-card">
-              <span className="mv-icon">🎯</span>
-              <h3>Our Mission</h3>
-              <p>To uplift Bihari culinary traditions, preserve traditional culinary recipes, support local organic farming families, and reintroduce raw, authentic nutrition to modern urban households.</p>
-            </div>
-            <div className="mv-card">
-              <span className="mv-icon">👁️</span>
-              <h3>Our Vision</h3>
-              <p>To establish Bihari heritage food as a global standard for gourmet quality, bringing pure, preservative-free aging techniques back to the center of dining culture.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* 8. BIHAR HERITAGE SHOWCASE */}
-      <section className="heritage-showcase-section">
-        <div className="heritage-container">
-          <div className="heritage-grid">
-            <div className="heritage-image-wrapper">
-              <img src="/about_us.png" alt="Bihar Culinary Heritage" className="heritage-img" />
-            </div>
-            <div className="heritage-content">
-              <span className="section-subtitle">~ Cultural Roots ~</span>
-              <h2 className="section-headline">Rooted in Mithila Traditional Art & Culture</h2>
-              <p>
-                Bihar's culinary heritage is closely linked to its lifestyle. Our packaging draws inspiration from Mithila painting motifs (Madhubani), celebrating sun, earth, fish, and harvest. By choosing Swadyum, you support local women artisans who paint our gift boxes, bringing Bihar's cultural soul straight to your home.
+              <p className="about-story-text">
+                This isn't just about food; it's about curating a luxury culinary experience that stays fiercely loyal to its roots. From spicy mango achaar to premium heritage combos, Swadyum is the standard for authentic Bhojpur flavors.
               </p>
-            </div>
+              
+              <div className="about-signature">
+                <strong>Swadyum Foods</strong>
+                <span>Ara, Bhojpur, Bihar</span>
+              </div>
+            </motion.div>
           </div>
+
         </div>
       </section>
 
-      {/* 9. TEAM SECTION */}
-      <section className="about-team-section">
-        <div className="team-container-box">
-          <div className="team-header-centered">
-            <span className="section-subtitle">~ Master Artisans ~</span>
-            <h2 className="section-headline">Meet Our Team</h2>
+      {/* ════════════════════════════════════════════
+          CORE VALUES (BENTO GRID)
+      ════════════════════════════════════════════ */}
+      <section className="about-values">
+        <div className="about-values-container">
+          <div className="about-values-header">
+            <span className="about-eyebrow">The Swadyum Standard</span>
+            <h2 className="about-heading">Why Choose Us?</h2>
           </div>
 
-          <div className="team-grid-cards">
-            {teamMembers.map((member) => (
-              <div key={member.id} className="team-card-info">
-                <div className="team-img-wrapper">
-                  <img src={member.image} alt={member.name} className="team-img-avatar" />
-                </div>
-                <h3 className="team-name">{member.name}</h3>
-                <span className="team-role">{member.role}</span>
-                <p className="team-desc">{member.desc}</p>
-              </div>
+          <div className="about-values-grid">
+            {values.map((val, i) => (
+              <motion.div 
+                className="about-value-card" 
+                key={i}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-50px' }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
+              >
+                <div className="value-icon">{val.icon}</div>
+                <h3 className="value-title">{val.title}</h3>
+                <p className="value-desc">{val.desc}</p>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 10. CTA */}
-      <section className="about-cta-section">
-        <div className="about-cta-container">
-          <span className="cta-subtitle">~ Bring Bihar Home ~</span>
-          <h2>Taste the Pure Heritage</h2>
-          <p>Every jar of Swadyum carries the warmth of the sun and the soul of Bihar's kitchens.</p>
-          <button className="about-cta-btn" onClick={() => onNavigate('shop')}>Shop Collections</button>
+      {/* ════════════════════════════════════════════
+          BOTTOM CTA
+      ════════════════════════════════════════════ */}
+      <section className="about-cta">
+        <div className="about-cta-inner">
+          <div className="about-cta-card">
+            <div className="about-cta-img-side">
+              <img src="/deal_scatter.png" alt="Swadyum pickles" className="about-cta-img" />
+            </div>
+            <div className="about-cta-content">
+              <span className="about-cta-eyebrow">Experience Swadyum</span>
+              <h2 className="about-cta-heading">Taste the Best of Bhojpur</h2>
+              <p className="about-cta-desc">
+                Elevate your meals with our premium, sun-cured pickles. Prepared traditionally, packaged luxuriously.
+              </p>
+              <button className="about-cta-btn" onClick={() => onNavigate('shop')}>
+                Shop Now
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 

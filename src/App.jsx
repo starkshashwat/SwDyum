@@ -1,21 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import './App.css';
 import { supabase } from './supabaseClient';
 import Header from './Header';
-import TrustBar from './TrustBar';
-import ProductsSection from './ProductsSection';
+import FeaturedProducts from './FeaturedProducts';
 import ProcessSection from './ProcessSection';
 import ComboOfferSection from './ComboOfferSection';
 import MadhubaniDivider from './MadhubaniDivider';
+import HeroSection from './HeroSection';
 import SocialProofSection from './SocialProofSection';
 import FinalCTASection from './FinalCTASection';
 import ShopPage from './ShopPage';
 import ProductDetailsPage from './ProductDetailsPage';
 import AboutPage from './AboutPage';
 import ContactPage from './ContactPage';
-import BlogPage from './BlogPage';
-import BlogDetailsPage from './BlogDetailsPage';
+import RecipePage from './RecipePage';
 import ReviewsPage from './ReviewsPage';
 import CategoryPage from './CategoryPage';
 import Footer from './Footer';
@@ -38,11 +36,7 @@ function App() {
     if (path === '/shop') return 'shop';
     if (path === '/about') return 'about';
     if (path === '/contact') return 'contact';
-    if (path === '/blog') return 'blog';
-    if (path.startsWith('/blog/')) {
-      const slug = path.substring('/blog/'.length);
-      return `blog-${slug}`;
-    }
+    if (path === '/recipes') return 'recipes';
     if (path === '/reviews') return 'reviews';
     if (path === '/privacy-policy') return 'privacy-policy';
     if (path === '/shipping-policy') return 'shipping-policy';
@@ -235,11 +229,7 @@ function App() {
     if (targetPage === 'shop') path = '/shop';
     else if (targetPage === 'about') path = '/about';
     else if (targetPage === 'contact') path = '/contact';
-    else if (targetPage === 'blog') path = '/blog';
-    else if (targetPage.startsWith('blog-')) {
-      const slug = targetPage.substring('blog-'.length);
-      path = `/blog/${slug}`;
-    }
+    else if (targetPage === 'recipes') path = '/recipes';
     else if (targetPage === 'reviews') path = '/reviews';
     else if (targetPage === 'privacy-policy') path = '/privacy-policy';
     else if (targetPage === 'shipping-policy') path = '/shipping-policy';
@@ -278,10 +268,8 @@ function App() {
         <AboutPage onNavigate={handleNavigate} />
       ) : currentPage === 'contact' ? (
         <ContactPage onNavigate={handleNavigate} />
-      ) : currentPage === 'blog' ? (
-        <BlogPage onNavigate={handleNavigate} />
-      ) : currentPage.startsWith('blog-') ? (
-        <BlogDetailsPage blogSlug={currentPage.substring('blog-'.length)} onNavigate={handleNavigate} />
+      ) : currentPage === 'recipes' ? (
+        <RecipePage onNavigate={handleNavigate} />
       ) : currentPage === 'reviews' ? (
         <ReviewsPage onNavigate={handleNavigate} />
       ) : currentPage === 'privacy-policy' ? (
@@ -313,54 +301,8 @@ function App() {
       ) : (
         <>
           {/* ─── Hero Section ─── */}
-          <div className="hero-section">
-            <div className="hero-bg-overlay"></div>
-            <motion.div
-              className="hero-content"
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
-            >
-              <span className="hero-eyebrow">Sun-Cured · Small Batch · Since 2020</span>
-
-              <h1 className="hero-headline">
-                Taste the <em>Heritage</em> <br/>of Bihar in Every Bite
-              </h1>
-
-              <p className="hero-subtext">
-                Handcrafted in traditional clay pots, slow-aged under the summer sun, and steeped in raw cold-pressed mustard oil. The gold standard of Bihari pickles — now at your doorstep.
-              </p>
-
-              <div className="cta-group">
-                <button className="primary-cta" onClick={() => handleNavigate('shop')}>Shop Best Sellers</button>
-                <button className="secondary-cta" onClick={() => handleNavigate('about')}>Our Story</button>
-              </div>
-
-              <div className="trust-indicators">
-                <div className="rating-container">
-                  <span className="stars">★★★★★</span>
-                  <span className="rating-text">Loved by 200+ Families Across India (4.9/5 Rating)</span>
-                </div>
-
-                <div className="indicator-list">
-                  <div className="indicator-item">
-                    <span className="ind-bullet"></span> 100% Organic Spices
-                  </div>
-                  <div className="indicator-item">
-                    <span className="ind-bullet"></span> Aged in Earthen Martabans
-                  </div>
-                  <div className="indicator-item">
-                    <span className="ind-bullet"></span> No Preservatives or Chemicals
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </div>
-
-          {/* ─── Sales Funnel — Hero → Trust → Products → Process → Combos → Reviews → CTA ─── */}
-          <TrustBar />
-          <MadhubaniDivider variant="floral" />
-          <ProductsSection onNavigate={handleNavigate} addToCart={addToCart} />
+          <HeroSection onNavigate={handleNavigate} />
+          <FeaturedProducts onNavigate={handleNavigate} addToCart={addToCart} />
           <MadhubaniDivider variant="sun" />
           <ProcessSection />
           <MadhubaniDivider variant="fish" />

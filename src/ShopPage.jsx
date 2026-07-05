@@ -1,41 +1,91 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import './ShopPage.css';
-
 import { fetchProducts } from './data/products';
 
-function ShopPage({ onNavigate, addToCart }) {
-  const [productsData, setProductsData] = useState([]);
-  const [loading, setLoading] = useState(true);
+/* ─── Category tab icons ─────────────────────────────────────────────────── */
+const tabIcons = {
+  all: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+  ),
+  bestseller: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/></svg>
+  ),
+  pickles: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2h8l2 6H6l2-6z"/><rect x="6" y="8" width="12" height="12" rx="2"/><line x1="12" y1="8" x2="12" y2="20"/></svg>
+  ),
+  combos: (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+  ),
+};
 
+const categories = [
+  { key: 'All', label: 'All Products', icon: tabIcons.all },
+  { key: 'Bestseller', label: 'Bestseller', icon: tabIcons.bestseller },
+  { key: 'Pickles', label: 'Pickles', icon: tabIcons.pickles },
+  { key: 'Gift Boxes', label: 'Combos', icon: tabIcons.combos },
+];
+
+const sortOptions = [
+  { key: 'default', label: 'Recommended' },
+  { key: 'price-low', label: 'Price: Low → High' },
+  { key: 'price-high', label: 'Price: High → Low' },
+  { key: 'rating', label: 'Top Rated' },
+];
+
+/* ─── Stars helper ───────────────────────────────────────────────────────── */
+function Stars({ rating, count }) {
+  const full = Math.floor(rating);
+  const hasHalf = rating - full >= 0.3;
+  return (
+    <div className="sp-stars-row">
+      <div className="sp-stars">
+        {[...Array(5)].map((_, idx) => (
+          <svg key={idx} width="13" height="13" viewBox="0 0 24 24"
+            fill={idx < full ? '#d4a843' : (idx === full && hasHalf ? 'url(#sp-half)' : 'none')}
+            stroke="#d4a843" strokeWidth="1.5" aria-hidden="true">
+            {idx === full && hasHalf && (
+              <defs><linearGradient id="sp-half"><stop offset="50%" stopColor="#d4a843"/><stop offset="50%" stopColor="transparent"/></linearGradient></defs>
+            )}
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        ))}
+      </div>
+      <span className="sp-review-count">{count} reviews</span>
+    </div>
+  );
+}
+
+/* ─── Card animation variants ────────────────────────────────────────────── */
+const cardVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: (i) => ({
+    opacity: 1, y: 0,
+    transition: { delay: i * 0.06, duration: 0.4, ease: [0.16, 1, 0.3, 1] },
+  }),
+};
+
+/* ═══════════════════════════════════════════════════════════════════════════ */
+
+function ShopPage({ onNavigate, addToCart }) {
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState('default');
-  const [priceRange, setPriceRange] = useState(1500);
-  const [onlyBestsellers, setOnlyBestsellers] = useState(false);
-  const [onlyGiftBoxes, setOnlyGiftBoxes] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedWeights, setSelectedWeights] = useState({});
-  
-  const carouselRef = useRef(null);
-  const [carouselWidth, setCarouselWidth] = useState(0);
 
   useEffect(() => {
-    const loadProducts = async () => {
+    const load = async () => {
       setLoading(true);
       const data = await fetchProducts();
-      setProductsData(data);
+      setProducts(data);
       setLoading(false);
     };
-    loadProducts();
+    load();
   }, []);
 
-  // Initialize carousel scroll width constraints
-  useEffect(() => {
-    if (carouselRef.current) {
-      setCarouselWidth(carouselRef.current.scrollWidth - carouselRef.current.offsetWidth);
-    }
-  }, [filter, searchQuery, sortBy, productsData]);
-
+  /* ─── Weight selector ─── */
   const handleWeightSelect = (productId, weight) => {
     setSelectedWeights(prev => ({ ...prev, [productId]: weight }));
   };
@@ -45,264 +95,232 @@ function ShopPage({ onNavigate, addToCart }) {
     return selectedWeights[product.id] || Object.keys(product.prices)[0] || '250g';
   };
 
-  // Filter & Search Logic
-  const filteredProducts = productsData.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                          (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    // Category pill matching
+  /* ─── Filter + Sort ─── */
+  const filtered = products.filter(p => {
+    const matchesSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()));
     let matchesCategory = true;
-    if (filter !== 'All') {
-      if (filter === 'Gift Boxes') {
-        matchesCategory = p.category === 'Heritage Gift Box';
-      } else {
-        matchesCategory = p.category === filter || (p.categories && p.categories.includes(filter));
-      }
-    }
-
-    // Toggle parameters
-    const matchesBestseller = !onlyBestsellers || p.isBestseller;
-    const matchesGiftBoxes = !onlyGiftBoxes || p.category === 'Heritage Gift Box';
-
-    // Price matching
-    const price = p.base_price || 0;
-    const matchesPrice = price <= priceRange;
-
-    return matchesSearch && matchesCategory && matchesBestseller && matchesGiftBoxes && matchesPrice;
+    if (filter === 'Bestseller') matchesCategory = p.isBestseller;
+    else if (filter === 'Gift Boxes') matchesCategory = p.category === 'Heritage Gift Box';
+    else if (filter !== 'All') matchesCategory = p.category === filter ||
+      (p.category && p.category.toLowerCase().includes(filter.toLowerCase()));
+    return matchesSearch && matchesCategory;
   });
 
-  // Sort Logic
-  const sortedProducts = [...filteredProducts].sort((a, b) => {
-    const aPrice = a.base_price || 0;
-    const bPrice = b.base_price || 0;
-
-    if (sortBy === 'price-low') {
-      return aPrice - bPrice;
-    } else if (sortBy === 'price-high') {
-      return bPrice - aPrice;
-    } else if (sortBy === 'rating') {
-      return (b.rating || 0) - (a.rating || 0);
-    }
-    return 0; // Default ordering
+  const sorted = [...filtered].sort((a, b) => {
+    const aP = a.base_price || 0, bP = b.base_price || 0;
+    if (sortBy === 'price-low') return aP - bP;
+    if (sortBy === 'price-high') return bP - aP;
+    if (sortBy === 'rating') return (b.rating || 0) - (a.rating || 0);
+    return 0;
   });
+
+  const getDiscount = (mrp, price) => {
+    if (!mrp || mrp <= price) return null;
+    return Math.round(((mrp - price) / mrp) * 100);
+  };
 
   return (
-    <div className="shop-page-wrapper">
-      
-      {/* SECTION 01: HERO SECTION */}
-      <section className="shop-hero-section">
-        <div className="shop-hero-container">
-          
-          {/* Left: Editorial Texts */}
-          <div className="shop-hero-content">
-            <span className="section-eyebrow">Shop Swadyum</span>
-            <h1 className="shop-hero-headline section-headline">
-              Discover Bihar's<br />
-              Finest Homemade Pickles
-            </h1>
-            <p className="shop-hero-description">
-              Crafted using traditional recipes, premium ingredients, and generations of culinary heritage.
+    <div className="sp-wrapper">
+
+      {/* ════════════════════════════════════════════
+          HERO BANNER
+      ════════════════════════════════════════════ */}
+      <section className="sp-hero">
+        <div className="sp-hero-banner">
+          <div className="sp-hero-bg" style={{ backgroundImage: 'url(/banner.png)' }} />
+          <div className="sp-hero-overlay" />
+          <motion.div
+            className="sp-hero-content"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
+            <h1 className="sp-hero-title">Our <em>Collection</em></h1>
+            <p className="sp-hero-subtitle">
+              Crafted with traditional recipes, premium ingredients, and generations of Bihari culinary heritage.
             </p>
-          </div>
-
-          {/* Right: Large Editorial Food Composition */}
-          <div className="shop-hero-visual-collage">
-            <div className="collage-brass-rim"></div>
-            <div className="collage-visual-wrapper">
-              <img src="/deal_scatter.png" alt="Spices and ingredients" className="collage-img-back" />
-              <img src="/prod_mango.png" alt="Mango Pickle jar" className="collage-img-front-left" />
-              <img src="/prod_garlic.png" alt="Garlic Achar jar" className="collage-img-front-right" />
-            </div>
-            <div className="collage-utensil-tag">Traditional Brassware</div>
-          </div>
-
+          </motion.div>
         </div>
       </section>
 
-      {/* SECTION 02: Simple 2-Tab Toggle — sized for a 4-product brand */}
-      <section className="shop-filter-bar-section">
-        <div className="shop-filter-bar-container">
-          <div className="shop-tabs">
-            <button
-              className={`shop-tab-btn ${filter === 'All' ? 'active' : ''}`}
-              onClick={() => setFilter('All')}
-            >
-              All Flavours
-            </button>
-            <button
-              className={`shop-tab-btn ${filter === 'Gift Boxes' ? 'active' : ''}`}
-              onClick={() => setFilter('Gift Boxes')}
-            >
-              Combos
-            </button>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 03: PRODUCT GRID */}
-      <section className="shop-product-grid-section">
-        <div className="shop-grid-container">
-
-          {sortedProducts.length === 0 ? (
-            <div className="no-products-found">
-              <p>No products match your active discovery filters.</p>
-              <button 
-                className="reset-filters-btn"
-                onClick={() => {
-                  setFilter('All');
-                  setSearchQuery('');
-                  setSortBy('default');
-                  setPriceRange(1000);
-                  setOnlyBestsellers(false);
-                  setOnlyGiftBoxes(false);
-                }}
+      {/* ════════════════════════════════════════════
+          FILTERS + SORT BAR
+      ════════════════════════════════════════════ */}
+      <section className="sp-toolbar">
+        <div className="sp-toolbar-inner">
+          {/* Category tabs */}
+          <div className="sp-tabs">
+            {categories.map(cat => (
+              <button
+                key={cat.key}
+                className={`sp-tab ${filter === cat.key ? 'active' : ''}`}
+                onClick={() => setFilter(cat.key)}
               >
-                Reset All Filters
+                <span className="sp-tab-icon">{cat.icon}</span>
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Right: Search + Sort */}
+          <div className="sp-toolbar-right">
+            <div className="sp-search-wrap">
+              <svg className="sp-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input
+                type="text"
+                className="sp-search-input"
+                placeholder="Search products..."
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <select
+              className="sp-sort-select"
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value)}
+            >
+              {sortOptions.map(opt => (
+                <option key={opt.key} value={opt.key}>{opt.label}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════
+          PRODUCT GRID
+      ════════════════════════════════════════════ */}
+      <section className="sp-grid-section">
+        <div className="sp-grid-container">
+          {/* Results count */}
+          <p className="sp-result-count">
+            Showing <strong>{sorted.length}</strong> product{sorted.length !== 1 ? 's' : ''}
+          </p>
+
+          {loading ? (
+            <div className="sp-grid">
+              {[...Array(4)].map((_, i) => (
+                <div className="sp-card sp-card-skeleton" key={i}>
+                  <div className="sp-skel-img" />
+                  <div className="sp-skel-info">
+                    <div className="sp-skel-line w60" />
+                    <div className="sp-skel-line w80" />
+                    <div className="sp-skel-line w40" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : sorted.length === 0 ? (
+            <div className="sp-empty">
+              <p>No products match your filters.</p>
+              <button className="sp-reset-btn" onClick={() => { setFilter('All'); setSearchQuery(''); setSortBy('default'); }}>
+                Reset Filters
               </button>
             </div>
           ) : (
-            <div className="shop-products-grid">
-              {sortedProducts.map((p) => {
-                const activeWeight = getActiveWeight(p);
-                const price = p.prices[activeWeight];
+            <div className="sp-grid">
+              <AnimatePresence mode="popLayout">
+                {sorted.map((product, i) => {
+                  const activeWeight = getActiveWeight(product);
+                  const price = product.prices?.[activeWeight] || product.base_price || 0;
+                  const mrp = Math.round(price * 1.35);
+                  const discount = getDiscount(mrp, price);
 
-                return (
-                  <div key={p.id} className="shop-product-card">
-                    <div className="card-paper-overlay"></div>
-                    <div className="card-gold-border-reveal"></div>
-                    
-                    {/* Image with zoom on hover */}
-                    <div className="product-image-container" style={{ cursor: 'pointer' }} onClick={() => onNavigate('product-' + p.slug)}>
-                      <img src={p.image} alt={p.name} className="card-product-img" />
-                      {p.isBestseller && <span className="bestseller-badge">Bestseller</span>}
-                    </div>
+                  return (
+                    <motion.div
+                      className="sp-card"
+                      key={product.id}
+                      custom={i}
+                      variants={cardVariants}
+                      initial="hidden"
+                      animate="visible"
+                      layout
+                      onClick={() => onNavigate && onNavigate(`product-${product.slug}`)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={e => { if (e.key === 'Enter') onNavigate && onNavigate(`product-${product.slug}`); }}
+                    >
+                      {/* Sale badge */}
+                      {discount && <span className="sp-sale-badge">Sale</span>}
 
-                    <div className="product-card-details">
-                      <span className="product-card-category">{p.category}</span>
-                      <h3 className="product-card-title" style={{ cursor: 'pointer' }} onClick={() => onNavigate('product-' + p.slug)}>{p.name}</h3>
-                      <p className="product-card-desc">{p.description}</p>
-                      
-                      {/* Ratings */}
-                      <div className="product-card-rating">
-                        <span className="rating-stars">{"★".repeat(Math.floor(p.rating))}</span>
-                        <span className="rating-text">{p.rating} ({p.reviewsCount} reviews)</span>
+                      {/* Bestseller badge */}
+                      {product.isBestseller && <span className="sp-best-badge">★ Bestseller</span>}
+
+                      {/* Image */}
+                      <div className="sp-card-img-wrap">
+                        <img src={product.image} alt={product.name} className="sp-card-img" loading="lazy" />
+                        <span className="sp-weight-tag">{activeWeight}</span>
                       </div>
 
-                      {/* Weight & Price Selector */}
-                      <div className="product-price-selector">
-                        <div className="weight-options">
-                          {Object.keys(p.prices).map((weight) => (
-                            <button
-                              key={weight}
-                              className={`weight-btn ${activeWeight === weight ? 'active' : ''}`}
-                              onClick={() => handleWeightSelect(p.id, weight)}
-                            >
-                              {weight}
-                            </button>
-                          ))}
+                      {/* Info */}
+                      <div className="sp-card-body">
+                        <Stars rating={product.rating || 4.8} count={product.reviewsCount || 42} />
+
+                        <h3 className="sp-product-name">{product.name}</h3>
+
+                        {product.description && (
+                          <p className="sp-product-desc">{product.description}</p>
+                        )}
+
+                        {/* Weight selector */}
+                        {product.prices && Object.keys(product.prices).length > 1 && (
+                          <div className="sp-weight-options">
+                            {Object.keys(product.prices).map(w => (
+                              <button
+                                key={w}
+                                className={`sp-weight-btn ${activeWeight === w ? 'active' : ''}`}
+                                onClick={e => { e.stopPropagation(); handleWeightSelect(product.id, w); }}
+                              >
+                                {w}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Price row */}
+                        <div className="sp-price-row">
+                          <span className="sp-mrp">₹{mrp.toLocaleString('en-IN')}</span>
+                          <span className="sp-price">₹{price.toLocaleString('en-IN')}/-</span>
+                          {discount && <span className="sp-discount">-{discount}% OFF</span>}
                         </div>
-                        <div className="price-display">
-                          <span className="price-currency">₹</span>
-                          <span className="price-amount">{price}</span>
-                        </div>
-                      </div>
 
-                      {/* CTAs */}
-                      <div className="product-card-actions">
-                        <button className="add-to-cart-btn" onClick={() => addToCart(p, activeWeight, 1)}>Add To Cart</button>
-                        <button className="quick-view-btn" onClick={() => onNavigate('product-' + p.slug)}>Quick View</button>
+                        {/* Add to cart */}
+                        <button
+                          className="sp-add-btn"
+                          onClick={e => { e.stopPropagation(); addToCart && addToCart(product, activeWeight, 1); }}
+                        >
+                          ADD TO CART
+                        </button>
                       </div>
-
-                    </div>
-                  </div>
-                );
-              })}
+                    </motion.div>
+                  );
+                })}
+              </AnimatePresence>
             </div>
           )}
         </div>
       </section>
 
-      {/* SECTION 04: FEATURED COLLECTION BANNER */}
-      <section className="shop-featured-banner-section">
-        <div className="featured-banner-wrapper">
-          <div className="featured-banner-card">
-            
-            <div className="banner-visual-box">
-              <div className="halo-glow"></div>
-              <img src="/deal_scatter.png" alt="Swadyum Gift Box" className="giftbox-banner-img" />
+      {/* ════════════════════════════════════════════
+          BOTTOM CTA BANNER
+      ════════════════════════════════════════════ */}
+      <section className="sp-bottom-cta">
+        <div className="sp-bottom-cta-inner">
+          <div className="sp-bottom-cta-card">
+            <div className="sp-bottom-cta-img-side">
+              <img src="/deal_scatter.png" alt="Swadyum pickles" className="sp-bottom-cta-img" />
             </div>
-
-            <div className="banner-content-box">
-              <span className="section-subtitle">~ Featured Collection ~</span>
-              <h2 className="section-headline banner-light-headline">Experience Bihar In One Box</h2>
-              <p className="banner-description">
-                Elevate your meals and celebrations with Swadyum's premium hand-packed combo gift chests. A perfect assortment of raw mango, whole garlic, sweet lemon, and stuffed red chili pickles inspired by traditional family recipes.
+            <div className="sp-bottom-cta-content">
+              <span className="sp-bottom-cta-eyebrow">Featured Collection</span>
+              <h2 className="sp-bottom-cta-heading">Experience Bihar In One Box</h2>
+              <p className="sp-bottom-cta-desc">
+                Elevate your meals with Swadyum's premium hand-packed combo gift chests — a perfect assortment of our finest pickles.
               </p>
-              <button className="banner-shop-cta-btn" onClick={() => setFilter('Gift Boxes')}>
-                Explore Gifting Packs
+              <button className="sp-bottom-cta-btn" onClick={() => setFilter('Gift Boxes')}>
+                Explore Gift Packs
               </button>
             </div>
-
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 05: CUSTOMER FAVORITES (CAROUSEL) */}
-      <section className="shop-favorites-carousel-section">
-        <div className="favorites-container">
-          <div className="favorites-header">
-            <span className="section-subtitle">~ Customer Favorites ~</span>
-            <h2 className="section-headline">Most Ordered Products</h2>
-          </div>
-
-          <div className="favorites-slider-wrap">
-            <motion.div ref={carouselRef} className="favorites-carousel" whileTap={{ cursor: "grabbing" }}>
-              <motion.div 
-                drag="x" 
-                dragConstraints={{ right: 0, left: -carouselWidth }}
-                className="favorites-carousel-track"
-              >
-                {productsData.slice(0, 5).map((fav) => (
-                  <div key={fav.id} className="fav-product-card">
-                    <div className="fav-img-wrapper" style={{ cursor: 'pointer' }} onClick={() => onNavigate('product-' + fav.slug)}>
-                      <img src={fav.image} alt={fav.name} />
-                      <span className="fav-order-badge">Bestseller</span>
-                    </div>
-                    <div className="fav-info">
-                      <h4 className="fav-name" style={{ cursor: 'pointer' }} onClick={() => onNavigate('product-' + fav.slug)}>{fav.name}</h4>
-                      <div className="fav-rating">★★★★★ {fav.rating}</div>
-                      <p className="fav-text">“Generations of recipes cured under Bihar's sun.”</p>
-                      <button className="fav-shop-link-btn" onClick={() => onNavigate('product-' + fav.slug)}>
-                        View Details
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </motion.div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* SECTION 06: CTA */}
-      <section className="shop-footer-cta-section">
-        <div className="footer-cta-container">
-          <div className="footer-cta-card">
-            <span className="section-subtitle">~ Explore Traditional Bihar Flavors ~</span>
-            <h2 className="section-headline cta-light-headline">Bring Swadyum To Your Dining Table</h2>
-            <p className="cta-description">
-              Prepared without artificial preservatives, colors, or shortcuts. Naturally sun-cured and shipped with care across India.
-            </p>
-            <button 
-              className="cta-action-btn"
-              onClick={() => {
-                setFilter('All');
-                setSearchQuery('');
-                window.scrollTo({ top: 600, behavior: 'smooth' });
-              }}
-            >
-              Shop All Pickles
-            </button>
           </div>
         </div>
       </section>
