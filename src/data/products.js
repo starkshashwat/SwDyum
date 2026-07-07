@@ -95,6 +95,7 @@ export const getProductBySlug = async (slug) => {
     name: product.name,
     slug: product.slug,
     description: product.description,
+    short_description: product.short_description,
     image: primaryImage,
     images: sortedImages.map(img => img.url),
     category: product.categories?.name || 'Uncategorized',

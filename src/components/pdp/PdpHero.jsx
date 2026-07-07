@@ -104,7 +104,7 @@ function PdpHero({
         </div>
 
         <p className="pdp-short-story">
-          Prepared using sun-ripened ingredients, cold-pressed mustard oil, and traditional Bihari spices. Every jar is handcrafted in small batches to preserve authentic taste.
+          {product.short_description || "Prepared using sun-ripened ingredients, cold-pressed mustard oil, and traditional Bihari spices. Every jar is handcrafted in small batches to preserve authentic taste."}
         </p>
 
         <div className="pdp-price-block">
