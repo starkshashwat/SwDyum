@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './PdpTabs.css';
 
-function PdpTabs({ product }) {
+function PdpTabs({ product, tabsData }) {
   const [activeTab, setActiveTab] = useState('Description');
 
   const tabs = [
@@ -16,15 +16,15 @@ function PdpTabs({ product }) {
     },
     { 
       name: 'Nutrition', 
-      content: 'Rich in probiotics and antioxidants due to the natural fermentation and sun-curing process. Contains healthy fats from pure mustard oil.'
+      content: tabsData?.nutrition || 'Rich in probiotics and antioxidants due to the natural fermentation and sun-curing process. Contains healthy fats from pure mustard oil.'
     },
     { 
       name: 'Storage', 
-      content: 'Keep in a cool dry place.\n\nUse dry spoon only.\n\nBest consumed within 12 to 18 months of opening.'
+      content: tabsData?.storage || 'Keep in a cool dry place.\n\nUse dry spoon only.\n\nBest consumed within 12 to 18 months of opening.'
     },
     { 
       name: 'Shipping', 
-      content: 'We ship PAN-India in heavy-duty, leak-proof glass jars to ensure chemical-free transit. Deliveries typically arrive within 5-7 business days.'
+      content: tabsData?.shipping || 'We ship PAN-India in heavy-duty, leak-proof glass jars to ensure chemical-free transit. Deliveries typically arrive within 5-7 business days.'
     },
   ];
 

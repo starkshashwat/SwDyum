@@ -70,10 +70,10 @@ function ProductDetailsPage({ slug, onNavigate, addToCart }) {
       <PdpProcessTimeline />
 
       {/* 5. TASTE PROFILE */}
-      <PdpTasteProfile />
+      <PdpTasteProfile tasteProfile={p.pdp_config?.taste_profile} />
 
       {/* 6. TABS (INFO) */}
-      <PdpTabs product={p} />
+      <PdpTabs product={p} tabsData={p.pdp_config?.tabs} />
 
       {/* 7. REVIEWS */}
       <ReviewSection productId={p.id} />

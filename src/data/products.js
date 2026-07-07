@@ -105,7 +105,8 @@ export const getProductBySlug = async (slug) => {
     reviewsCount: Math.floor(Math.random() * 50) + 10,
     stock: totalStock,
     variants: product.product_variants || [],
-    pure_ingredients: product.pure_ingredients || []
+    pure_ingredients: product.pure_ingredients || [],
+    pdp_config: product.pdp_config || {}
   };
 };
 

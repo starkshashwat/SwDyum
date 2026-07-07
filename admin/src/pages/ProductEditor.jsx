@@ -33,6 +33,11 @@ export default function ProductEditor() {
   const [variants, setVariants] = useState([]);
   const [images, setImages] = useState([]);
   const [pureIngredients, setPureIngredients] = useState([]);
+  
+  const [pdpConfig, setPdpConfig] = useState({
+    taste_profile: { metrics: [], pairings: [] },
+    tabs: { nutrition: '', storage: '', shipping: '' }
+  });
 
   useEffect(() => {
     fetchCategories();
@@ -78,6 +83,13 @@ export default function ProductEditor() {
 
     if (product.pure_ingredients && Array.isArray(product.pure_ingredients)) {
       setPureIngredients(product.pure_ingredients);
+    }
+    
+    if (product.pdp_config) {
+      setPdpConfig({
+        taste_profile: product.pdp_config.taste_profile || { metrics: [], pairings: [] },
+        tabs: product.pdp_config.tabs || { nutrition: '', storage: '', shipping: '' }
+      });
     }
 
     // Fetch Variants
@@ -180,6 +192,51 @@ export default function ProductEditor() {
     }
   };
 
+  // --- PDP Config Handlers ---
+  const updatePdpTab = (tabName, value) => {
+    setPdpConfig(prev => ({ ...prev, tabs: { ...prev.tabs, [tabName]: value } }));
+  };
+
+  const addTasteMetric = () => {
+    setPdpConfig(prev => ({
+      ...prev,
+      taste_profile: { ...prev.taste_profile, metrics: [...(prev.taste_profile.metrics || []), { label: '', level: 50 }] }
+    }));
+  };
+  const updateTasteMetric = (index, field, value) => {
+    setPdpConfig(prev => {
+      const metrics = [...prev.taste_profile.metrics];
+      metrics[index][field] = value;
+      return { ...prev, taste_profile: { ...prev.taste_profile, metrics } };
+    });
+  };
+  const removeTasteMetric = (index) => {
+    setPdpConfig(prev => ({
+      ...prev,
+      taste_profile: { ...prev.taste_profile, metrics: prev.taste_profile.metrics.filter((_, i) => i !== index) }
+    }));
+  };
+
+  const addTastePairing = () => {
+    setPdpConfig(prev => ({
+      ...prev,
+      taste_profile: { ...prev.taste_profile, pairings: [...(prev.taste_profile.pairings || []), { name: '', icon: '🍛' }] }
+    }));
+  };
+  const updateTastePairing = (index, field, value) => {
+    setPdpConfig(prev => {
+      const pairings = [...prev.taste_profile.pairings];
+      pairings[index][field] = value;
+      return { ...prev, taste_profile: { ...prev.taste_profile, pairings } };
+    });
+  };
+  const removeTastePairing = (index) => {
+    setPdpConfig(prev => ({
+      ...prev,
+      taste_profile: { ...prev.taste_profile, pairings: prev.taste_profile.pairings.filter((_, i) => i !== index) }
+    }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -192,6 +249,7 @@ export default function ProductEditor() {
       cost_price: parseFloat(formData.cost_price) || null,
       category_id: formData.category_id || null, // handle empty select
       pure_ingredients: pureIngredients.map(ing => ({ name: ing.name, img: ing.img, benefit: ing.benefit })),
+      pdp_config: pdpConfig,
       updated_at: new Date().toISOString()
     };
 
@@ -436,6 +494,78 @@ export default function ProductEditor() {
               </div>
             )}
           </div>
+
+          {/* Taste Profile Editor */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
+            <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-100 pb-2">Taste Profile & Pairings</h2>
+            
+            {/* Metrics */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-gray-700">Flavor Metrics</h3>
+                <button type="button" onClick={addTasteMetric} className="text-xs font-medium text-blue-600 hover:text-blue-700 inline-flex items-center">
+                  <Plus className="w-3 h-3 mr-1" /> Add Metric
+                </button>
+              </div>
+              
+              {(!pdpConfig.taste_profile.metrics || pdpConfig.taste_profile.metrics.length === 0) && (
+                <p className="text-xs text-gray-500 italic">No metrics. Will use defaults (Spicy, Tangy, etc).</p>
+              )}
+              
+              {pdpConfig.taste_profile.metrics && pdpConfig.taste_profile.metrics.map((metric, idx) => (
+                <div key={idx} className="flex items-center gap-3 bg-gray-50 p-2 rounded border border-gray-200">
+                  <input type="text" placeholder="e.g. Spicy" value={metric.label} onChange={e => updateTasteMetric(idx, 'label', e.target.value)} className="w-1/3 px-2 py-1 text-sm border border-gray-300 rounded" />
+                  <input type="range" min="0" max="100" value={metric.level} onChange={e => updateTasteMetric(idx, 'level', parseInt(e.target.value))} className="flex-1" />
+                  <span className="text-xs text-gray-500 w-8">{metric.level}%</span>
+                  <button type="button" onClick={() => removeTasteMetric(idx)} className="p-1 text-gray-400 hover:text-red-600"><Trash2 className="w-4 h-4" /></button>
+                </div>
+              ))}
+            </div>
+
+            {/* Pairings */}
+            <div className="space-y-3 pt-4 border-t border-gray-100">
+              <div className="flex items-center justify-between">
+                <h3 className="text-sm font-medium text-gray-700">Food Pairings</h3>
+                <button type="button" onClick={addTastePairing} className="text-xs font-medium text-blue-600 hover:text-blue-700 inline-flex items-center">
+                  <Plus className="w-3 h-3 mr-1" /> Add Pairing
+                </button>
+              </div>
+              
+              {(!pdpConfig.taste_profile.pairings || pdpConfig.taste_profile.pairings.length === 0) && (
+                <p className="text-xs text-gray-500 italic">No pairings. Will use defaults.</p>
+              )}
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {pdpConfig.taste_profile.pairings && pdpConfig.taste_profile.pairings.map((pair, idx) => (
+                  <div key={idx} className="flex items-center gap-2 bg-gray-50 p-2 rounded border border-gray-200">
+                    <input type="text" placeholder="Emoji (e.g. 🍛)" value={pair.icon} onChange={e => updateTastePairing(idx, 'icon', e.target.value)} className="w-12 px-2 py-1 text-sm border border-gray-300 rounded text-center" />
+                    <input type="text" placeholder="e.g. Dal Chawal" value={pair.name} onChange={e => updateTastePairing(idx, 'name', e.target.value)} className="flex-1 px-2 py-1 text-sm border border-gray-300 rounded" />
+                    <button type="button" onClick={() => removeTastePairing(idx)} className="p-1 text-gray-400 hover:text-red-600"><Trash2 className="w-4 h-4" /></button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Information Tabs Editor */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-4">
+            <h2 className="text-lg font-semibold text-gray-900 border-b border-gray-100 pb-2">Information Tabs</h2>
+            <p className="text-xs text-gray-500">Leave blank to use default text for any of these tabs.</p>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nutrition</label>
+              <textarea rows={3} placeholder="Enter nutrition info..." value={pdpConfig.tabs.nutrition || ''} onChange={e => updatePdpTab('nutrition', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black sm:text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Storage Instructions</label>
+              <textarea rows={3} placeholder="Keep in a cool dry place..." value={pdpConfig.tabs.storage || ''} onChange={e => updatePdpTab('storage', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black sm:text-sm" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Shipping Details</label>
+              <textarea rows={3} placeholder="We ship PAN-India..." value={pdpConfig.tabs.shipping || ''} onChange={e => updatePdpTab('shipping', e.target.value)} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-black sm:text-sm" />
+            </div>
+          </div>
+
         </div>
 
         {/* Sidebar Column */}

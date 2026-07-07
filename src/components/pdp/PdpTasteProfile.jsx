@@ -2,14 +2,14 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import './PdpTasteProfile.css';
 
-const flavorMetrics = [
+const defaultFlavorMetrics = [
   { label: 'Spicy', level: 80 },
   { label: 'Tangy', level: 95 },
   { label: 'Oil Level', level: 60 },
   { label: 'Crunch', level: 70 },
 ];
 
-const pairings = [
+const defaultPairings = [
   { name: 'Paratha', icon: '🫓' },
   { name: 'Dal Chawal', icon: '🍛' },
   { name: 'Litti Chokha', icon: '🔥' },
@@ -17,7 +17,10 @@ const pairings = [
   { name: 'Poori', icon: '🥟' },
 ];
 
-function PdpTasteProfile() {
+function PdpTasteProfile({ tasteProfile }) {
+  const displayMetrics = tasteProfile?.metrics && tasteProfile.metrics.length > 0 ? tasteProfile.metrics : defaultFlavorMetrics;
+  const displayPairings = tasteProfile?.pairings && tasteProfile.pairings.length > 0 ? tasteProfile.pairings : defaultPairings;
+
   return (
     <section className="pdp-taste-section">
       <div className="pdp-section-container pdp-taste-container">
@@ -27,7 +30,7 @@ function PdpTasteProfile() {
           <span className="pdp-eyebrow">Taste Profile</span>
           <h2 className="pdp-heading">Bold & Balanced</h2>
           <div className="flavor-bars">
-            {flavorMetrics.map((metric, idx) => (
+            {displayMetrics.map((metric, idx) => (
               <div className="flavor-bar-wrap" key={idx}>
                 <div className="flavor-label">{metric.label}</div>
                 <div className="flavor-track">
@@ -49,7 +52,7 @@ function PdpTasteProfile() {
           <span className="pdp-eyebrow">Pairing Suggestions</span>
           <h2 className="pdp-heading">Perfect With</h2>
           <div className="pairing-grid">
-            {pairings.map((pair, idx) => (
+            {displayPairings.map((pair, idx) => (
               <motion.div 
                 className="pairing-item" 
                 key={idx}
