@@ -18,6 +18,7 @@ import SubscriptionsList from './pages/SubscriptionsList';
 import AnnouncementsList from './pages/AnnouncementsList';
 import RecipesList from './pages/RecipesList';
 import SEOCenter from './pages/SEOCenter';
+import Inbox from './pages/Inbox';
 import './index.css';
 
 function App() {
@@ -63,6 +64,9 @@ function App() {
 
         {/* Growth & Analytics */}
         <Route path="/seo" element={<SEOCenter />} />
+
+        {/* Inbox */}
+        <Route path="/inbox" element={<Inbox />} />
 
         {/* Settings */}
         <Route path="/settings" element={<div className="p-4">Settings Component (Coming Soon)</div>} />

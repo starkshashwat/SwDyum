@@ -39,6 +39,7 @@ export default function AdminLayout() {
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'Inbox (WhatsApp)', path: '/inbox', icon: Mail },
     { name: 'Categories', path: '/categories', icon: Tags },
     { name: 'Products', path: '/products', icon: Package },
     { name: 'Inventory', path: '/inventory', icon: ClipboardList },
