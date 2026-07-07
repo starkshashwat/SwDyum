@@ -2,46 +2,11 @@ import React, { useState } from 'react';
 import { supabase } from './supabaseClient';
 import './CartPage.css';
 
-function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
-  const [isCheckoutLoading, setIsCheckoutLoading] = useState(false);
+function CartPage({ cart, updateCartQty, removeFromCart, onNavigate, handleFastrrCheckout, isCheckoutLoading }) {
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const shippingThreshold = 799;
   const shippingFee = subtotal >= shippingThreshold || subtotal === 0 ? 0 : 60;
   const total = subtotal + shippingFee;
-
-  const handleFastrrCheckout = async (e) => {
-    e.preventDefault();
-    setIsCheckoutLoading(true);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('fastrr-checkout', {
-        body: {
-          raw_cart: cart,
-          redirect_url: window.location.origin
-        }
-      });
-
-      if (error) {
-        throw new Error(error.message || 'Failed to invoke fastrr-checkout function.');
-      }
-
-      if (data && data.token) {
-        if (window.HeadlessCheckout) {
-          window.HeadlessCheckout.addToCart(e, data.token, { fallbackUrl: window.location.origin });
-        } else {
-          alert('Shiprocket Fastrr Checkout SDK not loaded. Check console.');
-        }
-      } else {
-        const errorMsg = data?.error?.message || data?.error || 'Failed to initialize Fastrr Checkout.';
-        alert(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
-      }
-    } catch (err) {
-      console.error('Fastrr error:', err);
-      alert(`Checkout initialization failed: ${err.message || 'Network error'}`);
-    } finally {
-      setIsCheckoutLoading(false);
-    }
-  };
 
   return (
     <div className="cart-page-wrapper">
@@ -173,7 +138,7 @@ function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
 
                 <button
                   className="checkout-cta-btn"
-                  onClick={handleFastrrCheckout}
+                  onClick={(e) => handleFastrrCheckout(e, null, 'cart_page')}
                   disabled={isCheckoutLoading}
                 >
                   {isCheckoutLoading ? 'Initializing Secure Checkout...' : 'Proceed to Secure Checkout 🔒'}

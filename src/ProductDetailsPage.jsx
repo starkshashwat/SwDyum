@@ -13,7 +13,7 @@ import PdpUgc from './components/pdp/PdpUgc';
 import PdpComboSection from './components/pdp/PdpComboSection';
 import PdpFaq from './components/pdp/PdpFaq';
 
-function ProductDetailsPage({ slug, onNavigate, addToCart }) {
+function ProductDetailsPage({ slug, onNavigate, addToCart, handleFastrrCheckout, isCheckoutLoading, cart }) {
   const [p, setP] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState('250g');
@@ -25,19 +25,25 @@ function ProductDetailsPage({ slug, onNavigate, addToCart }) {
       setLoading(true);
       const data = await getProductBySlug(slug);
       if (data) {
-        const related = await getRelatedProducts(data.id, 4);
-        setP({ ...data, related });
+        setP({ ...data, related: [] }); // Set product immediately
         setSelectedSize(Object.keys(data.prices)[0] || '250g');
         setQuantity(1);
         setSubscription('One Time');
+        setLoading(false); // Stop loader immediately
+        
+        // Fetch related asynchronously so it doesn't block
+        getRelatedProducts(data.id, 4).then(related => {
+          setP(prev => ({ ...prev, related }));
+        });
+      } else {
+        setLoading(false);
       }
-      setLoading(false);
       window.scrollTo(0, 0);
     };
     loadProduct();
   }, [slug]);
 
-  if (loading) return <div className="pdp-loader">Preparing your experience...</div>;
+  if (loading) return null; // Remove huge blocking text to fix delay perception
   if (!p) return <div className="pdp-loader">Product not found.</div>;
 
   return (
@@ -54,6 +60,9 @@ function ProductDetailsPage({ slug, onNavigate, addToCart }) {
         setSubscription={setSubscription}
         addToCart={addToCart}
         onNavigate={onNavigate}
+        handleFastrrCheckout={handleFastrrCheckout}
+        isCheckoutLoading={isCheckoutLoading}
+        cart={cart}
       />
 
       {/* 2. STICKY PURCHASE BAR */}

@@ -11,7 +11,10 @@ function PdpHero({
   subscription, 
   setSubscription, 
   addToCart, 
-  onNavigate 
+  onNavigate,
+  handleFastrrCheckout,
+  isCheckoutLoading,
+  cart
 }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [pincode, setPincode] = useState('');
@@ -27,7 +30,17 @@ function PdpHero({
 
   const handleCheckDelivery = () => {
     if (pincode.length >= 6) {
-      setDeliveryMsg("Estimated Delivery: 5-7 Days");
+      const today = new Date();
+      const minDate = new Date(today);
+      minDate.setDate(today.getDate() + 4);
+      const maxDate = new Date(today);
+      maxDate.setDate(today.getDate() + 7);
+
+      const options = { month: 'short', day: 'numeric' };
+      const minDateStr = minDate.toLocaleDateString('en-IN', options);
+      const maxDateStr = maxDate.toLocaleDateString('en-IN', options);
+
+      setDeliveryMsg(`Estimated Delivery: ${minDateStr} - ${maxDateStr}`);
     } else {
       setDeliveryMsg("Please enter a valid 6-digit PIN code.");
     }
@@ -39,9 +52,7 @@ function PdpHero({
   const currentPrice = product.prices[selectedSize] || product.base_price;
   const mrp = Math.round(currentPrice * 1.35); // 35% markup for MRP
   const savings = mrp - currentPrice;
-  const finalPrice = subscription === 'Subscribe & Save 10%' 
-    ? Math.round(currentPrice * 0.9) 
-    : currentPrice;
+  const finalPrice = currentPrice;
 
   return (
     <section className="pdp-hero-container">
@@ -136,30 +147,7 @@ function PdpHero({
           </div>
         </div>
 
-        {/* Subscription */}
-        <div className="pdp-selector-group">
-          <label className="pdp-selector-label">Purchase Type</label>
-          <div className="pdp-subscription-toggle">
-            <label className={`sub-option ${subscription === 'One Time' ? 'active' : ''}`}>
-              <input 
-                type="radio" 
-                name="purchaseType" 
-                checked={subscription === 'One Time'}
-                onChange={() => setSubscription('One Time')}
-              />
-              <span className="sub-text">One Time Purchase</span>
-            </label>
-            <label className={`sub-option ${subscription === 'Subscribe & Save 10%' ? 'active' : ''}`}>
-              <input 
-                type="radio" 
-                name="purchaseType" 
-                checked={subscription === 'Subscribe & Save 10%'}
-                onChange={() => setSubscription('Subscribe & Save 10%')}
-              />
-              <span className="sub-text">Subscribe & Save 10%</span>
-            </label>
-          </div>
-        </div>
+
 
         {/* Action Row */}
         <div className="pdp-action-row">
@@ -178,12 +166,28 @@ function PdpHero({
         
         <button 
           className="pdp-buy-btn"
-          onClick={() => {
-            addToCart(product, selectedSize, quantity, subscription);
-            onNavigate('checkout');
+          disabled={isCheckoutLoading}
+          onClick={(e) => {
+            const itemMatch = cart && cart.find(item => item.slug === product.slug && item.weight === selectedSize && item.subscription === subscription);
+            let customCart;
+            if (itemMatch) {
+                customCart = cart.map(item => item === itemMatch ? { ...item, quantity: item.quantity + quantity } : item);
+            } else {
+                customCart = [...(cart || []), {
+                  slug: product.slug,
+                  name: product.name,
+                  weight: selectedSize,
+                  price: product.prices?.[selectedSize] || product.base_price,
+                  quantity: quantity,
+                  image: product.image || product.images?.[0] || '/prod_mango.png',
+                  subscription: subscription
+                }];
+            }
+            addToCart(product, selectedSize, quantity, subscription, false);
+            handleFastrrCheckout(e, customCart, 'buy_now');
           }}
         >
-          Buy Now
+          {isCheckoutLoading ? 'Processing...' : 'Buy Now'}
         </button>
 
         {/* Delivery Checker */}

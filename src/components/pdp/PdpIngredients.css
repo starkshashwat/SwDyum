@@ -76,8 +76,8 @@
 .ing-info {
   padding: 16px;
   text-align: center;
-  position: relative;
-  min-height: 60px;
+  background: var(--color-card);
+  transition: background 0.3s;
 }
 
 .ing-info h4 {
@@ -85,39 +85,35 @@
   font-size: 1.1rem;
   color: var(--color-ink);
   margin: 0;
-  transition: opacity 0.3s;
 }
 
 .ing-hover-content {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  padding: 16px;
-  background: var(--color-chili);
-  color: white;
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.3s;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: none;
+  animation: fadeIn 0.3s forwards;
 }
 
 .ing-hover-content p {
   margin: 0;
-  font-size: 0.85rem;
-  line-height: 1.4;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: white;
+}
+
+.pdp-ingredient-card:hover .ing-info {
+  background: var(--color-chili);
 }
 
 .pdp-ingredient-card:hover .ing-info h4 {
-  opacity: 0;
+  display: none;
 }
 
 .pdp-ingredient-card:hover .ing-hover-content {
-  opacity: 1;
-  transform: translateY(0);
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 768px) {

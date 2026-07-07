@@ -3,7 +3,7 @@
   gap: var(--space-10);
   max-width: 1400px;
   margin: 0 auto;
-  padding: var(--space-8) var(--space-6);
+  padding: 120px var(--space-6) var(--space-8);
   min-height: 85vh;
 }
 
@@ -345,7 +345,8 @@
 /* Trust Icons */
 .pdp-trust-icons {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  justify-content: space-between;
   gap: 12px;
   border-top: 1px solid var(--color-border);
   padding-top: var(--space-5);
@@ -353,9 +354,11 @@
 
 .trust-icon-item {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  font-size: 0.95rem;
+  text-align: center;
+  gap: 8px;
+  font-size: 0.85rem;
   color: var(--color-muted);
   font-weight: 500;
 }

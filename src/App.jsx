@@ -25,6 +25,7 @@ import ForgotPasswordPage from './ForgotPasswordPage';
 import AccountPage from './AccountPage';
 import OrderDetailsPage from './OrderDetailsPage';
 import SalesPop from './SalesPop';
+import CartDrawer from './components/cart/CartDrawer';
 // Removed ExitIntentPop import
 import PrivacyPolicyPage from './PrivacyPolicyPage';
 import ShippingPolicyPage from './ShippingPolicyPage';
@@ -74,6 +75,7 @@ function App() {
   });
 
   const [redirectPath, setRedirectPath] = useState(null);
+  const [isCartOpen, setIsCartOpen] = useState(false);
 
   // Sync user state to localStorage as a cache and initialize Supabase auth listener
   useEffect(() => {
@@ -162,7 +164,7 @@ function App() {
     localStorage.setItem('swadyum_cart', JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = (product, weight, qty, subscription = 'One Time') => {
+  const addToCart = (product, weight, qty, subscription = 'One Time', openCart = true) => {
     setCart(prev => {
       const idx = prev.findIndex(item => item.slug === product.slug && item.weight === weight && item.subscription === subscription);
       if (idx > -1) {
@@ -174,13 +176,54 @@ function App() {
           slug: product.slug,
           name: product.name,
           weight: weight,
-          price: product.price || product.prices[weight],
+          price: product.price || product.prices?.[weight] || product.base_price,
           quantity: qty,
-          image: product.image || product.images[0],
+          image: product.image || product.images?.[0] || '/prod_mango.png',
           subscription: subscription
         }];
       }
     });
+    if (openCart) {
+      setIsCartOpen(true);
+    }
+  };
+
+  const [checkoutSource, setCheckoutSource] = useState(null);
+
+  const handleFastrrCheckout = async (e, customCart = null, source = 'cart') => {
+    if (e) e.preventDefault();
+    const checkoutCart = customCart || cart;
+    if (checkoutCart.length === 0) return;
+    setCheckoutSource(source);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('fastrr-checkout', {
+        body: {
+          raw_cart: checkoutCart,
+          redirect_url: window.location.origin
+        }
+      });
+
+      if (error) {
+        throw new Error(error.message || 'Failed to invoke fastrr-checkout function.');
+      }
+
+      if (data && data.token) {
+        if (window.HeadlessCheckout) {
+          window.HeadlessCheckout.addToCart(e, data.token, { fallbackUrl: window.location.origin });
+        } else {
+          alert('Shiprocket Fastrr Checkout SDK not loaded. Check console.');
+        }
+      } else {
+        const errorMsg = data?.error?.message || data?.error || 'Failed to initialize Fastrr Checkout.';
+        alert(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
+      }
+    } catch (err) {
+      console.error('Fastrr error:', err);
+      alert(`Checkout initialization failed: ${err.message || 'Network error'}`);
+    } finally {
+      setCheckoutSource(null);
+    }
   };
 
   const updateCartQty = (slug, weight, subscription, newQty) => {
@@ -260,8 +303,24 @@ function App() {
 
   return (
     <div className="app-container">
-      <Header currentPage={currentPage} onNavigate={handleNavigate} cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)} />
+      <Header 
+        currentPage={currentPage} 
+        onNavigate={handleNavigate} 
+        cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)} 
+        onOpenCart={() => setIsCartOpen(true)}
+      />
       
+      <CartDrawer 
+        isOpen={isCartOpen}
+        onClose={() => setIsCartOpen(false)}
+        cart={cart}
+        updateCartQty={updateCartQty}
+        removeFromCart={removeFromCart}
+        addToCart={addToCart}
+        onNavigate={handleNavigate}
+        handleFastrrCheckout={handleFastrrCheckout}
+        isCheckoutLoading={checkoutSource === 'cart'}
+      />
       {currentPage === 'shop' ? (
         <ShopPage onNavigate={handleNavigate} addToCart={addToCart} />
       ) : currentPage === 'about' ? (
@@ -281,7 +340,7 @@ function App() {
       ) : currentPage === 'terms' ? (
         <TermsPage onNavigate={handleNavigate} />
       ) : currentPage === 'cart' ? (
-        <CartPage cart={cart} updateCartQty={updateCartQty} removeFromCart={removeFromCart} onNavigate={handleNavigate} />
+        <CartPage cart={cart} updateCartQty={updateCartQty} removeFromCart={removeFromCart} onNavigate={handleNavigate} handleFastrrCheckout={handleFastrrCheckout} isCheckoutLoading={checkoutSource === 'cart_page'} />
       ) : currentPage === 'checkout' ? (
         <CheckoutPage cart={cart} clearCart={clearCart} onNavigate={handleNavigate} currentUser={currentUser} />
       ) : currentPage === 'login' ? (
@@ -297,7 +356,7 @@ function App() {
       ) : currentPage.startsWith('category-') ? (
         <CategoryPage categorySlug={currentPage.substring('category-'.length)} onNavigate={handleNavigate} addToCart={addToCart} />
       ) : currentPage.startsWith('product-') ? (
-        <ProductDetailsPage slug={currentPage.substring('product-'.length)} onNavigate={handleNavigate} addToCart={addToCart} />
+        <ProductDetailsPage slug={currentPage.substring('product-'.length)} onNavigate={handleNavigate} addToCart={addToCart} handleFastrrCheckout={handleFastrrCheckout} isCheckoutLoading={checkoutSource === 'buy_now'} cart={cart} />
       ) : (
         <>
           {/* ─── Hero Section ─── */}

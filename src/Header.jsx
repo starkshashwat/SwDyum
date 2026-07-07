@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Header.css';
 
-function Header({ currentPage = 'home', onNavigate, cartCount = 0 }) {
+function Header({ currentPage = 'home', onNavigate, cartCount = 0, onOpenCart }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -78,7 +78,7 @@ function Header({ currentPage = 'home', onNavigate, cartCount = 0 }) {
             <button
               className="action-btn cart-btn"
               aria-label={`Cart with ${cartCount} items`}
-              onClick={() => navigate('cart')}
+              onClick={onOpenCart}
             >
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
