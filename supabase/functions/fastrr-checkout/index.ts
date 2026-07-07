@@ -118,7 +118,7 @@ serve(async (req) => {
     
     if (!response.ok) {
       return new Response(JSON.stringify({ error: data.message || data.error || 'Failed to generate Fastrr token', details: data }), {
-        status: response.status,
+        status: 200,
         headers: corsHeaders
       });
     }
@@ -131,7 +131,7 @@ serve(async (req) => {
   } catch (err: any) {
     console.error('Edge Function Error:', err);
     return new Response(JSON.stringify({ error: err.message }), {
-      status: 500,
+      status: 200,
       headers: corsHeaders
     });
   }
