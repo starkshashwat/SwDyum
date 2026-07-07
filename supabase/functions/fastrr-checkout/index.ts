@@ -28,7 +28,13 @@ serve(async (req) => {
   };
 
   try {
-    const { raw_cart, redirect_url } = await req.json();
+    const bodyObj = await req.json();
+    console.log('Incoming Request Body:', JSON.stringify(bodyObj));
+    
+    // Support both the new frontend (raw_cart) and the old live frontend (cart_data.items)
+    const raw_cart = bodyObj.raw_cart || (bodyObj.cart_data ? bodyObj.cart_data.items : []);
+    const redirect_url = bodyObj.redirect_url;
+    
     const apiKey = Deno.env.get('FASTRR_API_KEY');
     const secretKey = Deno.env.get('FASTRR_SECRET_KEY');
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || Deno.env.get('VITE_SUPABASE_URL') || '';
@@ -43,16 +49,27 @@ serve(async (req) => {
     // Map frontend cart (slug, weight) to database variant IDs
     const mappedItems = [];
     for (const item of raw_cart) {
-      const { data: p } = await supabase
+      // The live frontend sends 'variant_id' as the slug, while new frontend sends 'slug'
+      const itemSlug = item.slug || item.variant_id;
+      // The old frontend didn't send weight, so we might need to match the first variant if weight is missing
+      
+      const { data: p, error: pError } = await supabase
         .from('products')
         .select('id, product_variants(id, weight_label)')
-        .eq('slug', item.slug)
+        .eq('slug', itemSlug)
         .single();
       
-      if (!p) throw new Error(`Product not found for slug: ${item.slug}`);
+      if (!p || pError) throw new Error(`Product not found for slug: ${itemSlug}`);
       
-      const variant = p.product_variants.find((v: any) => v.weight_label === item.weight);
-      if (!variant) throw new Error(`Variant not found for weight: ${item.weight}`);
+      let variant;
+      if (item.weight) {
+        variant = p.product_variants.find((v: any) => v.weight_label === item.weight);
+      } else {
+        // Fallback to the first variant if weight is not provided by the old frontend
+        variant = p.product_variants[0];
+      }
+      
+      if (!variant) throw new Error(`Variant not found for item: ${itemSlug}`);
 
       mappedItems.push({
         variant_id: variant.id,
