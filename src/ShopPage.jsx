@@ -19,11 +19,9 @@ const tabIcons = {
   ),
 };
 
-const categories = [
+const baseTabs = [
   { key: 'All', label: 'All Products', icon: tabIcons.all },
-  { key: 'Bestseller', label: 'Bestseller', icon: tabIcons.bestseller },
-  { key: 'Pickles', label: 'Pickles', icon: tabIcons.pickles },
-  { key: 'Gift Boxes', label: 'Combos', icon: tabIcons.combos },
+  { key: 'Bestseller', label: 'Bestseller', icon: tabIcons.bestseller }
 ];
 
 const sortOptions = [
@@ -75,11 +73,30 @@ function ShopPage({ onNavigate, addToCart }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedWeights, setSelectedWeights] = useState({});
 
+  const [dynamicCategories, setDynamicCategories] = useState(baseTabs);
+
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       const data = await fetchProducts();
       setProducts(data);
+      
+      const uniqueCats = Array.from(new Set(data.map(p => p.category))).filter(c => c && c !== 'Uncategorized');
+      const newTabs = [...baseTabs];
+      
+      uniqueCats.forEach(cat => {
+        let icon = tabIcons.pickles; 
+        const lowerCat = cat.toLowerCase();
+        if (lowerCat.includes('box') || lowerCat.includes('combo')) {
+          icon = tabIcons.combos;
+        } else if (lowerCat.includes('murabba') || lowerCat.includes('sweet')) {
+           icon = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v9"/></svg>;
+        }
+        
+        newTabs.push({ key: cat, label: cat, icon: icon });
+      });
+      
+      setDynamicCategories(newTabs);
       setLoading(false);
     };
     load();
@@ -100,10 +117,11 @@ function ShopPage({ onNavigate, addToCart }) {
     const matchesSearch = !searchQuery || p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (p.description && p.description.toLowerCase().includes(searchQuery.toLowerCase()));
     let matchesCategory = true;
-    if (filter === 'Bestseller') matchesCategory = p.isBestseller;
-    else if (filter === 'Gift Boxes') matchesCategory = p.category === 'Heritage Gift Box';
-    else if (filter !== 'All') matchesCategory = p.category === filter ||
-      (p.category && p.category.toLowerCase().includes(filter.toLowerCase()));
+    if (filter === 'Bestseller') {
+      matchesCategory = p.isBestseller;
+    } else if (filter !== 'All') {
+      matchesCategory = p.category === filter;
+    }
     return matchesSearch && matchesCategory;
   });
 
@@ -151,7 +169,7 @@ function ShopPage({ onNavigate, addToCart }) {
         <div className="sp-toolbar-inner">
           {/* Category tabs */}
           <div className="sp-tabs">
-            {categories.map(cat => (
+            {dynamicCategories.map(cat => (
               <button
                 key={cat.key}
                 className={`sp-tab ${filter === cat.key ? 'active' : ''}`}
@@ -316,7 +334,12 @@ function ShopPage({ onNavigate, addToCart }) {
               <p className="sp-bottom-cta-desc">
                 Elevate your meals with Swadyum's premium hand-packed combo gift chests — a perfect assortment of our finest pickles.
               </p>
-              <button className="sp-bottom-cta-btn" onClick={() => setFilter('Gift Boxes')}>
+              <button className="sp-bottom-cta-btn" onClick={() => {
+                const boxCat = dynamicCategories.find(c => c.label.toLowerCase().includes('box') || c.label.toLowerCase().includes('combo'));
+                if (boxCat) setFilter(boxCat.key);
+                else setFilter('All');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}>
                 Explore Gift Packs
               </button>
             </div>

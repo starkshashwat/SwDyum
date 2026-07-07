@@ -27,11 +27,8 @@ const tabIcons = {
   ),
 };
 
-const categories = [
-  { key: 'bestseller', label: 'Bestseller', icon: tabIcons.bestseller },
-  { key: 'pickles', label: 'Pickles', icon: tabIcons.pickles },
-  { key: 'spices', label: 'Spices', icon: tabIcons.spices },
-  { key: 'all', label: 'All Products', icon: tabIcons.all },
+const baseTabs = [
+  { key: 'bestseller', label: 'Bestseller', icon: tabIcons.bestseller }
 ];
 
 const cardVariants = {
@@ -84,11 +81,32 @@ function FeaturedProducts({ onNavigate, addToCart }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('bestseller');
+  const [dynamicCategories, setDynamicCategories] = useState(baseTabs);
 
   useEffect(() => {
     const loadData = async () => {
       const data = await fetchProducts();
       setProducts(data);
+      
+      const uniqueCats = Array.from(new Set(data.map(p => p.category))).filter(c => c && c !== 'Uncategorized');
+      
+      const newTabs = [...baseTabs];
+      
+      uniqueCats.forEach(cat => {
+        let icon = tabIcons.pickles;
+        const lowerCat = cat.toLowerCase();
+        if (lowerCat.includes('spices') || lowerCat.includes('powder')) {
+          icon = tabIcons.spices;
+        } else if (lowerCat.includes('box') || lowerCat.includes('combo')) {
+          icon = tabIcons.spices; // fallback icon
+        } else if (lowerCat.includes('murabba') || lowerCat.includes('sweet')) {
+           icon = <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v9"/></svg>;
+        }
+        newTabs.push({ key: cat, label: cat, icon: icon });
+      });
+      
+      newTabs.push({ key: 'all', label: 'All Products', icon: tabIcons.all });
+      setDynamicCategories(newTabs);
       setLoading(false);
     };
     loadData();
@@ -131,7 +149,7 @@ function FeaturedProducts({ onNavigate, addToCart }) {
 
         {/* ─── Category Tabs ─── */}
         <div className="fp-tabs">
-          {categories.map((cat) => (
+          {dynamicCategories.map((cat) => (
             <button
               key={cat.key}
               className={`fp-tab ${activeTab === cat.key ? 'active' : ''}`}
