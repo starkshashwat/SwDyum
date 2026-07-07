@@ -13,6 +13,8 @@ function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
     email: currentUser?.email || '',
     phone: currentUser?.phone || ''
   });
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteStatus, setDeleteStatus] = useState('');
   const [profileSuccess, setProfileSuccess] = useState(false);
   const [profileError, setProfileError] = useState('');
 
@@ -106,6 +108,42 @@ function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
     return d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   };
 
+  const handleDeleteRequest = async () => {
+    const confirmDelete = window.prompt('Are you sure you want to delete your account? Type "DELETE" to confirm.');
+    if (confirmDelete !== 'DELETE') {
+      alert('Deletion cancelled.');
+      return;
+    }
+
+    setIsDeleting(true);
+    setDeleteStatus('Submitting request...');
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) throw new Error('Not authenticated');
+
+      const response = await fetch('https://dligrptvajjsbzlcpjsk.supabase.co/functions/v1/delete-account', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({ reason: 'Self-service deletion' })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to submit deletion request');
+      }
+
+      setDeleteStatus('Request submitted successfully. You will be logged out.');
+      setTimeout(handleLogout, 3000);
+    } catch (err) {
+      console.error(err);
+      setDeleteStatus('Error submitting request. Please try again or email support.');
+      setIsDeleting(false);
+    }
+  };
+
   return (
     <div className="account-page-wrapper">
       <div className="account-container">
@@ -151,6 +189,12 @@ function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
                 onClick={() => setActiveTab('addresses')}
               >
                 <span className="sidebar-nav-icon">📍</span> Shipping Addresses
+              </button>
+              <button 
+                className={`sidebar-nav-item ${activeTab === 'privacy' ? 'active' : ''}`}
+                onClick={() => setActiveTab('privacy')}
+              >
+                <span className="sidebar-nav-icon">🛡️</span> Privacy & Data
               </button>
               <div className="sidebar-menu-divider"></div>
               <button 
@@ -330,6 +374,38 @@ function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
 
                   <button type="submit" className="tab-save-btn">Save Address Changes</button>
                 </form>
+              </div>
+            )}
+
+            {/* Panel 4: Privacy & Data Tab */}
+            {activeTab === 'privacy' && (
+              <div className="content-tab-card">
+                <h2 className="tab-title">Privacy & Data</h2>
+                <p className="tab-description">Manage your data and account settings.</p>
+                <div className="tab-divider"></div>
+
+                <div className="danger-zone">
+                  <h3>Danger Zone</h3>
+                  <div className="danger-zone-content">
+                    <div>
+                      <h4>Delete Account & Personal Data</h4>
+                      <p>Once you delete your account, there is no going back. Please be certain.</p>
+                      <p className="meta-compliance-note">This will permanently revoke any active WhatsApp sessions and remove your personal information.</p>
+                    </div>
+                    <button 
+                      className="btn-danger" 
+                      onClick={handleDeleteRequest}
+                      disabled={isDeleting}
+                    >
+                      {isDeleting ? 'Processing...' : 'Delete Account'}
+                    </button>
+                  </div>
+                  {deleteStatus && (
+                    <div className={`form-banner ${deleteStatus.includes('Error') ? 'form-error-banner' : 'form-success-banner'}`} style={{ marginTop: '15px' }}>
+                      {deleteStatus}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
 

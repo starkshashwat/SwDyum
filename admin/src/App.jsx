@@ -19,6 +19,7 @@ import AnnouncementsList from './pages/AnnouncementsList';
 import RecipesList from './pages/RecipesList';
 import SEOCenter from './pages/SEOCenter';
 import Inbox from './pages/Inbox';
+import AccountDeletionList from './pages/AccountDeletionList';
 import './index.css';
 
 function App() {
@@ -57,6 +58,9 @@ function App() {
 
         {/* Reviews */}
         <Route path="/reviews" element={<ReviewsList />} />
+
+        {/* Data Deletion */}
+        <Route path="/account-deletion" element={<AccountDeletionList />} />
 
         {/* CMS & Content */}
         <Route path="/announcements" element={<AnnouncementsList />} />

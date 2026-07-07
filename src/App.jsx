@@ -28,6 +28,7 @@ import SalesPop from './SalesPop';
 import CartDrawer from './components/cart/CartDrawer';
 // Removed ExitIntentPop import
 import PrivacyPolicyPage from './PrivacyPolicyPage';
+import DeleteAccountPage from './DeleteAccountPage';
 import ShippingPolicyPage from './ShippingPolicyPage';
 import ReturnPolicyPage from './ReturnPolicyPage';
 import TermsPage from './TermsPage';
@@ -40,6 +41,7 @@ function App() {
     if (path === '/recipes') return 'recipes';
     if (path === '/reviews') return 'reviews';
     if (path === '/privacy-policy') return 'privacy-policy';
+    if (path === '/delete-account') return 'delete-account';
     if (path === '/shipping-policy') return 'shipping-policy';
     if (path === '/return-policy') return 'return-policy';
     if (path === '/terms') return 'terms';
@@ -275,6 +277,7 @@ function App() {
     else if (targetPage === 'recipes') path = '/recipes';
     else if (targetPage === 'reviews') path = '/reviews';
     else if (targetPage === 'privacy-policy') path = '/privacy-policy';
+    else if (targetPage === 'delete-account') path = '/delete-account';
     else if (targetPage === 'shipping-policy') path = '/shipping-policy';
     else if (targetPage === 'return-policy') path = '/return-policy';
     else if (targetPage === 'terms') path = '/terms';
@@ -333,6 +336,8 @@ function App() {
         <ReviewsPage onNavigate={handleNavigate} />
       ) : currentPage === 'privacy-policy' ? (
         <PrivacyPolicyPage onNavigate={handleNavigate} />
+      ) : currentPage === 'delete-account' ? (
+        <DeleteAccountPage onNavigate={handleNavigate} />
       ) : currentPage === 'shipping-policy' ? (
         <ShippingPolicyPage onNavigate={handleNavigate} />
       ) : currentPage === 'return-policy' ? (

@@ -48,6 +48,7 @@ export default function AdminLayout() {
     { name: 'Coupons', path: '/coupons', icon: Tag },
     { name: 'Subscriptions', path: '/subscriptions', icon: RefreshCw },
     { name: 'Customers', path: '/customers', icon: Users },
+    { name: 'Data Deletion', path: '/account-deletion', icon: Shield },
     { name: 'Reviews', path: '/reviews', icon: Star },
     { name: 'Announcements', path: '/announcements', icon: Megaphone },
     { name: 'Recipes', path: '/recipes', icon: FileText },
