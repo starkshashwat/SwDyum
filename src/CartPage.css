@@ -335,7 +335,7 @@
 }
 
 .checkout-cta-btn {
-  background-color: var(--premium-gold);
+  background-color: var(--primary-green);
   color: #ffffff;
   border: none;
   width: 100%;
@@ -345,13 +345,25 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 12px rgba(199, 154, 59, 0.2);
+  box-shadow: 0 4px 12px rgba(47, 94, 59, 0.2);
 }
 
-.checkout-cta-btn:hover {
-  background-color: #b0842e;
+.checkout-cta-btn:hover:not(:disabled) {
+  background-color: #1e3f26;
   transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(199, 154, 59, 0.35);
+  box-shadow: 0 6px 18px rgba(47, 94, 59, 0.35);
+}
+
+.checkout-cta-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.checkout-cta-btn:disabled {
+  background-color: #cccccc;
+  color: #888888;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
 }
 
 .checkout-trust-indicators {
