@@ -32,6 +32,7 @@ export default function ProductEditor() {
 
   const [variants, setVariants] = useState([]);
   const [images, setImages] = useState([]);
+  const [pureIngredients, setPureIngredients] = useState([]);
 
   useEffect(() => {
     fetchCategories();
@@ -74,6 +75,10 @@ export default function ProductEditor() {
       mrp: product.mrp || '',
       cost_price: product.cost_price || ''
     });
+
+    if (product.pure_ingredients && Array.isArray(product.pure_ingredients)) {
+      setPureIngredients(product.pure_ingredients);
+    }
 
     // Fetch Variants
     const { data: variantsData } = await supabase
@@ -133,6 +138,48 @@ export default function ProductEditor() {
     setImages(images.filter((_, i) => i !== index));
   };
 
+  // --- Pure Ingredients Handlers ---
+  const addIngredient = () => {
+    setPureIngredients([...pureIngredients, { id: `ing-${Date.now()}`, name: '', img: '', benefit: '' }]);
+  };
+  const updateIngredient = (index, field, value) => {
+    const updated = [...pureIngredients];
+    updated[index][field] = value;
+    setPureIngredients(updated);
+  };
+  const removeIngredient = (index) => {
+    setPureIngredients(pureIngredients.filter((_, i) => i !== index));
+  };
+
+  const uploadIngredientImage = async (index, file) => {
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      alert("File is too large! Maximum allowed size is 2MB.");
+      return;
+    }
+    
+    setSaving(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `ing_${Date.now()}.${fileExt}`;
+      const filePath = `ingredients/${fileName}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('review-media')
+        .upload(filePath, file);
+        
+      if (uploadError) throw uploadError;
+      
+      const { data } = supabase.storage.from('review-media').getPublicUrl(filePath);
+      updateIngredient(index, 'img', data.publicUrl);
+    } catch (err) {
+      console.error('Upload failed:', err);
+      alert('Failed to upload image. Please ensure the review-media bucket exists.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -144,6 +191,7 @@ export default function ProductEditor() {
       mrp: parseFloat(formData.mrp) || null,
       cost_price: parseFloat(formData.cost_price) || null,
       category_id: formData.category_id || null, // handle empty select
+      pure_ingredients: pureIngredients.map(ing => ({ name: ing.name, img: ing.img, benefit: ing.benefit })),
       updated_at: new Date().toISOString()
     };
 
@@ -328,6 +376,60 @@ export default function ProductEditor() {
                     </div>
                     <div className="flex justify-end pb-1.5">
                       <button type="button" onClick={() => removeVariant(idx)} className="p-1.5 text-red-600 bg-red-50 hover:bg-red-100 rounded border border-red-200"><Trash2 className="w-4 h-4" /></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Pure Ingredients */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 space-y-6">
+            <div className="flex items-center justify-between border-b border-gray-100 pb-2">
+              <div>
+                <h2 className="text-lg font-semibold text-gray-900">Pure Ingredients</h2>
+                <p className="text-xs text-gray-500 mt-1">These will appear in the "Pure Ingredients" section on the product page.</p>
+              </div>
+              <button type="button" onClick={addIngredient} className="text-sm font-medium text-blue-600 hover:text-blue-700 inline-flex items-center">
+                <Plus className="w-4 h-4 mr-1" /> Add Ingredient
+              </button>
+            </div>
+
+            {pureIngredients.length === 0 ? (
+              <div className="text-center py-6 text-gray-500 border-2 border-dashed border-gray-200 rounded-lg">
+                <p>No custom ingredients added. The product page will use the default ingredients.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {pureIngredients.map((ing, idx) => (
+                  <div key={ing.id || idx} className="bg-gray-50 p-4 rounded-lg border border-gray-200 space-y-3 relative">
+                    <button type="button" onClick={() => removeIngredient(idx)} className="absolute top-2 right-2 p-1.5 text-gray-400 hover:text-red-600 bg-white rounded border border-gray-200"><Trash2 className="w-4 h-4" /></button>
+                    
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">Ingredient Name</label>
+                      <input type="text" placeholder="e.g. Raw Mango" value={ing.name} onChange={e => updateIngredient(idx, 'name', e.target.value)} className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded" />
+                    </div>
+                    
+                    <div className="flex gap-4 items-start">
+                      {ing.img ? (
+                        <img src={ing.img} alt="Preview" className="w-16 h-16 object-cover rounded border border-gray-300 bg-white" />
+                      ) : (
+                        <div className="w-16 h-16 bg-gray-200 border border-gray-300 rounded flex items-center justify-center">
+                          <ImageIcon className="w-6 h-6 text-gray-400" />
+                        </div>
+                      )}
+                      
+                      <div className="flex-1">
+                        <label className="block text-xs font-medium text-gray-500 mb-1">Upload Image (Max 2MB)</label>
+                        <input type="file" accept="image/*" onChange={(e) => uploadIngredientImage(idx, e.target.files[0])} className="text-sm text-gray-500 file:mr-4 file:py-1.5 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-black file:text-white hover:file:bg-gray-800" />
+                        <p className="text-xs text-gray-400 mt-1">Or paste a URL manually:</p>
+                        <input type="url" placeholder="https://..." value={ing.img} onChange={e => updateIngredient(idx, 'img', e.target.value)} className="w-full mt-1 px-2 py-1.5 text-sm border border-gray-300 rounded" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-medium text-gray-500 mb-1">Benefit / Description Text</label>
+                      <input type="text" placeholder="e.g. Hand-plucked tender mangoes loaded with Vitamin C..." value={ing.benefit} onChange={e => updateIngredient(idx, 'benefit', e.target.value)} className="w-full px-2 py-1.5 text-sm border border-gray-300 rounded" />
                     </div>
                   </div>
                 ))}

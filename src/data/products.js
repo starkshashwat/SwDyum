@@ -104,7 +104,8 @@ export const getProductBySlug = async (slug) => {
     rating: 4.9,
     reviewsCount: Math.floor(Math.random() * 50) + 10,
     stock: totalStock,
-    variants: product.product_variants || []
+    variants: product.product_variants || [],
+    pure_ingredients: product.pure_ingredients || []
   };
 };
 

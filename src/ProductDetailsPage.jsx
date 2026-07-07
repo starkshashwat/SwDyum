@@ -64,7 +64,7 @@ function ProductDetailsPage({ slug, onNavigate, addToCart }) {
       />
 
       {/* 3. INGREDIENTS SHOWCASE */}
-      <PdpIngredients />
+      <PdpIngredients ingredients={p.pure_ingredients} />
 
       {/* 4. THE MAKING PROCESS (TIMELINE) */}
       <PdpProcessTimeline />

@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import './PdpIngredients.css';
 
-const ingredients = [
+const defaultIngredients = [
   { name: 'Raw Mango', img: '/cat_mango.png', benefit: 'Hand-plucked tender mangoes loaded with Vitamin C for natural tanginess.' },
   { name: 'Mustard Oil', img: '/process_mixing_1783263028798.png', benefit: 'Cold-pressed Kachi Ghani oil preserving pungent aroma and healthy fats.' },
   { name: 'Fennel (Saunf)', img: '/cat_spices.png', benefit: 'Aids digestion and provides a sweet, aromatic undertone.' },
@@ -10,7 +10,9 @@ const ingredients = [
   { name: 'Red Chili', img: '/making_chilli.png', benefit: 'Sun-dried Mathania chilies for deep color and authentic heat.' },
 ];
 
-function PdpIngredients() {
+function PdpIngredients({ ingredients = [] }) {
+  const displayIngredients = ingredients && ingredients.length > 0 ? ingredients : defaultIngredients;
+
   return (
     <section className="pdp-ingredients-section">
       <div className="pdp-ingredients-container">
@@ -21,7 +23,7 @@ function PdpIngredients() {
         </div>
         
         <div className="pdp-ingredients-grid">
-          {ingredients.map((ing, idx) => (
+          {displayIngredients.map((ing, idx) => (
             <motion.div 
               key={idx} 
               className="pdp-ingredient-card"
