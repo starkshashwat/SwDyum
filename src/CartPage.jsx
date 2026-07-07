@@ -14,14 +14,9 @@ function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
     setIsCheckoutLoading(true);
 
     try {
-      const fastrrItems = cart.map(item => ({
-        variant_id: item.slug, // Pass slug as variant_id
-        quantity: item.quantity
-      }));
-
       const { data, error } = await supabase.functions.invoke('fastrr-checkout', {
         body: {
-          cart_data: { items: fastrrItems },
+          raw_cart: cart,
           redirect_url: window.location.origin
         }
       });

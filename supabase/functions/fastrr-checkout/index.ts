@@ -1,4 +1,5 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.108.2";
 
 function arrayBufferToBase64(buffer: ArrayBuffer) {
   let binary = '';
@@ -27,16 +28,40 @@ serve(async (req) => {
   };
 
   try {
-    const { cart_data, redirect_url } = await req.json();
+    const { raw_cart, redirect_url } = await req.json();
     const apiKey = Deno.env.get('FASTRR_API_KEY');
     const secretKey = Deno.env.get('FASTRR_SECRET_KEY');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || Deno.env.get('VITE_SUPABASE_URL') || '';
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
 
     if (!apiKey || !secretKey) {
       throw new Error('Fastrr API or Secret Key not configured in Supabase Secrets');
     }
 
+    const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // Map frontend cart (slug, weight) to database variant IDs
+    const mappedItems = [];
+    for (const item of raw_cart) {
+      const { data: p } = await supabase
+        .from('products')
+        .select('id, product_variants(id, weight_label)')
+        .eq('slug', item.slug)
+        .single();
+      
+      if (!p) throw new Error(`Product not found for slug: ${item.slug}`);
+      
+      const variant = p.product_variants.find((v: any) => v.weight_label === item.weight);
+      if (!variant) throw new Error(`Variant not found for weight: ${item.weight}`);
+
+      mappedItems.push({
+        variant_id: variant.id,
+        quantity: item.quantity
+      });
+    }
+
     const payload = {
-      cart_data,
+      cart_data: { items: mappedItems },
       redirect_url: redirect_url || "https://swadyum.store",
       timestamp: new Date().toISOString()
     };
@@ -71,9 +96,11 @@ serve(async (req) => {
     });
 
     const data = await response.json();
+    console.log('Shiprocket Response Status:', response.status);
+    console.log('Shiprocket Response Data:', JSON.stringify(data));
     
     if (!response.ok) {
-      return new Response(JSON.stringify({ error: data.message || 'Failed to generate Fastrr token' }), {
+      return new Response(JSON.stringify({ error: data.message || data.error || 'Failed to generate Fastrr token', details: data }), {
         status: response.status,
         headers: corsHeaders
       });
@@ -85,6 +112,7 @@ serve(async (req) => {
     });
 
   } catch (err: any) {
+    console.error('Edge Function Error:', err);
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
       headers: corsHeaders
