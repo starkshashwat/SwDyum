@@ -1,0 +1,69 @@
+.pdp-ugc-section {
+  padding: var(--space-16) var(--space-6);
+  background: var(--color-bg);
+}
+
+.ugc-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  max-width: 1400px;
+  margin: var(--space-8) auto 0;
+}
+
+.ugc-item {
+  position: relative;
+  aspect-ratio: 1/1;
+  background: var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.ugc-img-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-cream);
+  color: var(--color-muted);
+  font-weight: 600;
+}
+
+.ugc-hover-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.ugc-item:hover .ugc-hover-overlay {
+  opacity: 1;
+}
+
+.ugc-play-btn {
+  background: white;
+  color: var(--color-ink);
+  border: none;
+  padding: 12px 24px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  font-size: 0.9rem;
+  transform: translateY(10px);
+  transition: transform 0.3s;
+}
+
+.ugc-item:hover .ugc-play-btn {
+  transform: translateY(0);
+}
+
+@media (max-width: 900px) {
+  .ugc-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

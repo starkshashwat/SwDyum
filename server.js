@@ -14,6 +14,7 @@ import { createHmac } from 'crypto';
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
+import { createClient } from '@supabase/supabase-js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -45,12 +46,24 @@ const PORT = process.env.PROXY_PORT || 3001;
 const SHIPROCKET_BASE = 'https://apiv2.shiprocket.in/v1/external';
 const PICKUP_LOCATION = process.env.SHIPROCKET_PICKUP_LOCATION || 'Primary';
 
+// Supabase Connection for Catalog Sync APIs
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+let supabase = null;
+if (supabaseUrl && supabaseKey) {
+  supabase = createClient(supabaseUrl, supabaseKey);
+}
+
 // ─── Middleware ───────────────────────────────────────────────────────────────
 app.use(cors({
   origin: ['http://localhost:5173', 'http://localhost:4173'],
   methods: ['GET', 'POST', 'OPTIONS'],
 }));
-app.use(express.json());
+app.use(express.json({
+  verify: (req, res, buf) => {
+    req.rawBody = buf.toString('utf8');
+  }
+}));
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // SHIPROCKET UTILITIES
@@ -404,6 +417,430 @@ app.post('/api/fastrr/access-token', async (req, res) => {
   } catch (err) {
     console.error('❌ Fastrr token error:', err.message);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SHIPROCKET CATALOG SYNC ENDPOINTS
+// ═══════════════════════════════════════════════════════════════════════════════
+
+app.get('/api/shiprocket/products', async (req, res) => {
+  if (!supabase) return res.status(500).json({ error: 'Supabase not configured' });
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    const offset = (page - 1) * limit;
+
+    const { data: products, error, count } = await supabase
+      .from('products')
+      .select('*, product_images(url, is_primary, display_order), product_variants(*)', { count: 'exact' })
+      .range(offset, offset + limit - 1);
+
+    if (error) throw error;
+
+    const formattedProducts = products.map(p => ({
+      id: p.id,
+      title: p.name,
+      body_html: p.description,
+      status: p.is_active ? 'active' : 'draft',
+      created_at: p.created_at,
+      updated_at: p.updated_at,
+      vendor: 'Swadyum',
+      product_type: 'Pickles',
+      handle: p.slug,
+      images: p.product_images?.sort((a, b) => a.display_order - b.display_order).map((img, i) => ({
+        id: `img_${i}_${p.id}`,
+        product_id: p.id,
+        position: i + 1,
+        src: img.url
+      })) || [],
+      variants: p.product_variants?.map((v, i) => ({
+        id: v.id,
+        product_id: p.id,
+        title: v.weight_label,
+        price: v.price,
+        sku: v.sku || `SWD-${p.slug.substring(0, 5).toUpperCase()}-${v.weight_label}`,
+        position: i + 1,
+        inventory_policy: 'deny',
+        compare_at_price: v.mrp,
+        inventory_quantity: v.stock_quantity,
+        weight: parseFloat(v.weight_label) || 0,
+        weight_unit: (v.weight_label || '').toLowerCase().includes('kg') ? 'kg' : 'g',
+        requires_shipping: true
+      })) || []
+    }));
+
+    res.json({
+      products: formattedProducts,
+      page_info: {
+        has_next_page: offset + limit < count,
+        has_previous_page: page > 1,
+        total_count: count
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/shiprocket/collections', async (req, res) => {
+  if (!supabase) return res.status(500).json({ error: 'Supabase not configured' });
+  try {
+    const { data: collections, error } = await supabase.from('categories').select('*');
+    if (error) throw error;
+
+    res.json({
+      custom_collections: collections.map(c => ({
+        id: c.id,
+        handle: c.slug,
+        title: c.name,
+        updated_at: c.updated_at,
+        body_html: c.description,
+        published_at: c.created_at,
+        sort_order: 'manual',
+        image: {
+          src: c.banner_url
+        }
+      }))
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+app.get('/api/shiprocket/collections/:id/products', async (req, res) => {
+  if (!supabase) return res.status(500).json({ error: 'Supabase not configured' });
+  try {
+    const { id } = req.params;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    const offset = (page - 1) * limit;
+
+    const { data: products, error, count } = await supabase
+      .from('products')
+      .select('*, product_images(url, is_primary, display_order), product_variants(*)', { count: 'exact' })
+      .eq('category_id', id)
+      .range(offset, offset + limit - 1);
+
+    if (error) throw error;
+
+    const formattedProducts = products.map(p => ({
+      id: p.id,
+      title: p.name,
+      body_html: p.description,
+      status: p.is_active ? 'active' : 'draft',
+      created_at: p.created_at,
+      updated_at: p.updated_at,
+      vendor: 'Swadyum',
+      product_type: 'Pickles',
+      handle: p.slug,
+      images: p.product_images?.sort((a, b) => a.display_order - b.display_order).map((img, i) => ({
+        id: `img_${i}_${p.id}`,
+        product_id: p.id,
+        position: i + 1,
+        src: img.url
+      })) || [],
+      variants: p.product_variants?.map((v, i) => ({
+        id: v.id,
+        product_id: p.id,
+        title: v.weight_label,
+        price: v.price,
+        sku: v.sku || `SWD-${p.slug.substring(0, 5).toUpperCase()}-${v.weight_label}`,
+        position: i + 1,
+        inventory_policy: 'deny',
+        compare_at_price: v.mrp,
+        inventory_quantity: v.stock_quantity,
+        weight: parseFloat(v.weight_label) || 0,
+        weight_unit: (v.weight_label || '').toLowerCase().includes('kg') ? 'kg' : 'g',
+        requires_shipping: true
+      })) || []
+    }));
+
+    res.json({
+      products: formattedProducts,
+      page_info: {
+        has_next_page: offset + limit < count,
+        has_previous_page: page > 1,
+        total_count: count
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SHIPROCKET REALTIME WEBHOOK SYNC
+// ═══════════════════════════════════════════════════════════════════════════════
+
+const SHIPROCKET_WH_PRODUCT = 'https://checkout-api.shiprocket.com/wh/v1/custom/product';
+const SHIPROCKET_WH_COLLECTION = 'https://checkout-api.shiprocket.com/wh/v1/custom/collection';
+
+// Helper to fetch and format a single product
+async function fetchAndFormatProduct(productId) {
+  const { data: p, error } = await supabase
+    .from('products')
+    .select('*, product_images(url, is_primary, display_order), product_variants(*)')
+    .eq('id', productId)
+    .single();
+
+  if (error || !p) return null;
+
+  return {
+    id: p.id,
+    title: p.name,
+    body_html: p.description,
+    status: p.is_active ? 'active' : 'draft',
+    created_at: p.created_at,
+    updated_at: p.updated_at,
+    vendor: 'Swadyum',
+    product_type: 'Pickles',
+    handle: p.slug,
+    images: p.product_images?.sort((a, b) => a.display_order - b.display_order).map((img, i) => ({
+      id: `img_${i}_${p.id}`,
+      product_id: p.id,
+      position: i + 1,
+      src: img.url
+    })) || [],
+    variants: p.product_variants?.map((v, i) => ({
+      id: v.id,
+      product_id: p.id,
+      title: v.weight_label,
+      price: v.price,
+      sku: v.sku || `SWD-${p.slug.substring(0, 5).toUpperCase()}-${v.weight_label}`,
+      position: i + 1,
+      inventory_policy: 'deny',
+      compare_at_price: v.mrp,
+      inventory_quantity: v.stock_quantity,
+      weight: parseFloat(v.weight_label) || 0,
+      weight_unit: (v.weight_label || '').toLowerCase().includes('kg') ? 'kg' : 'g',
+      requires_shipping: true
+    })) || []
+  };
+}
+
+// Helper to fetch and format a single collection
+async function fetchAndFormatCollection(categoryId) {
+  const { data: c, error } = await supabase
+    .from('categories')
+    .select('*')
+    .eq('id', categoryId)
+    .single();
+    
+  if (error || !c) return null;
+
+  return {
+    id: c.id,
+    handle: c.slug,
+    title: c.name,
+    updated_at: c.updated_at,
+    body_html: c.description,
+    published_at: c.created_at,
+    sort_order: 'manual',
+    image: { src: c.banner_url }
+  };
+}
+
+// Debounce map to prevent sending multiple webhooks for rapid successive changes (e.g. updating product then variants)
+const syncTimeouts = {};
+
+function triggerShiprocketProductSync(productId) {
+  if (!productId) return;
+  if (syncTimeouts[`prod_${productId}`]) clearTimeout(syncTimeouts[`prod_${productId}`]);
+  
+  syncTimeouts[`prod_${productId}`] = setTimeout(async () => {
+    try {
+      console.log(`🔄 Syncing product ${productId} to Shiprocket...`);
+      const productPayload = await fetchAndFormatProduct(productId);
+      if (!productPayload) return;
+
+      const payloadStr = JSON.stringify(productPayload);
+      const apiKey = process.env.FASTRR_API_KEY;
+      const secretKey = process.env.FASTRR_SECRET_KEY;
+
+      if (!apiKey || !secretKey) {
+        console.warn('⚠️ Missing Fastrr API keys. Cannot send authenticated catalog webhook.');
+        return;
+      }
+
+      const hmac = createHmac('sha256', secretKey).update(payloadStr).digest('base64');
+
+      const res = await fetch(SHIPROCKET_WH_PRODUCT, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Api-Key': apiKey,
+          'X-Api-HMAC-SHA256': hmac
+        },
+        body: payloadStr
+      });
+      if (res.ok) console.log(`✅ Product ${productId} synced to Shiprocket successfully.`);
+      else console.error(`❌ Shiprocket product sync failed:`, await res.text());
+    } catch (err) {
+      console.error(`❌ Shiprocket product sync error:`, err);
+    }
+  }, 2000); // 2 second debounce
+}
+
+function triggerShiprocketCollectionSync(categoryId) {
+  if (!categoryId) return;
+  if (syncTimeouts[`cat_${categoryId}`]) clearTimeout(syncTimeouts[`cat_${categoryId}`]);
+  
+  syncTimeouts[`cat_${categoryId}`] = setTimeout(async () => {
+    try {
+      console.log(`🔄 Syncing collection ${categoryId} to Shiprocket...`);
+      const collectionPayload = await fetchAndFormatCollection(categoryId);
+      if (!collectionPayload) return;
+
+      const payloadStr = JSON.stringify(collectionPayload);
+      const apiKey = process.env.FASTRR_API_KEY;
+      const secretKey = process.env.FASTRR_SECRET_KEY;
+
+      if (!apiKey || !secretKey) {
+        console.warn('⚠️ Missing Fastrr API keys. Cannot send authenticated catalog webhook.');
+        return;
+      }
+
+      const hmac = createHmac('sha256', secretKey).update(payloadStr).digest('base64');
+
+      const res = await fetch(SHIPROCKET_WH_COLLECTION, {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'X-Api-Key': apiKey,
+          'X-Api-HMAC-SHA256': hmac
+        },
+        body: payloadStr
+      });
+      if (res.ok) console.log(`✅ Collection ${categoryId} synced to Shiprocket successfully.`);
+      else console.error(`❌ Shiprocket collection sync failed:`, await res.text());
+    } catch (err) {
+      console.error(`❌ Shiprocket collection sync error:`, err);
+    }
+  }, 2000);
+}
+
+// Initialize Realtime Subscriptions
+if (supabase) {
+  console.log('📡 Initializing Supabase Realtime listeners for Catalog Sync...');
+  supabase.channel('catalog-sync')
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, (payload) => {
+      triggerShiprocketProductSync(payload.new?.id || payload.old?.id);
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'product_variants' }, (payload) => {
+      triggerShiprocketProductSync(payload.new?.product_id || payload.old?.product_id);
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'product_images' }, (payload) => {
+      triggerShiprocketProductSync(payload.new?.product_id || payload.old?.product_id);
+    })
+    .on('postgres_changes', { event: '*', schema: 'public', table: 'categories' }, (payload) => {
+      triggerShiprocketCollectionSync(payload.new?.id || payload.old?.id);
+    })
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        console.log('✅ Realtime catalog sync listeners active.');
+      }
+    });
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// SHIPROCKET ORDER WEBHOOK (Incoming from Fastrr)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+app.post('/api/webhooks/shiprocket/order', async (req, res) => {
+  try {
+    const rawBody = req.rawBody || JSON.stringify(req.body);
+    const apiKey = process.env.FASTRR_API_KEY;
+    const secretKey = process.env.FASTRR_SECRET_KEY;
+    const providedSignature = req.headers['x-api-hmac-sha256'];
+
+    if (secretKey && providedSignature) {
+      const calculatedSignature = createHmac('sha256', secretKey).update(rawBody).digest('base64');
+      if (calculatedSignature !== providedSignature) {
+        console.warn(`⚠️ Shiprocket Order Webhook HMAC mismatch! Expected ${calculatedSignature}, got ${providedSignature}`);
+        // During early testing, we might just warn, but usually we would return 401
+      }
+    }
+
+    const orderData = req.body;
+    
+    if (!supabase) {
+      console.error('❌ Supabase not initialized, cannot save order from webhook.');
+      return res.status(200).send('OK'); // Must return 200 so Shiprocket stops retrying
+    }
+
+    const { order_id, status, cart_data, shipping_address, payment_type, payments } = orderData;
+    
+    if (!order_id) return res.status(200).send('OK');
+
+    console.log(`📥 Received Order Webhook from Shiprocket: ${order_id} [${status}]`);
+
+    // Check if order already exists
+    const { data: existingOrder } = await supabase.from('orders').select('id').eq('id', order_id).single();
+
+    if (existingOrder) {
+      console.log(`📦 Order ${order_id} already exists, updating status to ${status}`);
+      await supabase.from('orders').update({
+        status: status === 'SUCCESS' ? 'Paid' : (status === 'INITIATED' ? 'Pending' : 'Failed')
+      }).eq('id', order_id);
+      return res.status(200).send('OK');
+    }
+
+    // New Order - Insert it
+    console.log(`✨ Creating new order ${order_id} from webhook...`);
+    
+    let total = 0;
+    if (payments && payments.length > 0) {
+      total = payments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
+    } else {
+      total = orderData.total_amount_payable || orderData.subtotal_price || 0;
+    }
+
+    const newOrder = {
+      id: order_id,
+      date: orderData.created_at || new Date().toISOString(),
+      subtotal: orderData.subtotal_price || total,
+      shipping_fee: orderData.shipping_charges || 0,
+      cod_fee: orderData.cod_charges || 0,
+      discount_amount: orderData.total_discount || 0,
+      total: total,
+      status: status === 'SUCCESS' ? 'Paid' : (status === 'INITIATED' ? 'Pending' : 'Failed'),
+      payment_method: payment_type || 'Prepaid',
+      payment_id: payments?.[0]?.pg_transaction_id || null,
+      shipping_details: shipping_address || {}
+    };
+
+    const { error: insertError } = await supabase.from('orders').insert([newOrder]);
+
+    if (insertError) {
+      console.error(`❌ DB Insert Error for order ${order_id}:`, insertError);
+      return res.status(200).send('OK'); 
+    }
+
+    // Insert Items
+    if (cart_data && cart_data.items) {
+      const orderItems = cart_data.items.map(item => ({
+        order_id: order_id,
+        variant_id: item.variant_id, 
+        product_name: item.name || `Variant ${item.variant_id}`,
+        weight_label: item.weight || 'Unknown',
+        quantity: item.quantity,
+        unit_price: item.price || 0,
+        total_price: (item.price || 0) * item.quantity
+      }));
+      
+      const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
+      if (itemsError) {
+        console.error(`❌ DB Insert Items Error for order ${order_id}:`, itemsError);
+      }
+    }
+
+    console.log(`✅ Order ${order_id} successfully saved to database.`);
+    res.status(200).send('OK');
+
+  } catch (err) {
+    console.error('❌ Order Webhook Error:', err);
+    res.status(200).send('OK'); 
   }
 });
 

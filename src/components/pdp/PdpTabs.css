@@ -1,0 +1,76 @@
+.pdp-tabs-section {
+  padding: var(--space-12) var(--space-6);
+  background: var(--color-bg);
+}
+
+.pdp-tabs-container {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.pdp-tab-headers {
+  display: flex;
+  justify-content: center;
+  gap: var(--space-8);
+  border-bottom: 1px solid var(--color-border);
+  margin-bottom: var(--space-8);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.pdp-tab-headers::-webkit-scrollbar {
+  display: none;
+}
+
+.pdp-tab-btn {
+  padding: 16px 8px;
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--color-muted);
+  position: relative;
+  white-space: nowrap;
+  transition: color 0.3s;
+}
+
+.pdp-tab-btn:hover {
+  color: var(--color-ink);
+}
+
+.pdp-tab-btn.active {
+  color: var(--color-chili);
+}
+
+.pdp-tab-indicator {
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--color-chili);
+  border-radius: 2px 2px 0 0;
+}
+
+.pdp-tab-content-area {
+  min-height: 150px;
+}
+
+.pdp-tab-content {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--color-ink);
+}
+
+.pdp-tab-content p {
+  margin-bottom: 12px;
+}
+
+@media (max-width: 768px) {
+  .pdp-tab-headers {
+    justify-content: flex-start;
+    gap: var(--space-4);
+  }
+  .pdp-tab-btn {
+    font-size: 1rem;
+  }
+}

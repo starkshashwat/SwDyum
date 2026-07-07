@@ -188,10 +188,7 @@ function FeaturedProducts({ onNavigate, addToCart }) {
                     onKeyDown={(e) => { if (e.key === 'Enter') onNavigate && onNavigate(`product-${product.slug}`); }}
                     aria-label={`View ${product.name}`}
                   >
-                    {/* Sale Badge */}
-                    {discount && (
-                      <span className="fp-sale-badge">Sale</span>
-                    )}
+                    {/* Sale Badge removed */}
 
                     {/* Product Image */}
                     <div className="fp-card-img-wrap">

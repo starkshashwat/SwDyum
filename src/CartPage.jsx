@@ -19,15 +19,19 @@ function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
         quantity: item.quantity
       }));
 
-      const { data, error } = await supabase.functions.invoke('fastrr-checkout', {
-        body: {
+      const res = await fetch('http://localhost:3001/api/fastrr/access-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
           cart_data: { items: fastrrItems },
           redirect_url: window.location.origin
-        }
+        })
       });
 
-      if (error) {
-        throw error;
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Failed to initialize Fastrr Checkout.');
       }
 
       if (data && data.token) {
@@ -92,8 +96,8 @@ function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
                           {item.name}
                         </h4>
                         <span className="cart-item-weight">Net Weight: {item.weight} | Delivery: {item.subscription}</span>
-                        <button 
-                          className="cart-remove-btn" 
+                        <button
+                          className="cart-remove-btn"
                           onClick={() => removeFromCart(item.slug, item.weight, item.subscription)}
                         >
                           Remove
@@ -111,15 +115,15 @@ function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
                     <div className="cart-item-qty">
                       <span className="mobile-only-label">Qty:</span>
                       <div className="cart-qty-counter">
-                        <button 
-                          className="qty-adjust-btn" 
+                        <button
+                          className="qty-adjust-btn"
                           onClick={() => updateCartQty(item.slug, item.weight, item.subscription, item.quantity - 1)}
                         >
                           -
                         </button>
                         <span className="qty-value">{item.quantity}</span>
-                        <button 
-                          className="qty-adjust-btn" 
+                        <button
+                          className="qty-adjust-btn"
                           onClick={() => updateCartQty(item.slug, item.weight, item.subscription, item.quantity + 1)}
                         >
                           +
@@ -175,8 +179,8 @@ function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
                   <span className="total-value">₹{total}</span>
                 </div>
 
-                <button 
-                  className="checkout-cta-btn" 
+                <button
+                  className="checkout-cta-btn"
                   onClick={handleFastrrCheckout}
                   disabled={isCheckoutLoading}
                 >

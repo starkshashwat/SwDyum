@@ -178,7 +178,7 @@
   position: absolute;
   top: var(--space-4);
   right: var(--space-4);
-  background: var(--color-forest);
+  background: var(--color-chili);
   color: #fff;
   padding: 6px 14px;
   border-radius: var(--radius-full);
@@ -214,7 +214,7 @@
 }
 
 .meta-item svg {
-  color: var(--color-gold);
+  color: var(--color-mango);
 }
 
 .recipe-card-title {
@@ -298,8 +298,8 @@
 }
 
 .recipe-view-btn:hover {
-  background: var(--color-forest);
-  border-color: var(--color-forest);
+  background: var(--color-chili);
+  border-color: var(--color-chili);
   color: #fff;
 }
 
@@ -322,7 +322,7 @@
   margin-top: var(--space-2);
   width: 100%;
   padding: 14px;
-  background: var(--color-forest);
+  background: var(--color-chili);
   color: #fff;
   border: none;
   border-radius: var(--radius-full);
@@ -333,7 +333,7 @@
 }
 
 .recipe-shop-btn:hover {
-  background: var(--color-chili);
+  background: var(--color-chili-dark);
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(220, 60, 30, 0.2);
 }

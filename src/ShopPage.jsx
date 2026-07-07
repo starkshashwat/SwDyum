@@ -241,8 +241,7 @@ function ShopPage({ onNavigate, addToCart }) {
                       tabIndex={0}
                       onKeyDown={e => { if (e.key === 'Enter') onNavigate && onNavigate(`product-${product.slug}`); }}
                     >
-                      {/* Sale badge */}
-                      {discount && <span className="sp-sale-badge">Sale</span>}
+                      {/* Sale badge removed */}
 
                       {/* Bestseller badge */}
                       {product.isBestseller && <span className="sp-best-badge">★ Bestseller</span>}

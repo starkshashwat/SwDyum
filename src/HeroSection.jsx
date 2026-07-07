@@ -59,7 +59,7 @@ function HeroSection({ onNavigate }) {
     <section className="hero-section-v2" id="hero">
       <div className="hero-banner-container">
         {/* Background images */}
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           <motion.div
             key={slides[currentSlide].id}
             className="hero-banner-bg"

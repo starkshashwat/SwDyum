@@ -40,8 +40,8 @@ function StorytellingSection() {
         <div className="story-image-side">
           <div className="image-wrapper">
             <img 
-              src="/gal_mix.png" 
-              alt="Traditional Bihari kitchen preparation" 
+              src="/process_suncured_1783263051169.png" 
+              alt="Traditional sun-cured pickle preparation" 
               className="story-hero-img"
             />
           </div>

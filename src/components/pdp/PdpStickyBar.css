@@ -1,0 +1,81 @@
+.pdp-sticky-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: var(--color-bg);
+  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1000;
+  padding: 12px var(--space-6);
+}
+
+.pdp-sticky-bar.visible {
+  transform: translateY(0);
+}
+
+.pdp-sticky-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.pdp-sticky-product {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.pdp-sticky-product img {
+  width: 50px;
+  height: 50px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.pdp-sticky-info h4 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-family: var(--font-heading);
+}
+
+.pdp-sticky-variant {
+  font-size: 0.9rem;
+  color: var(--color-muted);
+}
+
+.pdp-sticky-add {
+  background: var(--color-chili);
+  color: white;
+  border: none;
+  padding: 12px 32px;
+  border-radius: var(--radius-full);
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.pdp-sticky-add:hover {
+  background: var(--color-chili-dark);
+}
+
+@media (min-width: 769px) {
+  .pdp-sticky-bar {
+    top: 0;
+    bottom: auto;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    transform: translateY(-100%);
+  }
+}
+
+@media (max-width: 768px) {
+  .pdp-sticky-info h4 {
+    font-size: 1rem;
+  }
+  .pdp-sticky-add {
+    padding: 10px 20px;
+  }
+}

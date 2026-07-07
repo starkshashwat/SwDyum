@@ -96,15 +96,34 @@ function ReviewSection({ productId }) {
         <h2 className="pdp-heading">Customer Reviews</h2>
       </div>
 
-      <div className="reviews-summary">
+      <div className="reviews-summary-flex">
         <div className="rating-big">
           <span className="avg-num">{averageRating}</span>
           <div className="stars-wrap">{renderStars(Math.round(averageRating))}</div>
           <span className="review-count">Based on {reviews.length} review{reviews.length !== 1 ? 's' : ''}</span>
         </div>
-        <button className="write-review-btn" onClick={() => setShowForm(!showForm)}>
-          {showForm ? 'Cancel' : 'Write a Review'}
-        </button>
+        
+        <div className="rating-progress-bars">
+          {[5, 4, 3, 2, 1].map(star => {
+            const count = reviews.filter(r => Math.round(r.rating) === star).length;
+            const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+            return (
+              <div className="progress-row" key={star}>
+                <span className="star-label">{'★'.repeat(star)}{'☆'.repeat(5 - star)}</span>
+                <div className="progress-track">
+                  <div className="progress-fill" style={{ width: `${pct}%` }}></div>
+                </div>
+                <span className="pct-label">{Math.round(pct)}%</span>
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="review-actions">
+          <button className="write-review-btn" onClick={() => setShowForm(!showForm)}>
+            {showForm ? 'Cancel' : 'Write a Review'}
+          </button>
+        </div>
       </div>
 
       {showForm && (

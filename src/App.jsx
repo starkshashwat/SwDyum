@@ -25,7 +25,7 @@ import ForgotPasswordPage from './ForgotPasswordPage';
 import AccountPage from './AccountPage';
 import OrderDetailsPage from './OrderDetailsPage';
 import SalesPop from './SalesPop';
-import ExitIntentPop from './ExitIntentPop';
+// Removed ExitIntentPop import
 import PrivacyPolicyPage from './PrivacyPolicyPage';
 import ShippingPolicyPage from './ShippingPolicyPage';
 import ReturnPolicyPage from './ReturnPolicyPage';
@@ -315,7 +315,7 @@ function App() {
 
       <Footer onNavigate={handleNavigate} />
       <SalesPop />
-      <ExitIntentPop onNavigate={handleNavigate} />
+      {/* Removed ExitIntentPop */}
     </div>
   );
 }

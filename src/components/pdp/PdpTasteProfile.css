@@ -1,0 +1,103 @@
+.pdp-taste-section {
+  padding: var(--space-16) var(--space-6);
+  background: var(--color-cream);
+}
+
+.pdp-taste-container {
+  display: flex;
+  gap: var(--space-16);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.flavor-meter-side,
+.pairing-side {
+  flex: 1;
+}
+
+.flavor-bars {
+  margin-top: var(--space-6);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.flavor-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.flavor-label {
+  width: 100px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--color-ink);
+}
+
+.flavor-track {
+  flex: 1;
+  height: 12px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.flavor-fill {
+  height: 100%;
+  background: var(--color-chili);
+  border-radius: var(--radius-full);
+}
+
+/* Pairings */
+.pairing-grid {
+  margin-top: var(--space-6);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.pairing-item {
+  background: var(--color-card);
+  padding: 16px 24px;
+  border-radius: var(--radius-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: default;
+}
+
+.pairing-item:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+}
+
+.pairing-icon {
+  font-size: 2rem;
+  transition: transform 0.3s;
+}
+
+.pairing-item:hover .pairing-icon {
+  animation: steam 1s infinite alternate ease-in-out;
+}
+
+@keyframes steam {
+  0% { transform: translateY(0) scale(1); }
+  100% { transform: translateY(-4px) scale(1.05); }
+}
+
+.pairing-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+@media (max-width: 768px) {
+  .pdp-taste-container {
+    flex-direction: column;
+    gap: var(--space-10);
+  }
+}

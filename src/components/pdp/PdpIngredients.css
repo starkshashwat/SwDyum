@@ -1,0 +1,136 @@
+.pdp-ingredients-section {
+  padding: var(--space-16) var(--space-6);
+  background: var(--color-warm-bg);
+}
+
+.pdp-ingredients-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.pdp-section-header.center {
+  text-align: center;
+  margin-bottom: var(--space-12);
+}
+
+.pdp-eyebrow {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--color-chili);
+  margin-bottom: 8px;
+}
+
+.pdp-heading {
+  font-family: var(--font-heading);
+  font-size: clamp(2rem, 4vw, 3rem);
+  color: var(--color-ink);
+  margin-bottom: 12px;
+  line-height: 1.1;
+}
+
+.pdp-subtext {
+  font-size: 1.1rem;
+  color: var(--color-muted);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.pdp-ingredients-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 24px;
+}
+
+.pdp-ingredient-card {
+  width: 200px;
+  background: var(--color-card);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+  position: relative;
+}
+
+.pdp-ingredient-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-xl);
+}
+
+.ing-img-wrap {
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+}
+
+.ing-img-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ing-info {
+  padding: 16px;
+  text-align: center;
+  position: relative;
+  min-height: 60px;
+}
+
+.ing-info h4 {
+  font-family: var(--font-heading);
+  font-size: 1.1rem;
+  color: var(--color-ink);
+  margin: 0;
+  transition: opacity 0.3s;
+}
+
+.ing-hover-content {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 16px;
+  background: var(--color-chili);
+  color: white;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ing-hover-content p {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.pdp-ingredient-card:hover .ing-info h4 {
+  opacity: 0;
+}
+
+.pdp-ingredient-card:hover .ing-hover-content {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+  .pdp-ingredient-card {
+    width: 160px;
+  }
+  .ing-img-wrap {
+    height: 130px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pdp-ingredient-card {
+    width: calc(50% - 12px);
+  }
+}
