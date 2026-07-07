@@ -335,7 +335,8 @@
 }
 
 .checkout-cta-btn {
-  background-color: var(--primary-green);
+  background-color: #2f5e3b; /* Fallback in case var is missing */
+  background-color: var(--primary-green, #2f5e3b);
   color: #ffffff;
   border: none;
   width: 100%;

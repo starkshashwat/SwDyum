@@ -19,19 +19,15 @@ function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
         quantity: item.quantity
       }));
 
-      const res = await fetch('http://localhost:3001/api/fastrr/access-token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('fastrr-checkout', {
+        body: {
           cart_data: { items: fastrrItems },
           redirect_url: window.location.origin
-        })
+        }
       });
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new Error(data.error || 'Failed to initialize Fastrr Checkout.');
+      if (error) {
+        throw new Error(error.message || 'Failed to invoke fastrr-checkout function.');
       }
 
       if (data && data.token) {
