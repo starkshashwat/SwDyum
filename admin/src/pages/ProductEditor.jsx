@@ -3,6 +3,36 @@ import { supabase } from '../lib/supabase';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Save, Loader2, Plus, Trash2, GripVertical, Image as ImageIcon } from 'lucide-react';
 
+const defaultIngredients = [
+  { id: 'def-1', name: 'Raw Mango', img: '/cat_mango.png', benefit: 'Hand-plucked tender mangoes loaded with Vitamin C for natural tanginess.' },
+  { id: 'def-2', name: 'Mustard Oil', img: '/process_mixing_1783263028798.png', benefit: 'Cold-pressed Kachi Ghani oil preserving pungent aroma and healthy fats.' },
+  { id: 'def-3', name: 'Fennel (Saunf)', img: '/cat_spices.png', benefit: 'Aids digestion and provides a sweet, aromatic undertone.' },
+  { id: 'def-4', name: 'Turmeric', img: '/process_grinding_1783263018468.png', benefit: 'High in curcumin for immunity and a vibrant golden hue.' },
+  { id: 'def-5', name: 'Red Chili', img: '/making_chilli.png', benefit: 'Sun-dried Mathania chilies for deep color and authentic heat.' },
+];
+
+const defaultTasteProfile = {
+  metrics: [
+    { label: 'Spicy', level: 80 },
+    { label: 'Tangy', level: 95 },
+    { label: 'Oil Level', level: 60 },
+    { label: 'Crunch', level: 70 },
+  ],
+  pairings: [
+    { name: 'Paratha', icon: '🫓' },
+    { name: 'Dal Chawal', icon: '🍛' },
+    { name: 'Litti Chokha', icon: '🔥' },
+    { name: 'Khichdi', icon: '🍲' },
+    { name: 'Poori', icon: '🥟' },
+  ]
+};
+
+const defaultTabs = {
+  nutrition: 'Rich in probiotics and antioxidants due to the natural fermentation and sun-curing process. Contains healthy fats from pure mustard oil.',
+  storage: 'Keep in a cool dry place.\n\nUse dry spoon only.\n\nBest consumed within 12 to 18 months of opening.',
+  shipping: 'We ship PAN-India in heavy-duty, leak-proof glass jars to ensure chemical-free transit. Deliveries typically arrive within 5-7 business days.'
+};
+
 export default function ProductEditor() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -32,11 +62,11 @@ export default function ProductEditor() {
 
   const [variants, setVariants] = useState([]);
   const [images, setImages] = useState([]);
-  const [pureIngredients, setPureIngredients] = useState([]);
+  const [pureIngredients, setPureIngredients] = useState(defaultIngredients);
   
   const [pdpConfig, setPdpConfig] = useState({
-    taste_profile: { metrics: [], pairings: [] },
-    tabs: { nutrition: '', storage: '', shipping: '' }
+    taste_profile: defaultTasteProfile,
+    tabs: defaultTabs
   });
 
   useEffect(() => {
@@ -81,16 +111,26 @@ export default function ProductEditor() {
       cost_price: product.cost_price || ''
     });
 
-    if (product.pure_ingredients && Array.isArray(product.pure_ingredients)) {
-      setPureIngredients(product.pure_ingredients);
+    if (product.pure_ingredients && Array.isArray(product.pure_ingredients) && product.pure_ingredients.length > 0) {
+      setPureIngredients(product.pure_ingredients.map((ing, i) => ({ ...ing, id: ing.id || `ing-${i}` })));
+    } else {
+      setPureIngredients(defaultIngredients);
     }
     
-    if (product.pdp_config) {
-      setPdpConfig({
-        taste_profile: product.pdp_config.taste_profile || { metrics: [], pairings: [] },
-        tabs: product.pdp_config.tabs || { nutrition: '', storage: '', shipping: '' }
-      });
+    let finalTasteProfile = defaultTasteProfile;
+    if (product.pdp_config?.taste_profile?.metrics?.length > 0 || product.pdp_config?.taste_profile?.pairings?.length > 0) {
+      finalTasteProfile = product.pdp_config.taste_profile;
     }
+    
+    let finalTabs = defaultTabs;
+    if (product.pdp_config?.tabs && (product.pdp_config.tabs.nutrition || product.pdp_config.tabs.storage || product.pdp_config.tabs.shipping)) {
+      finalTabs = product.pdp_config.tabs;
+    }
+
+    setPdpConfig({
+      taste_profile: finalTasteProfile,
+      tabs: finalTabs
+    });
 
     // Fetch Variants
     const { data: variantsData } = await supabase
