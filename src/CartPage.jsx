@@ -32,7 +32,8 @@ function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
           alert('Shiprocket Fastrr Checkout SDK not loaded. Check console.');
         }
       } else {
-        alert(data?.error || 'Failed to initialize Fastrr Checkout.');
+        const errorMsg = data?.error?.message || data?.error || 'Failed to initialize Fastrr Checkout.';
+        alert(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
       }
     } catch (err) {
       console.error('Fastrr error:', err);
