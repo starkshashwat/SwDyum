@@ -1,7 +1,100 @@
+/* ─── Top Bar ────────────────────────────────────────────────────────────── */
+.top-bar {
+  background: var(--color-ink);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 500;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1001;
+  transition: transform 0.3s ease;
+}
+
+.top-bar.hidden {
+  transform: translateY(-100%);
+}
+
+.top-bar-inner {
+  width: 100%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 var(--space-8);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.top-bar-contact {
+  display: flex;
+  gap: 16px;
+}
+
+.top-bar-contact a {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: white;
+  text-decoration: none;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.top-bar-contact a:hover {
+  opacity: 1;
+}
+
+.top-bar-announcement {
+  flex: 1;
+  overflow: hidden;
+  margin: 0 24px;
+}
+
+.marquee-container {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.marquee-content {
+  display: inline-block;
+  animation: marquee 20s linear infinite;
+}
+
+.marquee-content span {
+  padding-right: 50px;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.top-bar-socials {
+  display: flex;
+  gap: 12px;
+}
+
+.top-bar-socials a {
+  color: white;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+}
+
+.top-bar-socials a:hover {
+  opacity: 1;
+}
+
 /* ─── Site Header ────────────────────────────────────────────────────────── */
 .site-header {
   position: fixed;
-  top: 0;
+  top: 36px;
   left: 0;
   right: 0;
   z-index: 1000;
@@ -254,5 +347,18 @@
 
   .logo-img {
     height: 36px;
+  }
+  .top-bar-contact, .top-bar-socials {
+    display: none;
+  }
+  .top-bar-inner {
+    padding: 0 var(--space-4);
+    justify-content: center;
+  }
+  .top-bar-announcement {
+    margin: 0;
+  }
+  .marquee-content {
+    animation-duration: 15s;
   }
 }

@@ -101,6 +101,7 @@ html {
 
 body {
   margin: 0;
+  padding-top: 36px; /* Space for the permanent top bar */
   font-family: var(--font-body);
   font-size: var(--text-base);
   line-height: 1.6;
