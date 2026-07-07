@@ -1,177 +1,180 @@
-// Supabase Edge Function: shiprocket-sync
-// Deploy using: supabase functions deploy shiprocket-sync
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.108.2";
 
-// @ts-ignore
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-// @ts-ignore
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8"
+const SHIPROCKET_WH_PRODUCT = 'https://checkout-api.shiprocket.com/wh/v1/custom/product';
+const SHIPROCKET_WH_COLLECTION = 'https://checkout-api.shiprocket.com/wh/v1/custom/collection';
 
-declare const Deno: any;
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+function arrayBufferToBase64(buffer: ArrayBuffer) {
+  let binary = '';
+  const bytes = new Uint8Array(buffer);
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
 }
 
-serve(async (req: Request) => {
-  // Handle CORS Preflight
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+// Fetch and format a product
+async function syncProduct(productId: string, supabase: any, apiKey: string, secretKey: string) {
+  const { data: p, error } = await supabase
+    .from('products')
+    .select('*, product_images(url, is_primary, display_order), product_variants(*)')
+    .eq('id', productId)
+    .single();
+
+  if (error || !p) {
+    console.error('Failed to fetch product for sync:', error);
+    return;
   }
 
-  try {
-    const { orderId } = await req.json();
+  const productPayload = {
+    id: p.id,
+    title: p.name,
+    body_html: p.description,
+    status: p.is_active ? 'active' : 'draft',
+    created_at: p.created_at,
+    updated_at: p.updated_at,
+    vendor: 'Swadyum',
+    product_type: 'Pickles',
+    handle: p.slug,
+    images: p.product_images?.sort((a: any, b: any) => a.display_order - b.display_order).map((img: any, i: number) => ({
+      id: `img_${i}_${p.id}`,
+      product_id: p.id,
+      position: i + 1,
+      src: img.url
+    })) || [],
+    variants: p.product_variants?.map((v: any, i: number) => ({
+      id: v.id,
+      product_id: p.id,
+      title: v.weight_label,
+      price: v.price,
+      sku: v.sku || `SWD-${p.slug.substring(0, 5).toUpperCase()}-${v.weight_label}`,
+      position: i + 1,
+      inventory_policy: 'deny',
+      compare_at_price: v.mrp,
+      inventory_quantity: v.stock_quantity,
+      weight: parseFloat(v.weight_label) || 0,
+      weight_unit: (v.weight_label || '').toLowerCase().includes('kg') ? 'kg' : 'g',
+      requires_shipping: true
+    })) || []
+  };
 
-    if (!orderId) {
-      return new Response(JSON.stringify({ error: "orderId is required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
+  const payloadStr = JSON.stringify(productPayload);
+  
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secretKey),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(payloadStr));
+  const hmac = arrayBufferToBase64(signature);
+
+  const res = await fetch(SHIPROCKET_WH_PRODUCT, {
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      'X-Api-Key': apiKey,
+      'X-Api-HMAC-SHA256': hmac
+    },
+    body: payloadStr
+  });
+  
+  if (res.ok) console.log(`✅ Product ${productId} synced to Shiprocket successfully.`);
+  else console.error(`❌ Shiprocket product sync failed:`, await res.text());
+}
+
+// Fetch and format a collection
+async function syncCollection(categoryId: string, supabase: any, apiKey: string, secretKey: string) {
+  const { data: c, error } = await supabase
+    .from('categories')
+    .select('*')
+    .eq('id', categoryId)
+    .single();
+    
+  if (error || !c) {
+    console.error('Failed to fetch category for sync:', error);
+    return;
+  }
+
+  const collectionPayload = {
+    id: c.id,
+    handle: c.slug,
+    title: c.name,
+    updated_at: c.updated_at,
+    body_html: c.description,
+    published_at: c.created_at,
+    sort_order: 'manual',
+    image: { src: c.banner_url }
+  };
+
+  const payloadStr = JSON.stringify(collectionPayload);
+  
+  const encoder = new TextEncoder();
+  const key = await crypto.subtle.importKey(
+    "raw",
+    encoder.encode(secretKey),
+    { name: "HMAC", hash: "SHA-256" },
+    false,
+    ["sign"]
+  );
+  const signature = await crypto.subtle.sign("HMAC", key, encoder.encode(payloadStr));
+  const hmac = arrayBufferToBase64(signature);
+
+  const res = await fetch(SHIPROCKET_WH_COLLECTION, {
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      'X-Api-Key': apiKey,
+      'X-Api-HMAC-SHA256': hmac
+    },
+    body: payloadStr
+  });
+  
+  if (res.ok) console.log(`✅ Collection ${categoryId} synced to Shiprocket successfully.`);
+  else console.error(`❌ Shiprocket collection sync failed:`, await res.text());
+}
+
+serve(async (req) => {
+  try {
+    const payload = await req.json();
+
+    const apiKey = Deno.env.get('FASTRR_API_KEY');
+    const secretKey = Deno.env.get('FASTRR_SECRET_KEY');
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || Deno.env.get('VITE_SUPABASE_URL') || '';
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+
+    if (!apiKey || !secretKey || !supabaseUrl || !supabaseServiceKey) {
+      return new Response('Missing required environment variables', { status: 500 });
     }
 
-    // 1. Initialize Supabase Client with Admin credentials
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // 2. Fetch Order details from Supabase orders table
-    const { data: order, error: orderError } = await supabase
-      .from('orders')
-      .select('*')
-      .eq('id', orderId)
-      .single();
+    // Identify what was changed based on the Database Webhook payload
+    const table = payload.table;
+    const record = payload.type === 'DELETE' ? payload.old_record : payload.record;
 
-    if (orderError || !order) {
-      return new Response(JSON.stringify({ error: `Order ${orderId} not found: ${orderError?.message}` }), {
-        status: 404,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
+    if (!record) {
+      return new Response('No record found in payload', { status: 400 });
     }
 
-    // 3. Authenticate with Shiprocket API
-    const shiprocketEmail = Deno.env.get('SHIPROCKET_EMAIL');
-    const shiprocketPassword = Deno.env.get('SHIPROCKET_PASSWORD');
-
-    if (!shiprocketEmail || !shiprocketPassword) {
-      return new Response(JSON.stringify({ error: "Shiprocket credentials env variables not set" }), {
-        status: 500,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
+    if (table === 'products') {
+      await syncProduct(record.id, supabase, apiKey, secretKey);
+    } else if (table === 'product_variants' || table === 'product_images') {
+      await syncProduct(record.product_id, supabase, apiKey, secretKey);
+    } else if (table === 'categories') {
+      await syncCollection(record.id, supabase, apiKey, secretKey);
+    } else {
+      console.warn(`Unrecognized table sync: ${table}`);
     }
 
-    const authResponse = await fetch('https://apiv2.shiprocket.in/v1/external/auth/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        email: shiprocketEmail,
-        password: shiprocketPassword
-      })
-    });
-
-    if (!authResponse.ok) {
-      const authError = await authResponse.text();
-      return new Response(JSON.stringify({ error: `Shiprocket auth failed: ${authError}` }), {
-        status: 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
-
-    const { token } = await authResponse.json();
-
-    // 4. Map Order Items & Shipping Address to Shiprocket Payload
-    const items = typeof order.items === 'string' ? JSON.parse(order.items) : order.items;
-    const shippingDetails = typeof order.shipping_details === 'string' ? JSON.parse(order.shipping_details) : order.shipping_details;
-
-    const names = shippingDetails.name.trim().split(/\s+/);
-    const firstName = names[0] || 'Valued';
-    const lastName = names.slice(1).join(' ') || 'Customer';
-
-    const orderItems = items.map((item: any) => ({
-      name: item.name,
-      sku: `SWD-${item.slug.toUpperCase().substring(0, 10)}-${item.weight}`,
-      units: item.quantity,
-      selling_price: String(item.price)
-    }));
-
-    // Estimate box parameters
-    const totalQty = items.reduce((sum: number, i: any) => sum + i.quantity, 0);
-    const estimatedWeight = totalQty * 0.5; // average 0.5kg per jar details
-
-    const shiprocketPayload = {
-      order_id: order.id,
-      order_date: new Date(order.date).toISOString().replace(/T/, ' ').substring(0, 16),
-      pickup_location: "Patna Warehouse",
-      billing_customer_name: firstName,
-      billing_last_name: lastName,
-      billing_address: shippingDetails.address,
-      billing_city: shippingDetails.city,
-      billing_pincode: shippingDetails.zip,
-      billing_state: shippingDetails.state,
-      billing_country: "India",
-      billing_email: "support@swadyum.com", // dummy placeholder
-      billing_phone: "9876543210", // dummy placeholder
-      shipping_is_billing: true,
-      order_items: orderItems,
-      payment_method: order.payment_method === 'Cash on Delivery' ? 'COD' : 'Prepaid',
-      sub_total: order.subtotal,
-      length: 15,
-      width: 15,
-      height: 15,
-      weight: estimatedWeight
-    };
-
-    // 5. Create shipment on Shiprocket
-    const syncResponse = await fetch('https://apiv2.shiprocket.in/v1/external/orders/create/adhoc', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(shiprocketPayload)
-    });
-
-    const syncData = await syncResponse.json();
-
-    if (!syncResponse.ok || syncData.status_code !== 1) {
-      return new Response(JSON.stringify({ 
-        error: "Shiprocket order sync failed", 
-        details: syncData 
-      }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
-      });
-    }
-
-    // 6. Update local order row in database with tracking details
-    const awbCode = syncData.awb_code || `SR-AWB-${syncData.shipment_id || Math.floor(Math.random()*900000+100000)}`;
-    const courierName = syncData.courier_name || "BlueDart Express";
-
-    const { error: updateError } = await supabase
-      .from('orders')
-      .update({
-        status: 'Processing',
-        tracking_id: awbCode,
-        courier_name: courierName
-      })
-      .eq('id', order.id);
-
-    return new Response(JSON.stringify({ 
-      success: true, 
-      shiprocket_order_id: syncData.order_id,
-      shipment_id: syncData.shipment_id,
-      tracking_id: awbCode,
-      courier_name: courierName,
-      db_update_error: updateError?.message || null
-    }), {
-      status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
-    });
-
+    return new Response('Sync processed successfully', { status: 200 });
   } catch (err: any) {
+    console.error('❌ Sync Webhook Error:', err);
     return new Response(JSON.stringify({ error: err.message }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
+      headers: { 'Content-Type': 'application/json' }
     });
   }
 });
