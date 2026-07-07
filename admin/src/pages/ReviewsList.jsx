@@ -17,10 +17,9 @@ export default function ReviewsList() {
     try {
       setLoading(true);
       const { data, error } = await supabase
-        .from('reviews')
+        .from('product_reviews')
         .select(`
           *,
-          profiles:customer_id(name, email),
           products:product_id(name, slug)
         `)
         .order('created_at', { ascending: false });
@@ -37,7 +36,7 @@ export default function ReviewsList() {
   const toggleApproval = async (id, currentStatus) => {
     try {
       const { error } = await supabase
-        .from('reviews')
+        .from('product_reviews')
         .update({ is_approved: !currentStatus })
         .eq('id', id);
         
@@ -54,7 +53,7 @@ export default function ReviewsList() {
   const toggleFeatured = async (id, currentStatus) => {
     try {
       const { error } = await supabase
-        .from('reviews')
+        .from('product_reviews')
         .update({ is_featured: !currentStatus })
         .eq('id', id);
         
@@ -73,7 +72,7 @@ export default function ReviewsList() {
     
     try {
       const { error } = await supabase
-        .from('reviews')
+        .from('product_reviews')
         .delete()
         .eq('id', id);
         
@@ -87,9 +86,9 @@ export default function ReviewsList() {
   const filteredReviews = reviews.filter(r => {
     const term = searchTerm.toLowerCase();
     const matchesSearch = 
-      (r.review_text && r.review_text.toLowerCase().includes(term)) ||
+      (r.comment && r.comment.toLowerCase().includes(term)) ||
       (r.products?.name && r.products.name.toLowerCase().includes(term)) ||
-      (r.profiles?.name && r.profiles.name.toLowerCase().includes(term));
+      (r.author_name && r.author_name.toLowerCase().includes(term));
       
     let matchesFilter = true;
     if (filter === 'Pending') matchesFilter = !r.is_approved;
@@ -172,8 +171,7 @@ export default function ReviewsList() {
                 <div className="flex justify-between items-start">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-gray-900">{review.profiles?.name || 'Guest User'}</h3>
-                      {review.profiles?.email && <span className="text-sm text-gray-500">({review.profiles.email})</span>}
+                      <h3 className="font-bold text-gray-900">{review.author_name || 'Guest User'}</h3>
                     </div>
                     <p className="text-xs text-gray-500 mt-1">
                       on <span className="font-medium text-gray-700">{review.products?.name || 'Unknown Product'}</span>
@@ -187,7 +185,7 @@ export default function ReviewsList() {
                 </div>
                 
                 <p className="text-gray-700 text-sm leading-relaxed whitespace-pre-wrap">
-                  {review.review_text || <span className="italic text-gray-400">No written text provided</span>}
+                  {review.comment || <span className="italic text-gray-400">No written text provided</span>}
                 </p>
 
                 {/* Date and Badges */}
