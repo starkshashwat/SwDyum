@@ -13,7 +13,7 @@ import PdpUgc from './components/pdp/PdpUgc';
 import PdpComboSection from './components/pdp/PdpComboSection';
 import PdpFaq from './components/pdp/PdpFaq';
 
-function ProductDetailsPage({ slug, onNavigate, addToCart, handleFastrrCheckout, isCheckoutLoading, cart }) {
+function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow, cart }) {
   const [p, setP] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState('250g');
@@ -60,8 +60,7 @@ function ProductDetailsPage({ slug, onNavigate, addToCart, handleFastrrCheckout,
         setSubscription={setSubscription}
         addToCart={addToCart}
         onNavigate={onNavigate}
-        handleFastrrCheckout={handleFastrrCheckout}
-        isCheckoutLoading={isCheckoutLoading}
+        handleBuyNow={handleBuyNow}
         cart={cart}
       />
 

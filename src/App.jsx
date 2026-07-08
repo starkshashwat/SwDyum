@@ -192,49 +192,13 @@ function App() {
     }
   };
 
-  const [checkoutSource, setCheckoutSource] = useState(null);
-
-  const handleFastrrCheckout = async (e, customCart = null, source = 'cart') => {
-    if (e) e.preventDefault();
-    const checkoutCart = customCart || cart;
-    if (checkoutCart.length === 0) return;
-
+  const handleBuyNow = (product, selectedSize, quantity, subscription) => {
+    addToCart(product, selectedSize, quantity, subscription, false);
     if (!currentUser) {
       setIsWaModalOpen(true);
-      setPendingCheckout({ type: 'fastrr', cart: checkoutCart, source });
-      if (isCartOpen) setIsCartOpen(false);
-      return;
-    }
-
-    setCheckoutSource(source);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('fastrr-checkout', {
-        body: {
-          raw_cart: checkoutCart,
-          redirect_url: window.location.origin
-        }
-      });
-
-      if (error) {
-        throw new Error(error.message || 'Failed to invoke fastrr-checkout function.');
-      }
-
-      if (data && data.token) {
-        if (window.HeadlessCheckout) {
-          window.HeadlessCheckout.addToCart(e, data.token, { fallbackUrl: window.location.origin });
-        } else {
-          alert('Shiprocket Fastrr Checkout SDK not loaded. Check console.');
-        }
-      } else {
-        const errorMsg = data?.error?.message || data?.error || 'Failed to initialize Fastrr Checkout.';
-        alert(typeof errorMsg === 'object' ? JSON.stringify(errorMsg) : errorMsg);
-      }
-    } catch (err) {
-      console.error('Fastrr error:', err);
-      alert(`Checkout initialization failed: ${err.message || 'Network error'}`);
-    } finally {
-      setCheckoutSource(null);
+      setPendingCheckout({ type: 'checkout' });
+    } else {
+      setIsCartOpen(true);
     }
   };
 
@@ -272,16 +236,23 @@ function App() {
   }, []);
 
   const handleNavigate = (page) => {
-    // Authentication guard check
     let targetPage = page;
-    if ((page === 'account' || page.startsWith('order-details-')) && !currentUser) {
+
+    if (page === 'account' && !currentUser) {
+      setIsWaModalOpen(true);
+      setPendingCheckout({ type: 'account' });
+      if (isCartOpen) setIsCartOpen(false);
+      return;
+    }
+
+    if (page.startsWith('order-details-') && !currentUser) {
       setRedirectPath(page);
       targetPage = 'login';
     }
 
     if (page === 'checkout' && !currentUser) {
       setIsWaModalOpen(true);
-      setPendingCheckout({ type: 'standard' });
+      setPendingCheckout({ type: 'checkout' });
       if (isCartOpen) setIsCartOpen(false);
       return;
     }
@@ -338,8 +309,6 @@ function App() {
         removeFromCart={removeFromCart}
         addToCart={addToCart}
         onNavigate={handleNavigate}
-        handleFastrrCheckout={handleFastrrCheckout}
-        isCheckoutLoading={checkoutSource === 'cart'}
       />
       {currentPage === 'shop' ? (
         <ShopPage onNavigate={handleNavigate} addToCart={addToCart} />
@@ -362,7 +331,7 @@ function App() {
       ) : currentPage === 'terms' ? (
         <TermsPage onNavigate={handleNavigate} />
       ) : currentPage === 'cart' ? (
-        <CartPage cart={cart} updateCartQty={updateCartQty} removeFromCart={removeFromCart} onNavigate={handleNavigate} handleFastrrCheckout={handleFastrrCheckout} isCheckoutLoading={checkoutSource === 'cart_page'} />
+        <CartPage cart={cart} updateCartQty={updateCartQty} removeFromCart={removeFromCart} onNavigate={handleNavigate} />
       ) : currentPage === 'checkout' ? (
         <CheckoutPage cart={cart} clearCart={clearCart} onNavigate={handleNavigate} currentUser={currentUser} />
       ) : currentPage === 'login' ? (
@@ -378,7 +347,7 @@ function App() {
       ) : currentPage.startsWith('category-') ? (
         <CategoryPage categorySlug={currentPage.substring('category-'.length)} onNavigate={handleNavigate} addToCart={addToCart} />
       ) : currentPage.startsWith('product-') ? (
-        <ProductDetailsPage slug={currentPage.substring('product-'.length)} onNavigate={handleNavigate} addToCart={addToCart} handleFastrrCheckout={handleFastrrCheckout} isCheckoutLoading={checkoutSource === 'buy_now'} cart={cart} />
+        <ProductDetailsPage slug={currentPage.substring('product-'.length)} onNavigate={handleNavigate} addToCart={addToCart} handleBuyNow={handleBuyNow} cart={cart} />
       ) : (
         <>
           {/* ─── Hero Section ─── */}
@@ -407,10 +376,10 @@ function App() {
           setIsWaModalOpen(false);
           // Resume pending action
           if (pendingCheckout) {
-            if (pendingCheckout.type === 'fastrr') {
-              handleFastrrCheckout(null, pendingCheckout.cart, pendingCheckout.source);
-            } else if (pendingCheckout.type === 'standard') {
+            if (pendingCheckout.type === 'checkout') {
               handleNavigate('checkout');
+            } else if (pendingCheckout.type === 'account') {
+              handleNavigate('account');
             }
             setPendingCheckout(null);
           }

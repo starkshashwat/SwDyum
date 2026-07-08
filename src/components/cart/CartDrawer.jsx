@@ -21,7 +21,7 @@ const UPSELL_PRODUCTS = [
   }
 ];
 
-export default function CartDrawer({ isOpen, onClose, cart, updateCartQty, removeFromCart, addToCart, onNavigate, handleFastrrCheckout, isCheckoutLoading }) {
+export default function CartDrawer({ isOpen, onClose, cart, updateCartQty, removeFromCart, addToCart, onNavigate }) {
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -29,12 +29,8 @@ export default function CartDrawer({ isOpen, onClose, cart, updateCartQty, remov
   const progressPercent = Math.min(100, (subtotal / FREE_SHIPPING_THRESHOLD) * 100);
 
   const handleCheckout = (e) => {
-    if (handleFastrrCheckout) {
-      handleFastrrCheckout(e, cart);
-    } else {
-      onClose();
-      onNavigate('checkout');
-    }
+    onClose();
+    onNavigate('checkout');
   };
 
   const handleAddUpsell = (product) => {
@@ -153,9 +149,9 @@ export default function CartDrawer({ isOpen, onClose, cart, updateCartQty, remov
               <button 
                 className="checkout-btn" 
                 onClick={handleCheckout}
-                disabled={cart.length === 0 || isCheckoutLoading}
+                disabled={cart.length === 0}
               >
-                {isCheckoutLoading ? 'Processing...' : `Checkout • ₹${subtotal}`}
+                {`Checkout • ₹${subtotal}`}
               </button>
             </div>
           </motion.div>

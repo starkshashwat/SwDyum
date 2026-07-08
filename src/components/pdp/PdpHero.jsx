@@ -12,8 +12,7 @@ function PdpHero({
   setSubscription, 
   addToCart, 
   onNavigate,
-  handleFastrrCheckout,
-  isCheckoutLoading,
+  handleBuyNow,
   cart
 }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -166,28 +165,9 @@ function PdpHero({
         
         <button 
           className="pdp-buy-btn"
-          disabled={isCheckoutLoading}
-          onClick={(e) => {
-            const itemMatch = cart && cart.find(item => item.slug === product.slug && item.weight === selectedSize && item.subscription === subscription);
-            let customCart;
-            if (itemMatch) {
-                customCart = cart.map(item => item === itemMatch ? { ...item, quantity: item.quantity + quantity } : item);
-            } else {
-                customCart = [...(cart || []), {
-                  slug: product.slug,
-                  name: product.name,
-                  weight: selectedSize,
-                  price: product.prices?.[selectedSize] || product.base_price,
-                  quantity: quantity,
-                  image: product.image || product.images?.[0] || '/prod_mango.png',
-                  subscription: subscription
-                }];
-            }
-            addToCart(product, selectedSize, quantity, subscription, false);
-            handleFastrrCheckout(e, customCart, 'buy_now');
-          }}
+          onClick={() => handleBuyNow(product, selectedSize, quantity, subscription)}
         >
-          {isCheckoutLoading ? 'Processing...' : 'Buy Now'}
+          Buy Now
         </button>
 
         {/* Delivery Checker */}

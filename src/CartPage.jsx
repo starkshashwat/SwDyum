@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { supabase } from './supabaseClient';
 import './CartPage.css';
 
-function CartPage({ cart, updateCartQty, removeFromCart, onNavigate, handleFastrrCheckout, isCheckoutLoading }) {
+function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const shippingThreshold = 799;
   const shippingFee = subtotal >= shippingThreshold || subtotal === 0 ? 0 : 60;
@@ -138,10 +138,9 @@ function CartPage({ cart, updateCartQty, removeFromCart, onNavigate, handleFastr
 
                 <button
                   className="checkout-cta-btn"
-                  onClick={(e) => handleFastrrCheckout(e, null, 'cart_page')}
-                  disabled={isCheckoutLoading}
+                  onClick={() => onNavigate('checkout')}
                 >
-                  {isCheckoutLoading ? 'Initializing Secure Checkout...' : 'Proceed to Secure Checkout 🔒'}
+                  Proceed to Secure Checkout 🔒
                 </button>
 
                 {/* Trust Badges */}
