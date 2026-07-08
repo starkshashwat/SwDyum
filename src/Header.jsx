@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './Header.css';
 
-function Header({ currentPage = 'home', onNavigate, cartCount = 0, onOpenCart }) {
+function Header({ currentPage = 'home', onNavigate, cartCount = 0, onOpenCart, currentUser }) {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -94,20 +94,22 @@ function Header({ currentPage = 'home', onNavigate, cartCount = 0, onOpenCart })
           {/* Actions */}
           <div className="header-actions">
             <button
-              className={`action-btn relative ${currentPage === 'account' ? 'active' : ''}`}
+              className={`action-btn ${currentPage === 'account' ? 'active' : ''}`}
               aria-label="My account"
               onClick={() => navigate('account')}
             >
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-              </svg>
-              {currentUser && (!currentUser.name || !currentUser.email) && (
-                <span className="absolute top-0 right-0 flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-white"></span>
-                </span>
-              )}
+              <div className="icon-wrapper">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+                  <circle cx="12" cy="7" r="4"/>
+                </svg>
+                {currentUser && (!currentUser.name || !currentUser.email) && (
+                  <div className="notification-dot-wrapper">
+                    <span className="notification-dot-ping"></span>
+                    <span className="notification-dot"></span>
+                  </div>
+                )}
+              </div>
             </button>
 
             <button

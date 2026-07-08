@@ -27,6 +27,25 @@ export default {
       const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
       if (action === 'send') {
+        // --- Rate Limiting (60-second cooldown) ---
+        const { data: existingOtp } = await supabase
+          .from("whatsapp_otps")
+          .select("created_at")
+          .eq("phone", phone)
+          .single();
+
+        if (existingOtp && existingOtp.created_at) {
+          const secondsSinceLastOtp = (new Date().getTime() - new Date(existingOtp.created_at).getTime()) / 1000;
+          if (secondsSinceLastOtp < 60) {
+            const waitTime = Math.ceil(60 - secondsSinceLastOtp);
+            return new Response(JSON.stringify({ error: `Please wait ${waitTime} seconds before requesting a new OTP.` }), {
+              status: 200,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+        }
+        // ------------------------------------------
+
         // Generate a 6 digit OTP
         const generatedOtp = Math.floor(100000 + Math.random() * 900000).toString();
         const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
@@ -37,6 +56,7 @@ export default {
           .upsert({
             phone: phone,
             otp: generatedOtp,
+            created_at: new Date().toISOString(),
             expires_at: expiresAt.toISOString()
           });
 

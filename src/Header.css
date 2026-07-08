@@ -362,3 +362,48 @@
     animation-duration: 15s;
   }
 }
+
+/* ─── Notification Dot ───────────────────────────────────────────────────── */
+.icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.notification-dot-wrapper {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  display: flex;
+  height: 10px;
+  width: 10px;
+}
+
+.notification-dot-ping {
+  position: absolute;
+  display: inline-flex;
+  height: 100%;
+  width: 100%;
+  border-radius: 50%;
+  background-color: #ef4444; /* red-500 */
+  opacity: 0.75;
+  animation: ping 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+.notification-dot {
+  position: relative;
+  display: inline-flex;
+  border-radius: 50%;
+  height: 10px;
+  width: 10px;
+  background-color: #ef4444; /* red-500 */
+  border: 2px solid white;
+}
+
+@keyframes ping {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}

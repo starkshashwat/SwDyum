@@ -151,7 +151,11 @@ function App() {
           // fallback
         }
       } else {
-        setCurrentUser(null);
+        // If there is no standard Supabase session, check if a custom WhatsApp session exists
+        const saved = localStorage.getItem('swadyum_current_user');
+        if (!saved) {
+          setCurrentUser(null);
+        }
       }
     });
 

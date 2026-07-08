@@ -164,8 +164,8 @@
 }
 
 .wa-optin-checkbox input:checked + .wa-checkbox-custom {
-  background-color: #C1402B; /* Brand Color */
-  border-color: #C1402B;
+  background-color: #2e7d32; /* Brand Green */
+  border-color: #2e7d32;
 }
 
 .wa-optin-checkbox input:checked + .wa-checkbox-custom::after {
@@ -185,7 +185,7 @@
 }
 
 .wa-submit-btn {
-  background: #C1402B;
+  background: #2e7d32;
   color: white;
   border: none;
   padding: 16px;
@@ -200,13 +200,13 @@
 }
 
 .wa-submit-btn:hover:not(:disabled) {
-  background: #A93523;
+  background: #1b5e20;
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(193, 64, 43, 0.4);
+  box-shadow: 0 6px 16px rgba(46, 125, 50, 0.4);
 }
 
 .wa-submit-btn:disabled {
-  background: #E8B4AC;
+  background: #a5d6a7;
   cursor: not-allowed;
   box-shadow: none;
 }
@@ -249,8 +249,8 @@
 }
 
 .wa-otp-input:focus {
-  border-color: #C1402B;
-  box-shadow: 0 0 0 3px rgba(193, 64, 43, 0.1);
+  border-color: #2e7d32;
+  box-shadow: 0 0 0 3px rgba(46, 125, 50, 0.1);
   transform: translateY(-2px);
 }
 
