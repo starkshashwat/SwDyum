@@ -223,6 +223,7 @@ export const mockDb = {
         return result.data;
       } else {
         console.error('Edge function update failed:', result.error);
+        return { error: result.error || "Edge function failed" };
       }
     } catch (e) {
       console.error('Update error:', e);

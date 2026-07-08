@@ -13,7 +13,8 @@ export default {
     }
 
     try {
-      const { action, phone, otp, optIn } = await req.json();
+      const body = await req.json();
+      const { action, phone, otp, optIn, id, name, email } = body;
 
       if (!phone) {
         return new Response(JSON.stringify({ error: "Phone number is required" }), {
@@ -183,7 +184,6 @@ export default {
 
       } else {
         if (action === 'update_profile') {
-          const { id, name, email, phone: updatePhone } = await req.json();
           
           if (!id) {
             return new Response(JSON.stringify({ error: "User ID is required" }), {
@@ -194,7 +194,7 @@ export default {
 
           const { data, error } = await supabase
             .from("profiles")
-            .upsert({ id, name, email, phone: updatePhone })
+            .upsert({ id, name, email, phone })
             .select()
             .single();
 

@@ -57,12 +57,12 @@ function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
       phone: profileData.phone
     });
 
-    if (updated) {
+    if (updated && !updated.error) {
       setCurrentUser(updated);
       setProfileSuccess(true);
       setTimeout(() => setProfileSuccess(false), 3000);
     } else {
-      setProfileError('Failed to update profile.');
+      setProfileError(updated?.error || 'Failed to update profile.');
     }
   };
 
