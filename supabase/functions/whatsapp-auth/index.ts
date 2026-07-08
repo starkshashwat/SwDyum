@@ -115,13 +115,31 @@ export default {
           .from("profiles")
           .select("*")
           .eq("phone", phone)
-          .single();
+          .maybeSingle();
 
         if (!profile) {
-          const newUserId = crypto.randomUUID();
+          // Create the user in auth.users using the admin API to satisfy foreign key constraints
+          // The `profiles` row is typically created via a database trigger on auth.users
+          const { data: authData, error: authError } = await supabase.auth.admin.createUser({
+            phone: phone,
+            phone_confirm: true,
+            user_metadata: {
+              name: "WhatsApp User",
+              whatsapp_opt_in: optIn !== undefined ? optIn : true
+            }
+          });
+
+          if (authError) {
+            // If the user already exists in auth.users but not in profiles, or other error
+            throw authError;
+          }
+
+          // Wait a moment for the trigger to create the profile, or manually insert if no trigger exists
+          const newUserId = authData.user.id;
+          
           const { data: newProfile, error: insertError } = await supabase
             .from("profiles")
-            .insert({
+            .upsert({
               id: newUserId,
               phone: phone,
               name: "WhatsApp User",
