@@ -18,7 +18,7 @@ export default {
 
       if (!phone) {
         return new Response(JSON.stringify({ error: "Phone number is required" }), {
-          status: 400,
+          status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -81,7 +81,7 @@ export default {
       } else if (action === 'verify') {
         if (!otp) {
           return new Response(JSON.stringify({ error: "OTP is required for verification" }), {
-            status: 400,
+            status: 200,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
@@ -95,14 +95,14 @@ export default {
 
         if (fetchError || !record) {
           return new Response(JSON.stringify({ error: "Invalid or expired OTP" }), {
-            status: 400,
+            status: 200,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
 
         if (record.otp !== otp || new Date(record.expires_at) < new Date()) {
           return new Response(JSON.stringify({ error: "Invalid or expired OTP" }), {
-            status: 400,
+            status: 200,
             headers: { ...corsHeaders, "Content-Type": "application/json" },
           });
         }
@@ -179,7 +179,7 @@ export default {
 
       } else {
         return new Response(JSON.stringify({ error: "Invalid action" }), {
-          status: 400,
+          status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -187,7 +187,7 @@ export default {
     } catch (err) {
       console.error("Error in whatsapp-auth:", err);
       return new Response(JSON.stringify({ error: err.message }), {
-        status: 500,
+        status: 200,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
