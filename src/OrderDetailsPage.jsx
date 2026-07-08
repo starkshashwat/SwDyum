@@ -104,14 +104,6 @@ function OrderDetailsPage({ onNavigate, orderId, currentUser }) {
     });
   };
 
-  const handlePrintInvoice = () => {
-    if (invoice && invoice.pdf_url) {
-      window.open(invoice.pdf_url, '_blank');
-      return;
-    }
-    window.print();
-  };
-
   const shipping = order.shipping_details || {};
   const billing = order.billing_details || {};
 
@@ -133,7 +125,6 @@ function OrderDetailsPage({ onNavigate, orderId, currentUser }) {
             <span className="order-timestamp">Placed on {formatDate(order.created_at)}</span>
           </div>
           <div className="action-buttons-group">
-            <button className="btn-secondary" onClick={handlePrintInvoice}>🖨️ Print Invoice</button>
             <button className="btn-primary" onClick={() => onNavigate('account')}>← Dashboard</button>
           </div>
         </div>
@@ -194,101 +185,6 @@ function OrderDetailsPage({ onNavigate, orderId, currentUser }) {
            </div>
         </section>
 
-        {/* Printable Invoice Section */}
-        <section className="invoice-print-sheet details-card">
-          <div className="invoice-header">
-            <div className="invoice-brand">
-              <img src="/logo-01.webp" alt="Swadyum Logo" className="invoice-logo-img" />
-              <p className="brand-tag">Artisanal Sun-Cured Heritage</p>
-            </div>
-            <div className="invoice-meta-info">
-              <h2>TAX INVOICE</h2>
-              <p><strong>Invoice No:</strong> {invoice?.invoice_number || `INV-${cleanOrderId.substring(0, 8).toUpperCase()}`}</p>
-              <p><strong>Invoice Date:</strong> {formatDate(order.created_at).split(',')[0]}</p>
-              <p><strong>Order Ref:</strong> {cleanOrderId}</p>
-              {order.tracking_number && <p><strong>Tracking No:</strong> {order.tracking_number}</p>}
-            </div>
-          </div>
-
-          <div className="invoice-divider"></div>
-
-          <div className="invoice-addresses-row">
-            <div className="address-block seller-block">
-              <h4>Sold By:</h4>
-              <strong>Swadyum Foods Private Limited</strong>
-              <p>Plot 402, Fraser Road Corridor,</p>
-              <p>Fraser Road, Patna, Bihar - 800001</p>
-              <p><strong>GSTIN:</strong> 10AAECS1290K1Z9</p>
-              <p><strong>FSSAI Lic:</strong> 10424000109281</p>
-            </div>
-            <div className="address-block buyer-block">
-              <h4>Billing To:</h4>
-              <strong>{billing.name || shipping.name || order.customer_name}</strong>
-              <p>{billing.address || shipping.address || ''}</p>
-              <p>{[billing.city || shipping.city, billing.state || shipping.state, billing.zip || shipping.zip].filter(Boolean).join(', ')}</p>
-              <p><strong>Phone:</strong> {billing.phone || shipping.phone || order.customer_phone}</p>
-            </div>
-          </div>
-
-          <div className="invoice-divider"></div>
-
-          <table className="invoice-items-table">
-            <thead>
-              <tr>
-                <th>No.</th>
-                <th>Item Description</th>
-                <th>Weight / SKU</th>
-                <th>Unit Price</th>
-                <th>Quantity</th>
-                <th className="align-right">Net Amount</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orderItems.map((item, index) => (
-                <tr key={index}>
-                  <td>{index + 1}</td>
-                  <td className="item-name-col">
-                    <strong>{item.product_name}</strong>
-                    <span className="item-sub-desc">Artisanal Pickle</span>
-                  </td>
-                  <td>{item.weight_label} {item.sku ? `(${item.sku})` : ''}</td>
-                  <td>₹{item.unit_price}</td>
-                  <td>{item.quantity}</td>
-                  <td className="align-right">₹{item.final_price || item.total_price}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-
-          <div className="invoice-totals-section">
-            <div className="totals-table">
-              <div className="totals-row">
-                <span>Subtotal:</span>
-                <span>₹{order.subtotal}</span>
-              </div>
-              <div className="totals-row">
-                <span>Discount {order.coupon_code ? `(${order.coupon_code})` : ''}:</span>
-                <span>-₹{order.discount_amount || 0}</span>
-              </div>
-              <div className="totals-row">
-                <span>Delivery Charge:</span>
-                <span>{order.shipping_fee === 0 ? 'FREE' : `₹${order.shipping_fee}`}</span>
-              </div>
-              <div className="totals-row invoice-grand-total">
-                <strong>Total Payable Amount:</strong>
-                <strong>₹{order.total}</strong>
-              </div>
-            </div>
-          </div>
-
-          <div className="invoice-divider"></div>
-
-          <div className="invoice-footer-terms">
-            <p><strong>Payment Mode:</strong> {order.payment_method} (Status: {order.payment_status})</p>
-            {order.payment_id && <p><strong>Transaction ID:</strong> {order.payment_id}</p>}
-            <p>Thank you for choosing Swadyum Pickles. This is a computer-generated tax invoice and requires no signature.</p>
-          </div>
-        </section>
       </div>
     </div>
   );

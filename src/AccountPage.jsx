@@ -38,6 +38,7 @@ function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
             )
           `)
           .eq('customer_id', currentUser.id)
+          .eq('payment_status', 'Paid')
           .order('created_at', { ascending: false });
 
         if (!error && customerOrders) {
@@ -258,7 +259,7 @@ function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
             {activeTab === 'orders' && (
               <div className="content-tab-card">
                 <h2 className="tab-title">Order History</h2>
-                <p className="tab-description">Monitor your pending deliveries and review receipt histories.</p>
+                <p className="tab-description">Monitor your pending deliveries and review order histories.</p>
                 <div className="tab-divider"></div>
 
                 {orders.length === 0 ? (
