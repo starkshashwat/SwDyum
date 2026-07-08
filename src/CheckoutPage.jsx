@@ -36,9 +36,66 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
   const [processingStep, setProcessingStep] = useState('');
   const [fulfillError, setFulfillError] = useState(null);
 
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [couponError, setCouponError] = useState('');
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
+
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  
+  let discountAmount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.discount_type === 'percentage') {
+      discountAmount = (subtotal * appliedCoupon.discount_value) / 100;
+      if (appliedCoupon.max_discount && discountAmount > appliedCoupon.max_discount) {
+        discountAmount = appliedCoupon.max_discount;
+      }
+    } else if (appliedCoupon.discount_type === 'fixed') {
+      discountAmount = appliedCoupon.discount_value;
+    }
+  }
+
   const shippingFee = subtotal >= 799 || subtotal === 0 ? 0 : 60;
-  const total = subtotal + shippingFee;
+  const total = Math.max(0, subtotal - discountAmount + shippingFee);
+
+  const handleApplyCoupon = async (e) => {
+    e.preventDefault();
+    if (!couponCode.trim()) return;
+    setIsApplyingCoupon(true);
+    setCouponError('');
+    
+    try {
+      const { data, error } = await supabase
+        .from('coupons')
+        .select('*')
+        .eq('code', couponCode.trim().toUpperCase())
+        .eq('is_active', true)
+        .single();
+        
+      if (error || !data) throw new Error('Invalid or expired coupon');
+      
+      if (data.min_order_value && subtotal < data.min_order_value) {
+        throw new Error(`Minimum order value is ₹${data.min_order_value}`);
+      }
+      
+      if (data.valid_until && new Date(data.valid_until) < new Date()) {
+        throw new Error('This coupon has expired');
+      }
+      
+      setAppliedCoupon(data);
+      setCouponCode('');
+    } catch (err) {
+      setCouponError(err.message);
+      setAppliedCoupon(null);
+    } finally {
+      setIsApplyingCoupon(false);
+    }
+  };
+  
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponError('');
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -96,12 +153,13 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
       subtotal,
       shipping_fee: shippingFee,
       cod_fee: 0,
-      discount_amount: 0,
+      discount_amount: discountAmount,
       total,
       payment_method: 'Online / Razorpay',
       payment_id: razorpayOrderId, // Temporarily store RZP Order ID here
       shipping_details: shippingDetails,
       shipping: shippingDetails, // Added to satisfy NOT NULL constraint on manual column
+      coupon_code: appliedCoupon ? appliedCoupon.code : null,
       items: cart, // Added items to satisfy NOT NULL constraint
       status: 'Pending',
       created_at: new Date().toISOString()
@@ -320,6 +378,38 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
                 ))}
               </div>
 
+              {/* Coupon Section */}
+              <div className="coupon-section">
+                {!appliedCoupon ? (
+                  <div className="coupon-input-group">
+                    <input 
+                      type="text" 
+                      placeholder="Enter coupon code" 
+                      value={couponCode} 
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      disabled={isApplyingCoupon}
+                    />
+                    <button 
+                      type="button"
+                      onClick={handleApplyCoupon} 
+                      disabled={!couponCode.trim() || isApplyingCoupon}
+                      className="apply-coupon-btn"
+                    >
+                      {isApplyingCoupon ? '...' : 'Apply'}
+                    </button>
+                  </div>
+                ) : (
+                  <div className="applied-coupon-success">
+                    <div className="coupon-tag">
+                      <span className="coupon-icon">🏷️</span>
+                      <strong>{appliedCoupon.code}</strong>
+                    </div>
+                    <button type="button" className="remove-coupon-btn" onClick={handleRemoveCoupon}>✕</button>
+                  </div>
+                )}
+                {couponError && <span className="coupon-error-text">{couponError}</span>}
+              </div>
+
               <div className="summary-totals">
                 <div className="summary-row">
                   <span>Subtotal</span>
@@ -329,6 +419,12 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
                   <span>Shipping</span>
                   <span>{shippingFee === 0 ? 'FREE' : `₹${shippingFee}`}</span>
                 </div>
+                {discountAmount > 0 && (
+                  <div className="summary-row discount-row">
+                    <span>Discount ({appliedCoupon.code})</span>
+                    <span>-₹{Math.floor(discountAmount)}</span>
+                  </div>
+                )}
                 <div className="summary-divider"></div>
                 <div className="summary-row total-row">
                   <span>Total</span>
