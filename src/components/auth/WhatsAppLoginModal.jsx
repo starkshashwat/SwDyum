@@ -47,7 +47,7 @@ export default function WhatsAppLoginModal({ isOpen, onClose, onSuccess }) {
   };
 
   const handleVerifyOtp = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setError('');
     const otpString = otp.join('');
     if (otpString.length !== 6) {
@@ -90,15 +90,13 @@ export default function WhatsAppLoginModal({ isOpen, onClose, onSuccess }) {
     if (element.nextSibling && element.value) {
       element.nextSibling.focus();
     }
-
-    // Auto-submit if all 6 digits are filled
-    if (index === 5 && element.value && newOtp.every(d => d !== '')) {
-      // Small timeout to allow state to update and UI to render the last digit
-      setTimeout(() => {
-        handleVerifyOtp(new Event('submit'));
-      }, 100);
-    }
   };
+
+  useEffect(() => {
+    if (step === 2 && otp.length === 6 && otp.every(d => d !== '')) {
+      handleVerifyOtp();
+    }
+  }, [otp, step]);
 
   const handleOtpKeyDown = (e, index) => {
     if (e.key === 'Backspace' && !otp[index] && e.target.previousSibling) {
