@@ -26,7 +26,7 @@ import AccountPage from './AccountPage';
 import OrderDetailsPage from './OrderDetailsPage';
 import SalesPop from './SalesPop';
 import CartDrawer from './components/cart/CartDrawer';
-// Removed ExitIntentPop import
+import WhatsAppLoginModal from './components/auth/WhatsAppLoginModal';
 import PrivacyPolicyPage from './PrivacyPolicyPage';
 import DeleteAccountPage from './DeleteAccountPage';
 import ShippingPolicyPage from './ShippingPolicyPage';
@@ -78,6 +78,8 @@ function App() {
 
   const [redirectPath, setRedirectPath] = useState(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [isWaModalOpen, setIsWaModalOpen] = useState(false);
+  const [pendingCheckout, setPendingCheckout] = useState(null);
 
   // Sync user state to localStorage as a cache and initialize Supabase auth listener
   useEffect(() => {
@@ -196,6 +198,14 @@ function App() {
     if (e) e.preventDefault();
     const checkoutCart = customCart || cart;
     if (checkoutCart.length === 0) return;
+
+    if (!currentUser) {
+      setIsWaModalOpen(true);
+      setPendingCheckout({ type: 'fastrr', cart: checkoutCart, source });
+      if (isCartOpen) setIsCartOpen(false);
+      return;
+    }
+
     setCheckoutSource(source);
 
     try {
@@ -267,6 +277,13 @@ function App() {
     if ((page === 'account' || page.startsWith('order-details-')) && !currentUser) {
       setRedirectPath(page);
       targetPage = 'login';
+    }
+
+    if (page === 'checkout' && !currentUser) {
+      setIsWaModalOpen(true);
+      setPendingCheckout({ type: 'standard' });
+      if (isCartOpen) setIsCartOpen(false);
+      return;
     }
 
     setCurrentPage(targetPage);
@@ -379,6 +396,26 @@ function App() {
 
       <Footer onNavigate={handleNavigate} />
       <SalesPop />
+      <WhatsAppLoginModal 
+        isOpen={isWaModalOpen} 
+        onClose={() => {
+          setIsWaModalOpen(false);
+          setPendingCheckout(null);
+        }}
+        onSuccess={(profile) => {
+          setCurrentUser(profile);
+          setIsWaModalOpen(false);
+          // Resume pending action
+          if (pendingCheckout) {
+            if (pendingCheckout.type === 'fastrr') {
+              handleFastrrCheckout(null, pendingCheckout.cart, pendingCheckout.source);
+            } else if (pendingCheckout.type === 'standard') {
+              handleNavigate('checkout');
+            }
+            setPendingCheckout(null);
+          }
+        }}
+      />
       {/* Removed ExitIntentPop */}
     </div>
   );

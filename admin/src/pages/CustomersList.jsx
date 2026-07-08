@@ -87,6 +87,7 @@ export default function CustomersList() {
                 <th className="p-4">Name</th>
                 <th className="p-4">Email</th>
                 <th className="p-4">Phone</th>
+                <th className="p-4 text-center">WA Promo</th>
                 <th className="p-4">Joined On</th>
                 <th className="p-4 text-right">Actions</th>
               </tr>
@@ -107,6 +108,17 @@ export default function CustomersList() {
                   </td>
                   <td className="p-4 text-gray-600">{customer.email}</td>
                   <td className="p-4 text-gray-600">{customer.phone || 'N/A'}</td>
+                  <td className="p-4 text-center">
+                    {customer.whatsapp_opt_in ? (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800" title="Opted In">
+                        ✓ Yes
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800" title="Not Opted In">
+                        ✗ No
+                      </span>
+                    )}
+                  </td>
                   <td className="p-4 text-gray-500">
                     {new Date(customer.created_at).toLocaleDateString()}
                   </td>

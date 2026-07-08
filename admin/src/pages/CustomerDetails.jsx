@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { ArrowLeft, User, Mail, Phone, MapPin, ShoppingCart, Calendar } from 'lucide-react';
+import { ArrowLeft, User, Mail, Phone, MapPin, ShoppingCart, Calendar, MessageCircle } from 'lucide-react';
 
 export default function CustomerDetails() {
   const { id } = useParams();
@@ -89,6 +89,19 @@ export default function CustomerDetails() {
                 <div>
                   <p className="text-sm font-medium text-gray-900">Phone</p>
                   <p className="text-sm text-gray-600">{customer.phone || 'Not provided'}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <MessageCircle className="w-5 h-5 text-gray-400 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium text-gray-900">WhatsApp Promos</p>
+                  <p className="text-sm text-gray-600">
+                    {customer.whatsapp_opt_in ? (
+                      <span className="text-green-600 font-medium">✓ Subscribed</span>
+                    ) : (
+                      <span className="text-gray-500">✗ Not Subscribed</span>
+                    )}
+                  </p>
                 </div>
               </div>
             </div>
