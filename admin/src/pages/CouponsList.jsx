@@ -14,8 +14,14 @@ export default function CouponsList() {
     code: '',
     discount_type: 'percentage',
     discount_value: '',
+    discount_value: '',
     valid_until: ''
   });
+
+  // Edit modal state
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [editingCoupon, setEditingCoupon] = useState(null);
 
   useEffect(() => {
     fetchCoupons();
@@ -49,6 +55,43 @@ export default function CouponsList() {
       setCoupons(prev => prev.map(c => c.code === code ? { ...c, is_active: !currentStatus } : c));
     } catch (error) {
       console.error('Failed to toggle status:', error);
+      console.error('Failed to toggle status:', error);
+    }
+  };
+
+  const handleEditClick = (coupon) => {
+    setEditingCoupon({
+      ...coupon,
+      valid_until: coupon.valid_until ? coupon.valid_until.split('T')[0] : ''
+    });
+    setShowEditModal(true);
+  };
+
+  const handleUpdateCoupon = async (e) => {
+    e.preventDefault();
+    setIsUpdating(true);
+    try {
+      const payload = {
+        discount_type: editingCoupon.discount_type,
+        discount_value: Number(editingCoupon.discount_value),
+        valid_until: editingCoupon.valid_until ? new Date(editingCoupon.valid_until).toISOString() : null,
+      };
+
+      const { error } = await supabase
+        .from('coupons')
+        .update(payload)
+        .eq('code', editingCoupon.code);
+
+      if (error) throw error;
+      
+      setCoupons(prev => prev.map(c => c.code === editingCoupon.code ? { ...c, ...payload } : c));
+      setShowEditModal(false);
+      setEditingCoupon(null);
+    } catch (err) {
+      console.error('Error updating coupon:', err);
+      alert('Failed to update coupon: ' + err.message);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -164,7 +207,14 @@ export default function CouponsList() {
                         {coupon.is_active ? 'Active' : 'Disabled'}
                       </span>
                     </td>
-                    <td className="p-4 text-right space-x-2">
+                    <td className="p-4 text-right space-x-2 flex justify-end">
+                      <button 
+                        onClick={() => handleEditClick(coupon)}
+                        className="p-2 rounded-md transition-colors text-blue-600 hover:bg-blue-50"
+                        title="Edit"
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </button>
                       <button 
                         onClick={() => toggleStatus(coupon.code, coupon.is_active)}
                         className={`p-2 rounded-md transition-colors ${
@@ -253,6 +303,80 @@ export default function CouponsList() {
                   className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 disabled:bg-gray-400 font-medium"
                 >
                   {isCreating ? 'Creating...' : 'Create Coupon'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+      {/* Edit Coupon Modal */}
+      {showEditModal && editingCoupon && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full shadow-xl">
+            <h2 className="text-xl font-bold mb-4">Edit Coupon</h2>
+            <form onSubmit={handleUpdateCoupon} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Coupon Code</label>
+                <input 
+                  type="text" 
+                  value={editingCoupon.code}
+                  disabled
+                  className="w-full border border-gray-300 rounded-md p-2 bg-gray-100 text-gray-500 cursor-not-allowed"
+                />
+                <p className="text-xs text-gray-500 mt-1">Code cannot be changed as it is used in orders.</p>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Discount Type *</label>
+                  <select 
+                    value={editingCoupon.discount_type}
+                    onChange={e => setEditingCoupon({...editingCoupon, discount_type: e.target.value})}
+                    className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-black"
+                  >
+                    <option value="percentage">Percentage (%)</option>
+                    <option value="fixed">Fixed Amount (₹)</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Discount Value *</label>
+                  <input 
+                    type="number" 
+                    required
+                    min="1"
+                    value={editingCoupon.discount_value}
+                    onChange={e => setEditingCoupon({...editingCoupon, discount_value: e.target.value})}
+                    className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-black"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Valid Until (Optional)</label>
+                  <input 
+                    type="date" 
+                    value={editingCoupon.valid_until}
+                    onChange={e => setEditingCoupon({...editingCoupon, valid_until: e.target.value})}
+                    className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-black"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-gray-100">
+                <button 
+                  type="button" 
+                  onClick={() => setShowEditModal(false)}
+                  className="px-4 py-2 text-gray-600 hover:text-black font-medium"
+                >
+                  Cancel
+                </button>
+                <button 
+                  type="submit" 
+                  disabled={isUpdating}
+                  className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-800 disabled:bg-gray-400 font-medium"
+                >
+                  {isUpdating ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </form>
