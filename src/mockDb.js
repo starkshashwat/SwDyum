@@ -195,22 +195,38 @@ export const mockDb = {
   },
 
   updateCustomer: async (customerId, updatedFields) => {
-    // Check if id is a UUID (meaning it's a Supabase Auth User ID)
-    if (isUuid(customerId)) {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .update(updatedFields)
-          .eq('id', customerId)
-          .select()
-          .single();
+    // Attempt Edge Function update first (bypasses RLS, covers both UUIDs and WhatsApp phone numbers)
+    try {
+      const response = await fetch('https://dligrptvajjsbzlcpjsk.supabase.co/functions/v1/whatsapp-auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          action: 'update_profile',
+          id: customerId,
+          ...updatedFields
+        })
+      });
 
-        if (!error && data) {
-          return data;
+      const result = await response.json();
+
+      if (response.ok && result.data) {
+        // Also update local storage session if it exists
+        const saved = localStorage.getItem('swadyum_current_user');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed.id === customerId) {
+            localStorage.setItem('swadyum_current_user', JSON.stringify(result.data));
+          }
         }
-      } catch (e) {
-        // Fallback to local update
+        return result.data;
+      } else {
+        console.error('Edge function update failed:', result.error);
       }
+    } catch (e) {
+      console.error('Update error:', e);
+      // Fallback to local update below
     }
 
     // Fallback to local storage update

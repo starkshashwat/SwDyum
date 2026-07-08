@@ -1,5 +1,5 @@
 .account-page-wrapper {
-  background-color: var(--cream);
+  background-color: var(--color-bg);
   min-height: 90vh;
   padding: 140px 5% 80px 5%;
 }
@@ -15,7 +15,7 @@
 }
 
 .account-intro {
-  color: var(--muted-text);
+  color: var(--color-muted);
   font-size: 1.05rem;
   max-width: 600px;
   margin: 0 auto;
@@ -54,7 +54,7 @@
   width: 70px;
   height: 70px;
   border-radius: 50%;
-  background-color: var(--primary-green);
+  background-color: var(--color-leaf);
   color: #ffffff;
   font-size: 2rem;
   font-weight: 700;
@@ -68,14 +68,14 @@
 .user-sidebar-name {
   font-size: 1.25rem;
   font-weight: 800;
-  color: var(--dark-text);
+  color: var(--color-ink);
   margin-bottom: 0.2rem;
 }
 
 .user-sidebar-role {
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--premium-gold);
+  color: var(--color-mustard);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -97,7 +97,7 @@
   border-radius: 8px;
   font-size: 0.95rem;
   font-weight: 600;
-  color: var(--muted-text);
+  color: var(--color-muted);
   cursor: pointer;
   text-align: left;
   transition: all 0.2s ease;
@@ -105,16 +105,16 @@
 
 .sidebar-nav-item:hover {
   background-color: #fafbfc;
-  color: var(--dark-text);
+  color: var(--color-ink);
 }
 
 .sidebar-nav-item.active {
   background-color: #eaf2eb;
-  color: var(--primary-green);
+  color: var(--color-leaf);
 }
 
 .sidebar-order-badge {
-  background-color: var(--primary-green);
+  background-color: var(--color-leaf);
   color: #ffffff;
   font-size: 0.75rem;
   font-weight: 700;
@@ -124,7 +124,7 @@
 }
 
 .sidebar-nav-item.active .sidebar-order-badge {
-  background-color: var(--primary-green);
+  background-color: var(--color-leaf);
 }
 
 .sidebar-menu-divider {
@@ -160,11 +160,11 @@
 .tab-title {
   font-size: 1.6rem;
   font-weight: 800;
-  color: var(--dark-text);
+  color: var(--color-ink);
 }
 
 .tab-description {
-  color: var(--muted-text);
+  color: var(--color-muted);
   font-size: 0.95rem;
   margin-top: 0.4rem;
 }
@@ -184,7 +184,7 @@
 
 .form-success-banner {
   background-color: #eaf2eb;
-  color: var(--primary-green);
+  color: var(--color-leaf);
   border: 1px solid #cce0d0;
   border-radius: 8px;
   padding: 12px 16px;
@@ -254,7 +254,7 @@
 .tab-form-group label {
   font-size: 0.8rem;
   font-weight: 600;
-  color: var(--muted-text);
+  color: var(--color-muted);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -266,8 +266,8 @@
   padding: 12px 16px;
   font-size: 0.95rem;
   background-color: #ffffff;
-  color: var(--dark-text);
-  font-family: var(--font-family);
+  color: var(--color-ink);
+  font-family: var(--font-body);
   transition: all 0.2s ease;
   width: 100%;
 }
@@ -275,7 +275,7 @@
 .tab-form-group input:focus,
 .tab-form-group textarea:focus {
   outline: none;
-  border-color: var(--premium-gold);
+  border-color: var(--color-mustard);
   box-shadow: 0 0 0 3px rgba(199, 154, 59, 0.15);
 }
 
@@ -285,7 +285,7 @@
 }
 
 .tab-save-btn {
-  background-color: var(--primary-green);
+  background-color: var(--color-leaf);
   color: #ffffff;
   border: none;
   padding: 12px 25px;
@@ -317,8 +317,8 @@
 
 .orders-table th {
   padding: 1rem;
-  background-color: var(--cream);
-  color: var(--muted-text);
+  background-color: var(--color-bg);
+  color: var(--color-muted);
   font-weight: 600;
   font-size: 0.85rem;
   text-transform: uppercase;
@@ -329,12 +329,12 @@
   padding: 1.2rem 1rem;
   border-bottom: 1px solid #eef0f2;
   font-size: 0.95rem;
-  color: var(--dark-text);
+  color: var(--color-ink);
 }
 
 .order-id-cell {
   font-weight: 700;
-  color: var(--primary-green);
+  color: var(--color-leaf);
 }
 
 .status-badge {
@@ -375,8 +375,8 @@
 
 .order-details-view-btn {
   background: none;
-  border: 1px solid var(--premium-gold);
-  color: var(--premium-gold);
+  border: 1px solid var(--color-mustard);
+  color: var(--color-mustard);
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 0.85rem;
@@ -386,7 +386,7 @@
 }
 
 .order-details-view-btn:hover {
-  background-color: var(--premium-gold);
+  background-color: var(--color-mustard);
   color: #ffffff;
 }
 
@@ -409,12 +409,12 @@
 }
 
 .empty-orders-view p {
-  color: var(--muted-text);
+  color: var(--color-muted);
   margin-bottom: 1.5rem;
 }
 
 .empty-orders-cta {
-  background-color: var(--primary-green);
+  background-color: var(--color-leaf);
   color: #ffffff;
   border: none;
   padding: 10px 24px;
@@ -453,11 +453,11 @@
 .danger-zone-content h4 {
   font-size: 1.1rem;
   margin-bottom: 5px;
-  color: var(--color-primary);
+  color: var(--color-chili);
 }
 
 .danger-zone-content p {
-  color: var(--color-text);
+  color: var(--color-ink);
   font-size: 0.95rem;
   margin-bottom: 5px;
 }

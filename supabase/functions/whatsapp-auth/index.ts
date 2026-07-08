@@ -182,6 +182,35 @@ export default {
         });
 
       } else {
+        if (action === 'update_profile') {
+          const { id, name, email, phone: updatePhone } = await req.json();
+          
+          if (!id) {
+            return new Response(JSON.stringify({ error: "User ID is required" }), {
+              status: 200,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+
+          const { data, error } = await supabase
+            .from("profiles")
+            .upsert({ id, name, email, phone: updatePhone })
+            .select()
+            .single();
+
+          if (error) {
+            return new Response(JSON.stringify({ error: error.message }), {
+              status: 200,
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+
+          return new Response(JSON.stringify({ data }), {
+            status: 200,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+
         return new Response(JSON.stringify({ error: "Invalid action" }), {
           status: 200,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
