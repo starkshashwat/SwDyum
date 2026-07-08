@@ -1,5 +1,4 @@
-// Setup type definitions for built-in Supabase Runtime APIs
-import "@supabase/functions-js/edge-runtime.d.ts";
+// Edge Function for WhatsApp Auth
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 
 const corsHeaders = {
@@ -120,10 +119,14 @@ export default {
         if (!profile) {
           // Create the user in auth.users using the admin API to satisfy foreign key constraints
           // The `profiles` row is typically created via a database trigger on auth.users
+          // Use a dummy email to guarantee creation even if Phone Auth is completely disabled in Supabase settings
+          const dummyEmail = `wa_${phone.replace('+', '')}_${crypto.randomUUID().split('-')[0]}@swadyum.local`;
           const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-            phone: phone,
-            phone_confirm: true,
+            email: dummyEmail,
+            email_confirm: true,
+            password: crypto.randomUUID(),
             user_metadata: {
+              phone: phone,
               name: "WhatsApp User",
               whatsapp_opt_in: optIn !== undefined ? optIn : true
             }
