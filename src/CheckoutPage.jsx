@@ -1,6 +1,7 @@
 import React, { useState, useCallback } from 'react';
 import './CheckoutPage.css';
 import { mockDb } from './mockDb';
+import { supabase } from './supabaseClient';
 
 // ─── Load Razorpay checkout script dynamically ────────────────────────────────
 const loadRazorpayScript = () =>
@@ -86,59 +87,92 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
       netbanking: 'Net Banking / Razorpay',
     };
 
-    const customerId = currentUser ? currentUser.id : `guest_${Date.now()}`;
+    const customerId = currentUser ? currentUser.id : null;
+    const orderId = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-    // Save order locally / to Supabase
-    setProcessingStep('Saving your order...');
-    const newOrder = await mockDb.createOrder({
-      customerId,
-      items: cart,
-      subtotal,
-      shipping: shippingFee,
-      codFee: codFee,
-      total,
-      paymentMethod: paymentLabels[formData.paymentMethod] || formData.paymentMethod,
-      shippingDetails: {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zip: formData.zip,
-      },
-    });
+    const shippingDetails = {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      address: formData.address,
+      city: formData.city,
+      state: formData.state,
+      zip: formData.zip,
+    };
 
-    // Simulate backend fulfill
+    const finalPaymentMethod = paymentLabels[formData.paymentMethod] || formData.paymentMethod;
+
+    // Simulate backend fulfill (mock Shiprocket)
+    let awb = null;
+    let courierName = null;
+    
     setProcessingStep('Arranging mock shipment via Shiprocket...');
     try {
       await new Promise(r => setTimeout(r, 1000));
-      const result = {
-        awb: `AWB${Math.floor(Math.random() * 1000000000)}`,
-        courierName: 'Delhivery Surface',
-        labelUrl: '#',
-        shipmentId: `SHIP${Date.now()}`,
-        paymentId: paymentMethod === 'COD' ? null : razorpay_payment_id
-      };
-
-      if (result.awb) {
-        newOrder.trackingId = result.awb;
-        newOrder.courierName = result.courierName;
-        newOrder.labelUrl = result.labelUrl;
-        newOrder.shipmentId = result.shipmentId;
-        newOrder.paymentId = result.paymentId;
-        mockDb.updateLocalOrder(newOrder);
-      }
+      awb = `AWB${Math.floor(Math.random() * 1000000000)}`;
+      courierName = 'Delhivery Surface';
     } catch (err) {
       console.warn('Fulfillment mock failed:', err.message);
       setFulfillError(err.message);
     }
 
-    setPlacedOrder(newOrder);
+    setProcessingStep('Saving your order...');
+    const orderData = {
+      id: orderId,
+      customer_id: customerId,
+      subtotal,
+      shipping_fee: shippingFee,
+      cod_fee: codFee,
+      discount_amount: 0,
+      total,
+      payment_method: finalPaymentMethod,
+      payment_id: razorpay_payment_id || null,
+      shipping_details: shippingDetails,
+      status: paymentMethod === 'COD' ? 'Pending' : 'Paid',
+      tracking_id: awb,
+      courier_name: courierName
+    };
+    
+    try {
+      // 1. Insert Order
+      const { error: orderError } = await supabase.from('orders').insert([orderData]);
+      if (orderError) throw orderError;
+      
+      // 2. Insert Order Items
+      const orderItems = cart.map(item => ({
+        order_id: orderId,
+        product_name: item.name,
+        weight_label: item.weight,
+        subscription_type: item.subscription,
+        quantity: item.quantity,
+        unit_price: item.price,
+        total_price: item.price * item.quantity
+      }));
+      
+      const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
+      if (itemsError) throw itemsError;
+      
+    } catch (err) {
+      console.error('Failed to save order to Supabase:', err);
+      setFulfillError(`Database error: ${err.message}`);
+      setIsProcessing(false);
+      return;
+    }
+
+    setPlacedOrder({
+      ...orderData,
+      shippingDetails: shippingDetails, // expected by success screen
+      paymentMethod: finalPaymentMethod,
+      paymentId: razorpay_payment_id || null,
+      trackingId: awb,
+      courierName: courierName,
+      labelUrl: null
+    });
+
     setIsProcessing(false);
     setProcessingStep('');
     clearCart();
-  }, [cart, currentUser, formData, subtotal, shippingFee, total]);
+  }, [cart, currentUser, formData, subtotal, shippingFee, codFee, total, clearCart]);
 
   // ─── COD Flow: No payment needed ───────────────────────────────────────────
   const handleCodFlow = useCallback(async () => {
@@ -156,20 +190,102 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
     setFulfillError(null);
     setProcessingStep('Initializing secure payment...');
 
-    // Simulate network delay
-    await new Promise((r) => setTimeout(r, 1000));
-    
-    // Simulate successful mock payment
-    setProcessingStep('Processing mock payment (Backend Disabled)...');
-    await new Promise((r) => setTimeout(r, 1500));
+    try {
+      // 1. Load Razorpay script
+      const res = await loadRazorpayScript();
+      if (!res) {
+        throw new Error('Razorpay SDK failed to load. Are you online?');
+      }
 
-    await saveAndFulfill({
-      paymentMethod: 'Prepaid',
-      razorpay_order_id: `mock_order_${Date.now()}`,
-      razorpay_payment_id: `mock_pay_${Date.now()}`,
-      razorpay_signature: `mock_sig_${Date.now()}`,
-    });
-  }, [saveAndFulfill]);
+      // 2. Create order via Edge Function
+      const receiptId = `receipt_${Date.now()}`;
+      const { data, error } = await supabase.functions.invoke('razorpay', {
+        body: {
+          action: 'create_order',
+          amount: total,
+          receipt: receiptId
+        }
+      });
+
+      if (error) throw error;
+      if (data?.error) throw new Error(data.error);
+
+      const orderId = data.order.id;
+      // We pass the key directly in the frontend since it's a public key
+      const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_YourTestKeyId'; 
+
+      // 3. Open Razorpay Checkout Modal
+      const options = {
+        key: keyId,
+        amount: Math.round(total * 100),
+        currency: 'INR',
+        name: 'Swadyum',
+        description: 'Authentic Bihari Pickles',
+        image: '/logo-01.png',
+        order_id: orderId,
+        prefill: {
+          name: formData.name,
+          email: formData.email,
+          contact: formData.phone
+        },
+        theme: {
+          color: '#C1402B' // Swadyum brand color
+        },
+        handler: async function (response) {
+           setProcessingStep('Verifying payment...');
+           setIsProcessing(true);
+           
+           try {
+             // 4. Verify Payment via Edge Function
+             const { data: verifyData, error: verifyError } = await supabase.functions.invoke('razorpay', {
+               body: {
+                 action: 'verify_payment',
+                 razorpay_order_id: response.razorpay_order_id,
+                 razorpay_payment_id: response.razorpay_payment_id,
+                 razorpay_signature: response.razorpay_signature
+               }
+             });
+             
+             if (verifyError) throw verifyError;
+             if (verifyData?.error) throw new Error(verifyData.error);
+             
+             if (!verifyData.success) {
+               throw new Error('Payment verification failed (Invalid signature)');
+             }
+             
+             // 5. Success! Fulfill order
+             await saveAndFulfill({
+               paymentMethod: 'Prepaid',
+               razorpay_order_id: response.razorpay_order_id,
+               razorpay_payment_id: response.razorpay_payment_id,
+               razorpay_signature: response.razorpay_signature,
+             });
+           } catch (err) {
+             console.error('Verification error:', err);
+             setFulfillError(`Payment verification failed: ${err.message}`);
+             setIsProcessing(false);
+           }
+        },
+        modal: {
+          ondismiss: function() {
+            setIsProcessing(false);
+          }
+        }
+      };
+
+      const rzp1 = new window.Razorpay(options);
+      rzp1.on('payment.failed', function (response) {
+         setFulfillError(`Payment failed: ${response.error.description}`);
+         setIsProcessing(false);
+      });
+      rzp1.open();
+
+    } catch (err) {
+      console.error('Razorpay init error:', err);
+      setFulfillError(err.message || 'Failed to initialize payment.');
+      setIsProcessing(false);
+    }
+  }, [saveAndFulfill, total, formData]);
 
   // ─── Form Submit ────────────────────────────────────────────────────────────
   const handleSubmit = async (e) => {
