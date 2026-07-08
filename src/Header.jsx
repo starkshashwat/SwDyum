@@ -94,7 +94,7 @@ function Header({ currentPage = 'home', onNavigate, cartCount = 0, onOpenCart })
           {/* Actions */}
           <div className="header-actions">
             <button
-              className={`action-btn relative ${currentPage === 'account' ? 'active' : ''}`}
+              className={`action-btn ${currentPage === 'account' ? 'active' : ''}`}
               aria-label="My account"
               onClick={() => navigate('account')}
             >
@@ -102,12 +102,6 @@ function Header({ currentPage = 'home', onNavigate, cartCount = 0, onOpenCart })
                 <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
                 <circle cx="12" cy="7" r="4"/>
               </svg>
-              {currentUser && (!currentUser.name || !currentUser.email) && (
-                <span className="absolute top-0 right-0 flex h-3 w-3">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 border-2 border-white"></span>
-                </span>
-              )}
             </button>
 
             <button

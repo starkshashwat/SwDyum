@@ -81,9 +81,22 @@ export default function WhatsAppLoginModal({ isOpen, onClose, onSuccess }) {
 
   const handleOtpChange = (element, index) => {
     if (isNaN(element.value)) return false;
-    setOtp([...otp.map((d, idx) => (idx === index ? element.value : d))]);
+    
+    const newOtp = [...otp];
+    newOtp[index] = element.value;
+    setOtp(newOtp);
+
+    // Auto-focus next input
     if (element.nextSibling && element.value) {
       element.nextSibling.focus();
+    }
+
+    // Auto-submit if all 6 digits are filled
+    if (index === 5 && element.value && newOtp.every(d => d !== '')) {
+      // Small timeout to allow state to update and UI to render the last digit
+      setTimeout(() => {
+        handleVerifyOtp(new Event('submit'));
+      }, 100);
     }
   };
 
