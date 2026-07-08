@@ -80,6 +80,7 @@ function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isWaModalOpen, setIsWaModalOpen] = useState(false);
   const [pendingCheckout, setPendingCheckout] = useState(null);
+  const [toastMessage, setToastMessage] = useState('');
 
   // Sync user state to localStorage as a cache and initialize Supabase auth listener
   useEffect(() => {
@@ -374,7 +375,9 @@ function App() {
         onSuccess={(profile) => {
           setCurrentUser(profile);
           setIsWaModalOpen(false);
-          alert("Login successfully!");
+          setToastMessage("Login successfully!");
+          setTimeout(() => setToastMessage(''), 3000);
+          
           // Resume pending action
           if (pendingCheckout) {
             if (pendingCheckout.type === 'checkout') {
@@ -389,9 +392,27 @@ function App() {
         }}
       />
       {/* Removed ExitIntentPop */}
+
+      {/* Custom Toast Notification */}
+      <AnimatePresence>
+        {toastMessage && (
+          <motion.div 
+            className="toast-notification"
+            initial={{ opacity: 0, y: 50, x: "-50%" }}
+            animate={{ opacity: 1, y: 0, x: "-50%" }}
+            exit={{ opacity: 0, y: 50, x: "-50%" }}
+            transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <span>{toastMessage}</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
-
 
 export default App;

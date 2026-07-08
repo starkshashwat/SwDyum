@@ -126,7 +126,7 @@ export default {
             .upsert({
               id: newUserId,
               phone: phone,
-              name: "WhatsApp User",
+              name: "",
               whatsapp_opt_in: optIn !== undefined ? optIn : true
             })
             .select()
