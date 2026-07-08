@@ -81,8 +81,35 @@ export default {
               messaging_product: "whatsapp",
               recipient_type: "individual",
               to: phone,
-              type: "text",
-              text: { body: message },
+              type: "template",
+              template: {
+                name: "login_authenticttion",
+                language: {
+                  code: "en_US"
+                },
+                components: [
+                  {
+                    type: "body",
+                    parameters: [
+                      {
+                        type: "text",
+                        text: generatedOtp
+                      }
+                    ]
+                  },
+                  {
+                    type: "button",
+                    sub_type: "url",
+                    index: "0",
+                    parameters: [
+                      {
+                        type: "text",
+                        text: generatedOtp
+                      }
+                    ]
+                  }
+                ]
+              },
             }),
           });
           const apiResponse = await res.json();
