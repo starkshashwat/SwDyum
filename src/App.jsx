@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import './App.css';
 import { supabase } from './supabaseClient';
 import Header from './Header';
