@@ -16,6 +16,7 @@ import AboutPage from './AboutPage';
 import ContactPage from './ContactPage';
 import RecipePage from './RecipePage';
 import ReviewsPage from './ReviewsPage';
+import ThankYouPage from './ThankYouPage';
 import CategoryPage from './CategoryPage';
 import Footer from './Footer';
 import CartPage from './CartPage';
@@ -290,6 +291,7 @@ function App() {
     else if (targetPage === 'signup') path = '/signup';
     else if (targetPage === 'forgot-password') path = '/forgot-password';
     else if (targetPage === 'account') path = '/account';
+    else if (targetPage === 'thank-you') path = '/thank-you';
     else if (targetPage.startsWith('order-details-')) {
       const orderId = targetPage.substring('order-details-'.length);
       path = `/account/orders/${orderId}`;
@@ -356,6 +358,8 @@ function App() {
         <SignupPage onNavigate={handleNavigate} onSignup={setCurrentUser} redirectPath={redirectPath} setRedirectPath={setRedirectPath} />
       ) : currentPage === 'forgot-password' ? (
         <ForgotPasswordPage onNavigate={handleNavigate} />
+      ) : currentPage === 'thank-you' ? (
+        <ThankYouPage onNavigate={handleNavigate} />
       ) : currentPage === 'account' ? (
         <AccountPage onNavigate={handleNavigate} currentUser={currentUser} setCurrentUser={setCurrentUser} />
       ) : currentPage.startsWith('order-details-') ? (
