@@ -59,7 +59,8 @@ export default function CartDrawer({ isOpen, onClose, cart, updateCartQty, remov
     } else {
       document.body.style.overflow = 'unset';
     }
-  }, [isOpen, onClose]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   return (
     <AnimatePresence>

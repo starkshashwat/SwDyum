@@ -119,6 +119,7 @@
   font-size: 0.95rem;
   margin-bottom: 4px;
   font-family: var(--font-body);
+  padding-right: 28px;
 }
 
 .item-variant {
