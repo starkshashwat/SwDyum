@@ -301,6 +301,7 @@ function App() {
         onNavigate={handleNavigate} 
         cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)} 
         onOpenCart={() => setIsCartOpen(true)}
+        currentUser={currentUser}
       />
       
       <CartDrawer 
