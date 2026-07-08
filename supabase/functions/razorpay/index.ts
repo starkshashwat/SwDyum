@@ -149,6 +149,71 @@ serve(async (req) => {
             console.error('Error updating order:', error);
             return new Response('Database error', { status: 500 });
           }
+
+          // Fetch order to process inventory and coupon usage
+          const { data: orderDetails } = await supabaseAdmin
+            .from('orders')
+            .select('*')
+            .eq('payment_id', orderId)
+            .single();
+
+          if (orderDetails) {
+            // Process inventory reduction
+            const { data: items } = await supabaseAdmin
+              .from('order_items')
+              .select('*')
+              .eq('order_id', orderDetails.id);
+
+            if (items && items.length > 0) {
+              for (const item of items) {
+                // Find product by name
+                const { data: productData } = await supabaseAdmin
+                  .from('products')
+                  .select('id')
+                  .ilike('name', item.product_name)
+                  .single();
+
+                if (productData) {
+                  // Find variant by product_id and weight_label
+                  const { data: variant } = await supabaseAdmin
+                    .from('product_variants')
+                    .select('id, stock_quantity')
+                    .eq('product_id', productData.id)
+                    .eq('weight_label', item.weight_label)
+                    .single();
+
+                  if (variant) {
+                    // Log inventory change. This will trigger update_stock_from_log in DB
+                    // which automatically updates product_variants.stock_quantity
+                    await supabaseAdmin
+                      .from('inventory_logs')
+                      .insert([{
+                        variant_id: variant.id,
+                        change_type: 'Order Placed',
+                        quantity_changed: -item.quantity,
+                        note: `Order ${orderDetails.id}`
+                      }]);
+                  }
+                }
+              }
+            }
+
+            // Increment coupon usage
+            if (orderDetails.coupon_code) {
+               const { data: couponData } = await supabaseAdmin
+                 .from('coupons')
+                 .select('id, times_used')
+                 .eq('code', orderDetails.coupon_code)
+                 .single();
+               
+               if (couponData) {
+                 await supabaseAdmin
+                   .from('coupons')
+                   .update({ times_used: (couponData.times_used || 0) + 1 })
+                   .eq('id', couponData.id);
+               }
+            }
+          }
         }
       }
       
