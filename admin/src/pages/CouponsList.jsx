@@ -14,7 +14,6 @@ export default function CouponsList() {
     code: '',
     discount_type: 'percentage',
     discount_value: '',
-    min_order_value: '0',
     valid_until: ''
   });
 
@@ -61,10 +60,9 @@ export default function CouponsList() {
         code: newCoupon.code.toUpperCase(),
         discount_type: newCoupon.discount_type,
         discount_value: Number(newCoupon.discount_value),
-        min_order_value: Number(newCoupon.min_order_value),
-        valid_until: newCoupon.valid_until ? new Date(newCoupon.valid_until).toISOString() : null,
+        expiry_date: newCoupon.valid_until ? new Date(newCoupon.valid_until).toISOString() : null,
         is_active: true,
-        usage_count: 0
+        times_used: 0
       };
 
       const { data, error } = await supabase
@@ -76,7 +74,7 @@ export default function CouponsList() {
       
       setCoupons([data[0], ...coupons]);
       setShowCreateModal(false);
-      setNewCoupon({ code: '', discount_type: 'percentage', discount_value: '', min_order_value: '0', valid_until: '' });
+      setNewCoupon({ code: '', discount_type: 'percentage', discount_value: '', valid_until: '' });
     } catch (err) {
       console.error('Error creating coupon:', err);
       alert('Failed to create coupon: ' + err.message);
@@ -230,16 +228,6 @@ export default function CouponsList() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Min Order Value (₹)</label>
-                  <input 
-                    type="number" 
-                    min="0"
-                    value={newCoupon.min_order_value}
-                    onChange={e => setNewCoupon({...newCoupon, min_order_value: e.target.value})}
-                    className="w-full border border-gray-300 rounded-md p-2 focus:outline-none focus:ring-2 focus:ring-black"
-                  />
-                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Valid Until (Optional)</label>
                   <input 

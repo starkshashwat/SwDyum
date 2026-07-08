@@ -74,11 +74,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
         
       if (error || !data) throw new Error('Invalid or expired coupon');
       
-      if (data.min_order_value && subtotal < data.min_order_value) {
-        throw new Error(`Minimum order value is ₹${data.min_order_value}`);
-      }
-      
-      if (data.valid_until && new Date(data.valid_until) < new Date()) {
+      if (data.expiry_date && new Date(data.expiry_date) < new Date()) {
         throw new Error('This coupon has expired');
       }
       
