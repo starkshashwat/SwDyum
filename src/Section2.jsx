@@ -15,7 +15,7 @@ function Section2() {
             <button className="promo-btn promo-btn-outline">Shop now</button>
           </div>
           <div className="promo-image-wrapper">
-            <img src="/promo1.png" alt="Mango Pickle" className="promo-img" />
+            <img src="/promo1.webp" alt="Mango Pickle" className="promo-img" />
           </div>
         </div>
 
@@ -28,7 +28,7 @@ function Section2() {
             <button className="promo-btn promo-btn-solid">Shop now</button>
           </div>
           <div className="promo-image-wrapper">
-            <img src="/promo2.png" alt="Spices and Pickles" className="promo-img" />
+            <img src="/promo2.webp" alt="Spices and Pickles" className="promo-img" />
           </div>
         </div>
       </div>
@@ -39,7 +39,7 @@ function Section2() {
           <div className="about-image-composition">
             {/* Green brush stroke background effect */}
             <div className="brush-stroke"></div>
-            <img src="/about_us.png" alt="Fresh Ingredients" className="about-main-img" />
+            <img src="/about_us.webp" alt="Fresh Ingredients" className="about-main-img" />
             <div className="fresh-badge">
               <span>100%<br/>Authentic</span>
             </div>

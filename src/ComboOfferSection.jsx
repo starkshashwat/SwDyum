@@ -11,7 +11,7 @@ const combos = [
     price: 999,
     oldPrice: 1187,
     save: 188,
-    image: '/banner.png', // Fallback to banner, assuming we don't have a dedicated combo box image yet
+    image: '/banner.webp', // Fallback to banner, assuming we don't have a dedicated combo box image yet
     popular: true
   },
   {
@@ -22,7 +22,7 @@ const combos = [
     price: 549,
     oldPrice: 598,
     save: 49,
-    image: '/prod_chili.png'
+    image: '/prod_chili.webp'
   }
 ];
 

@@ -8,35 +8,35 @@ const steps = [
     title: 'Sourcing Fresh Ingredients',
     description:
       'Hand-picked raw mangoes, lemons, green chillies, and garlic are sourced directly from Bihar farms — ensuring peak freshness and flavour.',
-    image: '/process_sourcing_1783263006944.png',
+    image: '/process_sourcing_1783263006944.webp',
   },
   {
     number: 2,
     title: 'Traditional Spice Grinding',
     description:
       'Turmeric, fenugreek, mustard seeds, and red chilli are stone-ground using the age-old silbatta method for a rich, aromatic masala.',
-    image: '/process_grinding_1783263018468.png',
+    image: '/process_grinding_1783263018468.webp',
   },
   {
     number: 3,
     title: 'Hand-Mixed in Mustard Oil',
     description:
       'Every ingredient is hand-mixed with raw cold-pressed mustard oil in brass vessels, infusing deep flavour into every bite.',
-    image: '/process_mixing_1783263028798.png',
+    image: '/process_mixing_1783263028798.webp',
   },
   {
     number: 4,
     title: 'Aged in Clay Martabans',
     description:
       'The pickle is packed into handmade earthen martabans and left to mature — just as Bihari grandmothers have done for generations.',
-    image: '/process_aging_1783263039730.png',
+    image: '/process_aging_1783263039730.webp',
   },
   {
     number: 5,
     title: 'Sun-Cured & Sealed Fresh',
     description:
       'Each batch is sun-cured for 21 days under direct Bihar sunlight, then carefully sealed and packaged to preserve its authentic taste.',
-    image: '/process_suncured_1783263051169.png',
+    image: '/process_suncured_1783263051169.webp',
   },
 ];
 
@@ -97,7 +97,7 @@ function ProcessSection() {
             style={{ y: branchY }}
           >
             <img
-              src="/branch_birds.png"
+              src="/branch_birds.webp"
               alt=""
               aria-hidden="true"
               className="decor-branch-img"
@@ -126,7 +126,7 @@ function ProcessSection() {
             style={{ y: cowY }}
           >
             <img
-              src="/desi_cow.png"
+              src="/desi_cow.webp"
               alt=""
               aria-hidden="true"
               className="decor-cow-img"

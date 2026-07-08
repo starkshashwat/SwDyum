@@ -24,7 +24,7 @@ function Footer({ onNavigate }) {
         {/* Brand & Mission */}
         <div className="footer-brand-col">
           <div className="footer-logo">
-            <img src="/logo-01.png" alt="Swadyum" className="footer-logo-img" />
+            <img src="/logo-01.webp" alt="Swadyum" className="footer-logo-img" />
           </div>
           <p className="footer-mission">
             Bringing the authentic taste, sun-cured heritage, and traditional spice secrets of Bihar straight to your dining table.

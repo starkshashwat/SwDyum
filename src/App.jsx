@@ -188,7 +188,7 @@ function App() {
           weight: weight,
           price: product.price || product.prices?.[weight] || product.base_price,
           quantity: qty,
-          image: product.image || product.images?.[0] || '/prod_mango.png',
+          image: product.image || product.images?.[0] || '/prod_mango.webp',
           subscription: subscription
         }];
       }

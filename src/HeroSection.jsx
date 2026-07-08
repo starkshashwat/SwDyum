@@ -5,7 +5,7 @@ import './HeroSection.css';
 const slides = [
   {
     id: 1,
-    image: '/hero_banner.png',
+    image: '/hero_banner.webp',
     headline: (
       <>
         Taste the <em>Heritage.</em> Feel the <em>Tradition.</em>
@@ -16,7 +16,7 @@ const slides = [
   },
   {
     id: 2,
-    image: '/banner.png',
+    image: '/banner.webp',
     headline: (
       <>
         Sun-Cured <em>Spices.</em> Timeless <em>Flavour.</em>
@@ -27,7 +27,7 @@ const slides = [
   },
   {
     id: 3,
-    image: '/editorial_spoon.png',
+    image: '/editorial_spoon.webp',
     headline: (
       <>
         From Our <em>Kitchen.</em> To Your <em>Table.</em>

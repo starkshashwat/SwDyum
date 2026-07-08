@@ -310,7 +310,7 @@ function OrderDetailsPage({ onNavigate, orderId, currentUser }) {
         <section className="invoice-print-sheet details-card">
           <div className="invoice-header">
             <div className="invoice-brand">
-              <img src="/logo-01.png" alt="Swadyum Logo" className="invoice-logo-img" />
+              <img src="/logo-01.webp" alt="Swadyum Logo" className="invoice-logo-img" />
               <p className="brand-tag">Artisanal Sun-Cured Heritage</p>
             </div>
             <div className="invoice-meta-info">

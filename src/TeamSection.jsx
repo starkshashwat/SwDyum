@@ -7,19 +7,19 @@ function TeamSection() {
       id: 1,
       name: 'Nora Bell',
       role: 'Founder & Artisan',
-      image: '/team_founder.png'
+      image: '/team_founder.webp'
     },
     {
       id: 2,
       name: 'Robert Leo',
       role: 'Master Spice Blender',
-      image: '/team_chef.png'
+      image: '/team_chef.webp'
     },
     {
       id: 3,
       name: 'Alisa Lisa',
       role: 'Lead Sourcer',
-      image: '/team_farmer.png'
+      image: '/team_farmer.webp'
     }
   ];
 

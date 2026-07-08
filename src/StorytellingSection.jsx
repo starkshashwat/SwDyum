@@ -40,7 +40,7 @@ function StorytellingSection() {
         <div className="story-image-side">
           <div className="image-wrapper">
             <img 
-              src="/process_suncured_1783263051169.png" 
+              src="/process_suncured_1783263051169.webp" 
               alt="Traditional sun-cured pickle preparation" 
               className="story-hero-img"
             />

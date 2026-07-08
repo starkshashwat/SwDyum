@@ -71,7 +71,7 @@ function Header({ currentPage = 'home', onNavigate, cartCount = 0, onOpenCart, c
             onClick={(e) => { e.preventDefault(); navigate('home'); }}
             aria-label="Swadyum Home"
           >
-            <img src="/logo-01.png" alt="Swadyum" className="logo-img" />
+            <img src="/logo-01.webp" alt="Swadyum" className="logo-img" />
           </a>
 
           {/* Desktop Nav */}

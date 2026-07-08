@@ -54,7 +54,7 @@ function AboutPage({ onNavigate }) {
       ════════════════════════════════════════════ */}
       <section className="about-hero">
         <div className="about-hero-inner">
-          <div className="about-hero-bg" style={{ backgroundImage: 'url(/about_us.png)' }} />
+          <div className="about-hero-bg" style={{ backgroundImage: 'url(/about_us.webp)' }} />
           <div className="about-hero-overlay" />
           <motion.div
             className="about-hero-content"
@@ -83,7 +83,7 @@ function AboutPage({ onNavigate }) {
               viewport={{ once: true, margin: '-50px' }}
               transition={{ duration: 0.6 }}
             >
-              <img src="/branch_birds.png" alt="Decorative branch" className="about-decor-branch" />
+              <img src="/branch_birds.webp" alt="Decorative branch" className="about-decor-branch" />
               <span className="about-eyebrow">Our Roots</span>
               <h2 className="about-heading">
                 Pure Heritage.<br/>
@@ -155,7 +155,7 @@ function AboutPage({ onNavigate }) {
         <div className="about-cta-inner">
           <div className="about-cta-card">
             <div className="about-cta-img-side">
-              <img src="/deal_scatter.png" alt="Swadyum pickles" className="about-cta-img" />
+              <img src="/deal_scatter.webp" alt="Swadyum pickles" className="about-cta-img" />
             </div>
             <div className="about-cta-content">
               <span className="about-cta-eyebrow">Experience Swadyum</span>

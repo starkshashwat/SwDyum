@@ -3,10 +3,10 @@ import './GallerySection.css';
 
 function GallerySection() {
   const galleryImages = [
-    '/gal_cut.png',
-    '/gal_mix.png',
-    '/prod_mango.png',
-    '/prod_chili.png'
+    '/gal_cut.webp',
+    '/gal_mix.webp',
+    '/prod_mango.webp',
+    '/prod_chili.webp'
   ];
 
   return (

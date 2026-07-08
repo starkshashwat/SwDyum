@@ -221,7 +221,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
         currency: 'INR',
         name: 'Swadyum',
         description: 'Authentic Bihari Pickles',
-        image: '/logo-01.png',
+        image: '/logo-01.webp',
         order_id: orderId,
         prefill: {
           name: formData.name,

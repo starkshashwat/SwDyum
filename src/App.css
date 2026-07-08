@@ -4,7 +4,7 @@
   width: 100%;
   min-height: 100vh;
   min-height: 100dvh;
-  background-image: url('/banner.png');
+  background-image: url('/banner.webp');
   background-size: cover;
   background-position: center right;
   background-repeat: no-repeat;

@@ -6,7 +6,7 @@ const pairings = [
     id: 1,
     title: "Achar + Paratha",
     subtitle: "A Classic Breakfast Ritual",
-    image: "/promo1.png",
+    image: "/promo1.webp",
     description: "Flaky, layered whole wheat parathas served hot with melting butter and a generous side of Swadyum Mango Pickle. The tang of green mango cuts perfectly through the rich ghee.",
     recipe: {
       prepTime: "10 mins",
@@ -20,7 +20,7 @@ const pairings = [
     id: 2,
     title: "Achar + Dal Chawal",
     subtitle: "Generational Comfort Food",
-    image: "/deal_scatter.png",
+    image: "/deal_scatter.webp",
     description: "Simple yellow toor dal and steamed basmati rice drizzled with hot ghee, elevated with a spoonful of Swadyum Garlic Pickle. Raw garlic notes unlock a punchy depth of flavor.",
     recipe: {
       prepTime: "20 mins",
@@ -34,7 +34,7 @@ const pairings = [
     id: 3,
     title: "Achar + Litti Chokha",
     subtitle: "The Ultimate Bihari Feast",
-    image: "/promo2.png",
+    image: "/promo2.webp",
     description: "Traditional baked sattu-stuffed littis dipped in melted ghee, served with roasted eggplant chokha and Swadyum Stuffed Red Chili Pickle. A spicy, smoky masterclass.",
     recipe: {
       prepTime: "45 mins",

@@ -9,14 +9,14 @@ const UPSELL_PRODUCTS = [
     slug: 'mango-pickle',
     name: 'Aam Ka Achar',
     price: 199,
-    image: '/prod_mango.png',
+    image: '/prod_mango.webp',
     weight: '250g'
   },
   {
     slug: 'garlic-pickle',
     name: 'Spicy Garlic Pickle',
     price: 249,
-    image: '/cat_mango.png',
+    image: '/cat_mango.webp',
     weight: '250g'
   }
 ];

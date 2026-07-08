@@ -29,7 +29,7 @@ function ReviewsPage({ onNavigate }) {
     <div className="reviews-page-wrapper">
       
       {/* 1. HERO BANNER */}
-      <section className="reviews-hero-section" style={{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.7)), url('/about_us.png')` }}>
+      <section className="reviews-hero-section" style={{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.7)), url('/about_us.webp')` }}>
         <div className="reviews-hero-container">
           <span className="reviews-hero-subtitle">~ Pure Customer Love ~</span>
           <h1 className="reviews-hero-title">Loved By Families Across India</h1>
@@ -113,7 +113,7 @@ function ReviewsPage({ onNavigate }) {
           <div className="video-reviews-grid">
             <div className="video-review-card">
               <div className="video-thumbnail-box">
-                <img src="/gal_cut.png" alt="Video review thumbnail 1" />
+                <img src="/gal_cut.webp" alt="Video review thumbnail 1" />
                 <span className="video-play-btn">▶</span>
               </div>
               <h4>"Pure nostalgia in a jar"</h4>
@@ -122,7 +122,7 @@ function ReviewsPage({ onNavigate }) {
 
             <div className="video-review-card">
               <div className="video-thumbnail-box">
-                <img src="/gal_mix.png" alt="Video review thumbnail 2" />
+                <img src="/gal_mix.webp" alt="Video review thumbnail 2" />
                 <span className="video-play-btn">▶</span>
               </div>
               <h4>"Like grandmas rooftop"</h4>
@@ -131,7 +131,7 @@ function ReviewsPage({ onNavigate }) {
 
             <div className="video-review-card">
               <div className="video-thumbnail-box">
-                <img src="/about_us.png" alt="Video review thumbnail 3" />
+                <img src="/about_us.webp" alt="Video review thumbnail 3" />
                 <span className="video-play-btn">▶</span>
               </div>
               <h4>"The perfect sattu pairing"</h4>
@@ -150,12 +150,12 @@ function ReviewsPage({ onNavigate }) {
           </div>
 
           <div className="ugc-gallery-grid">
-            <div className="ugc-item"><img src="/prod_mango.png" alt="Mango jar on table" /></div>
-            <div className="ugc-item"><img src="/deal_scatter.png" alt="Achar with parathas" /></div>
-            <div className="ugc-item"><img src="/cat_mixed.png" alt="Clay pot packing" /></div>
-            <div className="ugc-item"><img src="/prod_garlic.png" alt="Garlic cloves on brass plate" /></div>
-            <div className="ugc-item"><img src="/gal_cut.png" alt="Opening security seals" /></div>
-            <div className="ugc-item"><img src="/gal_mix.png" alt="Mango pickle slices up close" /></div>
+            <div className="ugc-item"><img src="/prod_mango.webp" alt="Mango jar on table" /></div>
+            <div className="ugc-item"><img src="/deal_scatter.webp" alt="Achar with parathas" /></div>
+            <div className="ugc-item"><img src="/cat_mixed.webp" alt="Clay pot packing" /></div>
+            <div className="ugc-item"><img src="/prod_garlic.webp" alt="Garlic cloves on brass plate" /></div>
+            <div className="ugc-item"><img src="/gal_cut.webp" alt="Opening security seals" /></div>
+            <div className="ugc-item"><img src="/gal_mix.webp" alt="Mango pickle slices up close" /></div>
           </div>
         </div>
       </section>

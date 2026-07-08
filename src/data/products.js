@@ -28,7 +28,7 @@ export const fetchProducts = async () => {
 
   // Transform data to match the expected format of the frontend
   return data.map(product => {
-    const primaryImage = product.product_images?.find(img => img.is_primary)?.url || product.product_images?.[0]?.url || '/prod_mango.png';
+    const primaryImage = product.product_images?.find(img => img.is_primary)?.url || product.product_images?.[0]?.url || '/prod_mango.webp';
     
     // Construct prices map from variants
     const pricesMap = {};
@@ -78,7 +78,7 @@ export const getProductBySlug = async (slug) => {
 
   // Sort images by display_order
   const sortedImages = (product.product_images || []).sort((a, b) => a.display_order - b.display_order);
-  const primaryImage = sortedImages.find(img => img.is_primary)?.url || sortedImages[0]?.url || '/prod_mango.png';
+  const primaryImage = sortedImages.find(img => img.is_primary)?.url || sortedImages[0]?.url || '/prod_mango.webp';
 
   // Construct prices map from variants
   const pricesMap = {};
@@ -131,7 +131,7 @@ export const getRelatedProducts = async (currentProductId, limit = 3) => {
   }
 
   return data.map(product => {
-    const primaryImage = product.product_images?.find(img => img.is_primary)?.url || product.product_images?.[0]?.url || '/prod_mango.png';
+    const primaryImage = product.product_images?.find(img => img.is_primary)?.url || product.product_images?.[0]?.url || '/prod_mango.webp';
     return {
       id: product.id,
       name: product.name,

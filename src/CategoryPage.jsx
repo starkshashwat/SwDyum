@@ -10,35 +10,35 @@ const categoriesData = {
     title: "Signature Bihari Pickles Collection",
     subtitle: "~ From Earthen Jars ~",
     story: "Explore our collection of traditional, sun-matured pickles made with cold-pressed mustard oil, local organic spices, and generational culinary techniques. Every recipe is rooted in regional culinary traditions.",
-    heroImage: "/banner.png"
+    heroImage: "/banner.webp"
   },
   "mango-pickle": {
     tag: "Mango",
     title: "Handcrafted Mango Pickles",
     subtitle: "~ Mithila Sun-Dried Summer Heritage ~",
     story: "Made with firm, green raw mangoes hand-sliced and sun-cured over weeks. Infused with coarse mustard seeds, kalonji, fennel, and cold-pressed mustard oil, this tangy delicacy represents the heart of Bihar's summers.",
-    heroImage: "/cat_mango.png"
+    heroImage: "/cat_mango.webp"
   },
   "garlic-pickle": {
     tag: "Garlic",
     title: "Mountain Garlic Pickles",
     subtitle: "~ Rich Winter Indulgence ~",
     story: "Carefully hand-peeled plump cloves of regional garlic cured in stone-ground spices and pure mustard oil. Its rich, warm flavor balances parathas, khichdi, and heavy winter meals.",
-    heroImage: "/cat_garlic.png"
+    heroImage: "/cat_garlic.webp"
   },
   "lemon-pickle": {
     tag: "Lemon",
     title: "Oil-Free Zesty Lemon Pickles",
     subtitle: "~ Aged Solar Softened Citrus ~",
     story: "Prepared entirely without oil, matured in glass jars under direct sunlight for forty days. Natural juices combine with carom seeds and rock salt to form a sweet, sour glaze that aids digestion.",
-    heroImage: "/prod_lemon.png"
+    heroImage: "/prod_lemon.webp"
   },
   "green-chilli-pickle": {
     tag: "Chilli",
     title: "Stuffed Green Chilli Pickles",
     subtitle: "~ Bold Spicy Heat ~",
     story: "Bold local green chillies, slit and stuffed with roasted spices, dry mango powder, and pure oil. Handcrafted in small batches for the ultimate spicy comfort.",
-    heroImage: "/prod_chili.png"
+    heroImage: "/prod_chili.webp"
   }
 };
 

@@ -26,7 +26,7 @@ function ContactPage() {
       ════════════════════════════════════════════ */}
       <section className="contact-hero">
         <div className="contact-hero-inner">
-          <div className="contact-hero-bg" style={{ backgroundImage: 'url(/about_us.png)' }} />
+          <div className="contact-hero-bg" style={{ backgroundImage: 'url(/about_us.webp)' }} />
           <div className="contact-hero-overlay" />
           <motion.div
             className="contact-hero-content"

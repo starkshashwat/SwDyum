@@ -88,7 +88,7 @@ function SignatureExperienceSection() {
   const brassRotate = useTransform(smoothProgress, [0, 1], [-30, 30]);
   const brassOpacity = useTransform(smoothProgress, [0, 0.15, 0.62, 0.82], [0, 0.9, 0.9, 0]);
 
-  // Center: Earthen Courtyard (gal_mix.png)
+  // Center: Earthen Courtyard (gal_mix.webp)
   const centralZ = useTransform(smoothProgress, [0, 0.35, 0.6, 0.8], [-250, 0, 60, 220]);
   const centralY = useTransform(smoothProgress, [0, 0.35, 0.6, 0.8], [40, 0, -25, -100]);
   const centralScale = useTransform(smoothProgress, [0, 0.35, 0.6, 0.8], [0.85, 1, 1.05, 0.9]);
@@ -96,7 +96,7 @@ function SignatureExperienceSection() {
   const centralBlurVal = useTransform(smoothProgress, [0, 0.22, 0.58, 0.78], [12, 0, 0, 10]);
   const centralFilter = useTransform(centralBlurVal, (v) => `blur(${v}px)`);
 
-  // Spices & Ingredients (deal_scatter.png) - Left Upper
+  // Spices & Ingredients (deal_scatter.webp) - Left Upper
   const spicesZ = useTransform(smoothProgress, [0.05, 0.35, 0.6, 0.8], [-350, -50, 30, 180]);
   const spicesX = useTransform(smoothProgress, [0.05, 0.35, 0.6, 0.8], [-80, -20, 15, 90]);
   const spicesY = useTransform(smoothProgress, [0.05, 0.35, 0.6, 0.8], [-55, 0, 25, 80]);
@@ -106,7 +106,7 @@ function SignatureExperienceSection() {
   const spicesBlurVal = useTransform(smoothProgress, [0.05, 0.25, 0.58, 0.75], [16, 0, 0, 8]);
   const spicesFilter = useTransform(spicesBlurVal, (v) => `blur(${v}px)`);
 
-  // Artisan Craftsmanship (about_us.png) - Right Upper
+  // Artisan Craftsmanship (about_us.webp) - Right Upper
   const artisanZ = useTransform(smoothProgress, [0.05, 0.35, 0.6, 0.8], [-300, -40, 50, 200]);
   const artisanX = useTransform(smoothProgress, [0.05, 0.35, 0.6, 0.8], [80, 20, -15, -90]);
   const artisanY = useTransform(smoothProgress, [0.05, 0.35, 0.6, 0.8], [45, 0, -25, -80]);
@@ -116,7 +116,7 @@ function SignatureExperienceSection() {
   const artisanBlurVal = useTransform(smoothProgress, [0.05, 0.25, 0.58, 0.75], [16, 0, 0, 8]);
   const artisanFilter = useTransform(artisanBlurVal, (v) => `blur(${v}px)`);
 
-  // Slicing Process (gal_cut.png) - Left Lower
+  // Slicing Process (gal_cut.webp) - Left Lower
   const farmZ = useTransform(smoothProgress, [0.15, 0.45, 0.65, 0.85], [-400, -100, 15, 220]);
   const farmX = useTransform(smoothProgress, [0.15, 0.45, 0.65, 0.85], [-100, -30, 10, 70]);
   const farmY = useTransform(smoothProgress, [0.15, 0.45, 0.65, 0.85], [75, 0, -25, -90]);
@@ -126,7 +126,7 @@ function SignatureExperienceSection() {
   const farmBlurVal = useTransform(smoothProgress, [0.1, 0.3, 0.58, 0.78], [18, 0, 0, 10]);
   const farmFilter = useTransform(farmBlurVal, (v) => `blur(${v}px)`);
 
-  // Closeup Jar (prod_mango.png) - Right Lower
+  // Closeup Jar (prod_mango.webp) - Right Lower
   const closeupZ = useTransform(smoothProgress, [0.15, 0.45, 0.65, 0.85], [-180, 20, 80, 250]);
   const closeupX = useTransform(smoothProgress, [0.15, 0.45, 0.65, 0.85], [100, 30, -10, -75]);
   const closeupY = useTransform(smoothProgress, [0.15, 0.45, 0.65, 0.85], [-85, 0, 35, 100]);
@@ -382,7 +382,7 @@ function SignatureExperienceSection() {
             <div className="brass-texture-overlay"></div>
           </motion.div>
 
-          {/* Collage Item 2: Central Earthen Kitchen (gal_mix.png) */}
+          {/* Collage Item 2: Central Earthen Kitchen (gal_mix.webp) */}
           <motion.div 
             className="collage-item item-central"
             style={{ 
@@ -395,13 +395,13 @@ function SignatureExperienceSection() {
             }}
           >
             <div className="image-frame">
-              <img src="/gal_mix.png" alt="Bihari pickle aging in courtyard" />
+              <img src="/gal_mix.webp" alt="Bihari pickle aging in courtyard" />
               <div className="shadow-overlay"></div>
             </div>
             <span className="image-label">Earthen Courtyard Jars</span>
           </motion.div>
 
-          {/* Collage Item 3: Ingredients & Spice Preparation (deal_scatter.png) */}
+          {/* Collage Item 3: Ingredients & Spice Preparation (deal_scatter.webp) */}
           <motion.div 
             className="collage-item item-ingredients"
             style={{ 
@@ -416,13 +416,13 @@ function SignatureExperienceSection() {
             }}
           >
             <div className="image-frame">
-              <img src="/deal_scatter.png" alt="Traditional spices and brass dishes" />
+              <img src="/deal_scatter.webp" alt="Traditional spices and brass dishes" />
               <div className="shadow-overlay"></div>
             </div>
             <span className="image-label">Stone Ground Spices</span>
           </motion.div>
 
-          {/* Collage Item 4: Artisan Craftsmanship (about_us.png) */}
+          {/* Collage Item 4: Artisan Craftsmanship (about_us.webp) */}
           <motion.div 
             className="collage-item item-artisan"
             style={{ 
@@ -437,13 +437,13 @@ function SignatureExperienceSection() {
             }}
           >
             <div className="image-frame">
-              <img src="/about_us.png" alt="Women handcrafting pickles" />
+              <img src="/about_us.webp" alt="Women handcrafting pickles" />
               <div className="shadow-overlay"></div>
             </div>
             <span className="image-label">Generational Recipes</span>
           </motion.div>
 
-          {/* Collage Item 5: Closeup Product (prod_mango.png) */}
+          {/* Collage Item 5: Closeup Product (prod_mango.webp) */}
           <motion.div 
             className="collage-item item-closeup"
             style={{ 
@@ -458,13 +458,13 @@ function SignatureExperienceSection() {
             }}
           >
             <div className="image-frame">
-              <img src="/prod_mango.png" alt="Rich mango pickle close up" />
+              <img src="/prod_mango.webp" alt="Rich mango pickle close up" />
               <div className="shadow-overlay"></div>
             </div>
             <span className="image-label">Swadyum Sun-Dried Jar</span>
           </motion.div>
 
-          {/* Collage Item 6: Slicing (gal_cut.png) */}
+          {/* Collage Item 6: Slicing (gal_cut.webp) */}
           <motion.div 
             className="collage-item item-farm"
             style={{ 
@@ -479,7 +479,7 @@ function SignatureExperienceSection() {
             }}
           >
             <div className="image-frame">
-              <img src="/gal_cut.png" alt="Raw mango preparation" />
+              <img src="/gal_cut.webp" alt="Raw mango preparation" />
               <div className="shadow-overlay"></div>
             </div>
             <span className="image-label">Artisanal Slicing</span>

@@ -9,7 +9,7 @@ const recipes = [
     productUsed: 'Mango Pickle',
     prepTime: '2 Weeks (Curing)',
     difficulty: 'Medium',
-    image: '/making_mango.png',
+    image: '/making_mango.webp',
     description: 'The authentic Bhojpur method of preparing our signature spicy, tangy raw mango pickle using hand-ground spices and pure mustard oil.',
     ingredients: [
       '1 kg Raw Green Mangoes (firm and sour)',
@@ -39,7 +39,7 @@ const recipes = [
     productUsed: 'Garlic Pickle',
     prepTime: '1 Week (Curing)',
     difficulty: 'Medium',
-    image: '/making_garlic.png',
+    image: '/making_garlic.webp',
     description: 'A robust, pungent pickle made by infusing whole garlic cloves with rich spices and cold-pressed mustard oil.',
     ingredients: [
       '500g Fresh Garlic (peeled)',
@@ -70,7 +70,7 @@ const recipes = [
     productUsed: 'Lemon Pickle',
     prepTime: '3-4 Weeks (Curing)',
     difficulty: 'Easy',
-    image: '/making_lemon.png',
+    image: '/making_lemon.webp',
     description: 'An oil-free, sweet and tangy pickle where fresh lemons are slow-cooked purely by the heat of the summer sun.',
     ingredients: [
       '1 kg Thin-skinned Yellow Lemons',
@@ -98,7 +98,7 @@ const recipes = [
     productUsed: 'Green Chilli Pickle',
     prepTime: '1 Week (Curing)',
     difficulty: 'Hard',
-    image: '/making_chilli.png',
+    image: '/making_chilli.webp',
     description: 'The classic North Indian Hari Mirch ka Achaar, where long green chillies are meticulously stuffed with a tangy mustard filling.',
     ingredients: [
       '500g Long Green Chillies (thick variety, mild heat)',
@@ -139,7 +139,7 @@ function RecipePage({ onNavigate }) {
       ════════════════════════════════════════════ */}
       <section className="recipe-hero">
         <div className="recipe-hero-banner">
-          <div className="recipe-hero-bg" style={{ backgroundImage: 'url(/deal_scatter.png)' }} />
+          <div className="recipe-hero-bg" style={{ backgroundImage: 'url(/deal_scatter.webp)' }} />
           <div className="recipe-hero-overlay" />
           <motion.div
             className="recipe-hero-content"

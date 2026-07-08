@@ -146,7 +146,7 @@ function ShopPage({ onNavigate, addToCart }) {
       ════════════════════════════════════════════ */}
       <section className="sp-hero">
         <div className="sp-hero-banner">
-          <div className="sp-hero-bg" style={{ backgroundImage: 'url(/banner.png)' }} />
+          <div className="sp-hero-bg" style={{ backgroundImage: 'url(/banner.webp)' }} />
           <div className="sp-hero-overlay" />
           <motion.div
             className="sp-hero-content"
@@ -326,7 +326,7 @@ function ShopPage({ onNavigate, addToCart }) {
         <div className="sp-bottom-cta-inner">
           <div className="sp-bottom-cta-card">
             <div className="sp-bottom-cta-img-side">
-              <img src="/deal_scatter.png" alt="Swadyum pickles" className="sp-bottom-cta-img" />
+              <img src="/deal_scatter.webp" alt="Swadyum pickles" className="sp-bottom-cta-img" />
             </div>
             <div className="sp-bottom-cta-content">
               <span className="sp-bottom-cta-eyebrow">Featured Collection</span>

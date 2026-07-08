@@ -64,7 +64,7 @@ function DealSection() {
         {/* Right Side: Image with badges */}
         <div className="deal-image-side">
           <div className="deal-image-wrapper">
-            <img src="/deal_scatter.png" alt="Fresh Ingredients" className="deal-img" />
+            <img src="/deal_scatter.webp" alt="Fresh Ingredients" className="deal-img" />
             
             {/* Badges pointing to image */}
             <div className="floating-badge badge-1">

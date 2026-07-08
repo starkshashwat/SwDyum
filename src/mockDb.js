@@ -31,7 +31,7 @@ const seedOrders = () => {
         customerId: "cust_01",
         date: "2026-06-15T10:30:00.000Z",
         items: [
-          { slug: "mango-pickle", name: "Swadyum Mango Pickle", weight: "250g", price: 289, quantity: 2, image: "/prod_mango.png" }
+          { slug: "mango-pickle", name: "Swadyum Mango Pickle", weight: "250g", price: 289, quantity: 2, image: "/prod_mango.webp" }
         ],
         subtotal: 578,
         shipping: 50,

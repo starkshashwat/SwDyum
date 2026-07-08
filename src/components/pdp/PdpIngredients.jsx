@@ -3,11 +3,11 @@ import { motion } from 'framer-motion';
 import './PdpIngredients.css';
 
 const defaultIngredients = [
-  { name: 'Raw Mango', img: '/cat_mango.png', benefit: 'Hand-plucked tender mangoes loaded with Vitamin C for natural tanginess.' },
-  { name: 'Mustard Oil', img: '/process_mixing_1783263028798.png', benefit: 'Cold-pressed Kachi Ghani oil preserving pungent aroma and healthy fats.' },
-  { name: 'Fennel (Saunf)', img: '/cat_spices.png', benefit: 'Aids digestion and provides a sweet, aromatic undertone.' },
-  { name: 'Turmeric', img: '/process_grinding_1783263018468.png', benefit: 'High in curcumin for immunity and a vibrant golden hue.' },
-  { name: 'Red Chili', img: '/making_chilli.png', benefit: 'Sun-dried Mathania chilies for deep color and authentic heat.' },
+  { name: 'Raw Mango', img: '/cat_mango.webp', benefit: 'Hand-plucked tender mangoes loaded with Vitamin C for natural tanginess.' },
+  { name: 'Mustard Oil', img: '/process_mixing_1783263028798.webp', benefit: 'Cold-pressed Kachi Ghani oil preserving pungent aroma and healthy fats.' },
+  { name: 'Fennel (Saunf)', img: '/cat_spices.webp', benefit: 'Aids digestion and provides a sweet, aromatic undertone.' },
+  { name: 'Turmeric', img: '/process_grinding_1783263018468.webp', benefit: 'High in curcumin for immunity and a vibrant golden hue.' },
+  { name: 'Red Chili', img: '/making_chilli.webp', benefit: 'Sun-dried Mathania chilies for deep color and authentic heat.' },
 ];
 
 function PdpIngredients({ ingredients = [] }) {

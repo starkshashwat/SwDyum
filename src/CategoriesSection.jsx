@@ -3,10 +3,10 @@ import { motion } from 'framer-motion';
 import './CategoriesSection.css';
 
 const categories = [
-  { slug: 'mango-pickle', title: 'Mango Pickle', subtitle: 'The timeless favorite', image: '/cat_mango.png' },
-  { slug: 'garlic-pickle', title: 'Garlic Pickle', subtitle: 'Bold & aromatic', image: '/cat_garlic.png' },
-  { slug: 'lemon-pickle', title: 'Lemon Pickle', subtitle: 'Tangy & refreshing', image: '/prod_lemon.png' },
-  { slug: 'green-chilli-pickle', title: 'Green Chilli', subtitle: 'For spice lovers', image: '/prod_chili.png' },
+  { slug: 'mango-pickle', title: 'Mango Pickle', subtitle: 'The timeless favorite', image: '/cat_mango.webp' },
+  { slug: 'garlic-pickle', title: 'Garlic Pickle', subtitle: 'Bold & aromatic', image: '/cat_garlic.webp' },
+  { slug: 'lemon-pickle', title: 'Lemon Pickle', subtitle: 'Tangy & refreshing', image: '/prod_lemon.webp' },
+  { slug: 'green-chilli-pickle', title: 'Green Chilli', subtitle: 'For spice lovers', image: '/prod_chili.webp' },
 ];
 
 const cardVariants = {

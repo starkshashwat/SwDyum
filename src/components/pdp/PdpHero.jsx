@@ -22,9 +22,9 @@ function PdpHero({
   // Gallery images: primary image + placeholders for lifestyle, texture, etc.
   const gallery = product ? [
     product.image, 
-    '/process_aging_1783263039730.png', 
-    '/prod_mango.png', 
-    '/editorial_spoon.png'
+    '/process_aging_1783263039730.webp', 
+    '/prod_mango.webp', 
+    '/editorial_spoon.webp'
   ] : [];
 
   const handleCheckDelivery = () => {
