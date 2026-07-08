@@ -166,7 +166,16 @@ function App() {
 
   const [cart, setCart] = useState(() => {
     const saved = localStorage.getItem('swadyum_cart');
-    return saved ? JSON.parse(saved) : [];
+    if (saved) {
+      try {
+        let parsed = JSON.parse(saved);
+        return parsed.map(item => ({
+          ...item,
+          image: item.image ? item.image.replace(/\.(png|jpg|jpeg)$/i, '.webp') : item.image
+        }));
+      } catch (e) {}
+    }
+    return [];
   });
 
   // Sync cart to localStorage

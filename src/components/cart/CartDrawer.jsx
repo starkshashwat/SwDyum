@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './CartDrawer.css';
 
@@ -36,6 +36,30 @@ export default function CartDrawer({ isOpen, onClose, cart, updateCartQty, remov
   const handleAddUpsell = (product) => {
     addToCart(product, product.weight, 1, 'One Time');
   };
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+      
+      const handlePopState = () => {
+        onClose();
+      };
+      
+      // Push a state so that back button doesn't leave the page immediately
+      window.history.pushState({ drawerOpen: true }, '');
+      window.addEventListener('popstate', handlePopState);
+      
+      return () => {
+        document.body.style.overflow = 'unset';
+        window.removeEventListener('popstate', handlePopState);
+        if (window.history.state?.drawerOpen) {
+           window.history.back();
+        }
+      };
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+  }, [isOpen, onClose]);
 
   return (
     <AnimatePresence>
