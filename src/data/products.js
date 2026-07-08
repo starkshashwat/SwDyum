@@ -28,7 +28,8 @@ export const fetchProducts = async () => {
 
   // Transform data to match the expected format of the frontend
   return data.map(product => {
-    const primaryImage = product.product_images?.find(img => img.is_primary)?.url || product.product_images?.[0]?.url || '/prod_mango.webp';
+    let primaryImage = product.product_images?.find(img => img.is_primary)?.url || product.product_images?.[0]?.url || '/prod_mango.webp';
+    primaryImage = primaryImage.replace(/\.png$/, '.webp');
     
     // Construct prices map from variants
     const pricesMap = {};
@@ -78,7 +79,8 @@ export const getProductBySlug = async (slug) => {
 
   // Sort images by display_order
   const sortedImages = (product.product_images || []).sort((a, b) => a.display_order - b.display_order);
-  const primaryImage = sortedImages.find(img => img.is_primary)?.url || sortedImages[0]?.url || '/prod_mango.webp';
+  let primaryImage = sortedImages.find(img => img.is_primary)?.url || sortedImages[0]?.url || '/prod_mango.webp';
+  primaryImage = primaryImage.replace(/\.png$/, '.webp');
 
   // Construct prices map from variants
   const pricesMap = {};
@@ -97,7 +99,7 @@ export const getProductBySlug = async (slug) => {
     description: product.description,
     short_description: product.short_description,
     image: primaryImage,
-    images: sortedImages.map(img => img.url),
+    images: sortedImages.map(img => img.url.replace(/\.png$/, '.webp')),
     category: product.categories?.name || 'Uncategorized',
     prices: pricesMap,
     base_price: product.base_price,
@@ -131,7 +133,8 @@ export const getRelatedProducts = async (currentProductId, limit = 3) => {
   }
 
   return data.map(product => {
-    const primaryImage = product.product_images?.find(img => img.is_primary)?.url || product.product_images?.[0]?.url || '/prod_mango.webp';
+    let primaryImage = product.product_images?.find(img => img.is_primary)?.url || product.product_images?.[0]?.url || '/prod_mango.webp';
+    primaryImage = primaryImage.replace(/\.png$/, '.webp');
     return {
       id: product.id,
       name: product.name,

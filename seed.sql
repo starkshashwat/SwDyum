@@ -44,19 +44,19 @@ SELECT id, 'Set of 4 (250g each)', 1196, 100 FROM public.products WHERE slug = '
 
 -- 4. Product Images
 INSERT INTO public.product_images (product_id, url, is_primary, display_order)
-SELECT id, '/prod_mango.png', true, 0 FROM public.products WHERE slug IN ('mango-pickle', 'kathal-pickle', 'mango-murabba');
+SELECT id, '/prod_mango.webp', true, 0 FROM public.products WHERE slug IN ('mango-pickle', 'kathal-pickle', 'mango-murabba');
 
 INSERT INTO public.product_images (product_id, url, is_primary, display_order)
-SELECT id, '/prod_garlic.png', true, 0 FROM public.products WHERE slug = 'garlic-pickle';
+SELECT id, '/prod_garlic.webp', true, 0 FROM public.products WHERE slug = 'garlic-pickle';
 
 INSERT INTO public.product_images (product_id, url, is_primary, display_order)
-SELECT id, '/prod_lemon.png', true, 0 FROM public.products WHERE slug IN ('amla-pickle', 'amla-murabba');
+SELECT id, '/prod_lemon.webp', true, 0 FROM public.products WHERE slug IN ('amla-pickle', 'amla-murabba');
 
 INSERT INTO public.product_images (product_id, url, is_primary, display_order)
-SELECT id, '/prod_chili.png', true, 0 FROM public.products WHERE slug = 'oal-pickle';
+SELECT id, '/prod_chili.webp', true, 0 FROM public.products WHERE slug = 'oal-pickle';
 
 INSERT INTO public.product_images (product_id, url, is_primary, display_order)
-SELECT id, '/cat_spices.png', true, 0 FROM public.products WHERE slug IN ('tisauri-snack', 'chaurauri-snack');
+SELECT id, '/cat_spices.webp', true, 0 FROM public.products WHERE slug IN ('tisauri-snack', 'chaurauri-snack');
 
 INSERT INTO public.product_images (product_id, url, is_primary, display_order)
-SELECT id, '/deal_scatter.png', true, 0 FROM public.products WHERE slug = 'heritage-assortment-box';
+SELECT id, '/deal_scatter.webp', true, 0 FROM public.products WHERE slug = 'heritage-assortment-box';
