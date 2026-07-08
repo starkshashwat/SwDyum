@@ -374,12 +374,15 @@ function App() {
         onSuccess={(profile) => {
           setCurrentUser(profile);
           setIsWaModalOpen(false);
+          alert("Login successfully!");
           // Resume pending action
           if (pendingCheckout) {
             if (pendingCheckout.type === 'checkout') {
-              handleNavigate('checkout');
+              setCurrentPage('checkout');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
             } else if (pendingCheckout.type === 'account') {
-              handleNavigate('account');
+              setCurrentPage('account');
+              window.scrollTo({ top: 0, behavior: 'smooth' });
             }
             setPendingCheckout(null);
           }
