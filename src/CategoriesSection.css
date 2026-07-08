@@ -24,11 +24,11 @@
 .cat-card:hover {
   transform: translateY(-5px);
   box-shadow: var(--shadow-card-hover);
-  border-color: var(--color-primary);
+  border-color: var(--color-chili);
 }
 
 .cat-card:focus-visible {
-  outline: 3px solid var(--color-primary);
+  outline: 3px solid var(--color-chili);
   outline-offset: 2px;
 }
 
@@ -81,13 +81,13 @@
   height: 36px;
   border-radius: 50%;
   background: rgba(47, 94, 59, 0.06);
-  color: var(--color-primary);
+  color: var(--color-chili);
   margin-top: var(--space-2);
   transition: all var(--duration-normal) var(--ease-out);
 }
 
 .cat-card:hover .cat-card-arrow {
-  background: var(--color-primary);
+  background: var(--color-chili);
   color: #FFFFFF;
   transform: translateX(4px);
 }

@@ -75,8 +75,8 @@
 
 .exit-pop-code-box {
   background-color: #f1f8f4;
-  border: 1px dashed var(--color-primary);
-  color: var(--color-primary);
+  border: 1px dashed var(--color-chili);
+  color: var(--color-chili);
   padding: 10px;
   border-radius: var(--radius-sm);
   font-size: 1.2rem;

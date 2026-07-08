@@ -64,11 +64,11 @@
 .blog-intro-header {
   text-align: center;
   padding: 8rem 5%;
-  background-color: var(--cream);
+  background-color: var(--color-bg);
 }
 
 .blog-subtitle {
-  color: var(--primary-green);
+  color: var(--color-leaf);
   font-size: 24px;
   font-family: 'Brush Script MT', cursive, sans-serif;
   font-style: italic;
@@ -79,7 +79,7 @@
 .blog-headline {
   font-size: 42px;
   font-weight: 800;
-  color: var(--dark-text);
+  color: var(--color-ink);
   line-height: 1.3;
   margin-bottom: 2rem;
 }

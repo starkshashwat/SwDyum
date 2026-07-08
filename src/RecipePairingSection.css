@@ -2,7 +2,7 @@
   position: relative;
   width: 100vw;
   padding: 10rem 0;
-  background-color: var(--cream);
+  background-color: var(--color-bg);
   overflow: hidden;
 }
 
@@ -19,10 +19,10 @@
 }
 
 .rp-eyebrow {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 700;
-  color: var(--premium-gold);
+  color: var(--color-mustard);
   letter-spacing: 4px;
   text-transform: uppercase;
   margin-bottom: 2rem;
@@ -30,19 +30,19 @@
 }
 
 .rp-headline {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 64px;
   font-weight: 800;
-  color: var(--dark-text);
+  color: var(--color-ink);
   line-height: 1.15;
   letter-spacing: -1.5px;
   margin-bottom: 2.5rem;
 }
 
 .rp-subtext {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 20px;
-  color: var(--muted-text);
+  color: var(--color-muted);
   line-height: 1.75;
   max-width: 650px;
   margin: 0 auto;
@@ -108,16 +108,16 @@
 }
 
 .pairing-tag {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 11px;
   font-weight: 700;
-  color: var(--premium-gold);
+  color: var(--color-mustard);
   letter-spacing: 2px;
   text-transform: uppercase;
 }
 
 .pairing-card-title {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 26px;
   font-weight: 800;
   letter-spacing: -0.5px;
@@ -133,9 +133,9 @@
 }
 
 .pairing-card-desc {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 16px;
-  color: var(--muted-text);
+  color: var(--color-muted);
   line-height: 1.6;
 }
 
@@ -165,10 +165,10 @@
 }
 
 .meta-badge {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 12px;
   font-weight: 700;
-  color: var(--primary-green);
+  color: var(--color-leaf);
   background-color: rgba(47, 94, 59, 0.05);
   border: 1.5px dashed rgba(47, 94, 59, 0.2);
   padding: 0.4rem 0.8rem;
@@ -182,10 +182,10 @@
 }
 
 .recipe-section-title {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 13px;
   font-weight: 750;
-  color: var(--premium-gold);
+  color: var(--color-mustard);
   letter-spacing: 1.5px;
   text-transform: uppercase;
 }
@@ -198,9 +198,9 @@
 }
 
 .ingredient-li {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 14px;
-  color: var(--dark-text);
+  color: var(--color-ink);
   font-weight: 600;
   display: flex;
   align-items: center;
@@ -208,19 +208,19 @@
 }
 
 .gold-bullet {
-  color: var(--premium-gold);
+  color: var(--color-mustard);
   font-size: 18px;
   line-height: 0;
 }
 
 .recipe-pairing-tip {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 14px;
-  color: var(--muted-text);
+  color: var(--color-muted);
   line-height: 1.5;
   background-color: rgba(248, 245, 240, 0.6);
   padding: 0.8rem 1rem;
-  border-left: 3px solid var(--premium-gold);
+  border-left: 3px solid var(--color-mustard);
   font-style: italic;
   font-weight: 500;
 }
@@ -284,7 +284,7 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background-color: var(--premium-gold);
+  background-color: var(--color-mustard);
   opacity: 0;
 }
 
@@ -345,19 +345,19 @@
 }
 
 .cta-heading {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 36px;
   font-weight: 800;
-  color: var(--dark-text);
+  color: var(--color-ink);
   letter-spacing: -1px;
 }
 
 .cta-collection-btn {
-  background-color: var(--primary-green);
+  background-color: var(--color-leaf);
   color: #ffffff;
   border: none;
   padding: 1.2rem 3rem;
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 17px;
   font-weight: 700;
   letter-spacing: 0.5px;
@@ -370,7 +370,7 @@
 }
 
 .cta-collection-btn:hover {
-  background-color: var(--premium-gold);
+  background-color: var(--color-mustard);
   color: #1F1F1F;
   transform: translateY(-2px);
   box-shadow: 0 15px 35px rgba(199, 154, 59, 0.3);

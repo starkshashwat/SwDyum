@@ -1,7 +1,7 @@
 .storytelling-section {
   width: 100vw;
   /* Warm textured paper-inspired background using linear gradients and a grain SVG as data URI */
-  background-color: var(--cream);
+  background-color: var(--color-bg);
   background-image: 
     linear-gradient(rgba(248, 245, 240, 0.95), rgba(248, 245, 240, 0.95)),
     url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.08'/%3E%3C/svg%3E");
@@ -96,10 +96,10 @@
 }
 
 .story-eyebrow {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 700;
-  color: var(--premium-gold);
+  color: var(--color-mustard);
   text-transform: uppercase;
   letter-spacing: 4px;
   margin-bottom: 2rem;
@@ -107,18 +107,18 @@
 }
 
 .story-headline {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 64px;
   font-weight: 800;
-  color: var(--dark-text);
+  color: var(--color-ink);
   line-height: 1.15;
   margin-bottom: 3rem;
 }
 
 .story-paragraphs p {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 20px;
-  color: var(--muted-text);
+  color: var(--color-muted);
   line-height: 1.8;
   margin-bottom: 2rem;
 }
@@ -140,7 +140,7 @@
   top: 10px;
   bottom: 20px;
   width: 2px;
-  background-color: var(--premium-gold);
+  background-color: var(--color-mustard);
   opacity: 0.3;
   transform-origin: top;
   transform: scaleY(0);
@@ -180,10 +180,10 @@
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background-color: var(--primary-green);
-  border: 2px solid var(--cream);
+  background-color: var(--color-leaf);
+  border: 2px solid var(--color-bg);
   transform: translateX(-4px);
-  box-shadow: 0 0 0 2px var(--premium-gold);
+  box-shadow: 0 0 0 2px var(--color-mustard);
 }
 
 .step-content {
@@ -195,20 +195,20 @@
 .step-num {
   font-size: 14px;
   font-weight: 700;
-  color: var(--premium-gold);
+  color: var(--color-mustard);
   letter-spacing: 1px;
 }
 
 .step-title {
   font-size: 18px;
   font-weight: 700;
-  color: var(--dark-text);
+  color: var(--color-ink);
   margin: 0;
 }
 
 .step-desc {
   font-size: 16px;
-  color: var(--muted-text);
+  color: var(--color-muted);
   margin: 0;
 }
 
@@ -230,11 +230,11 @@
 }
 
 .story-quote {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 42px;
   font-style: italic;
   font-weight: 600;
-  color: var(--primary-green);
+  color: var(--color-leaf);
   line-height: 1.4;
   position: relative;
   display: inline-block;
@@ -246,7 +246,7 @@
   position: absolute;
   width: 40px;
   height: 4px;
-  background-color: var(--premium-gold);
+  background-color: var(--color-mustard);
   top: 50%;
 }
 

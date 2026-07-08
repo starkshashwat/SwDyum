@@ -2,7 +2,7 @@
    REVIEWS PAGE STYLING
    ========================================== */
 .reviews-page-wrapper {
-  background-color: var(--cream);
+  background-color: var(--color-bg);
   width: 100%;
   min-height: 100vh;
   padding-top: 100px; /* Offset for sticky header */
@@ -34,7 +34,7 @@
 .reviews-hero-subtitle {
   font-family: 'Brush Script MT', cursive, sans-serif;
   font-size: 34px;
-  color: var(--premium-gold);
+  color: var(--color-mustard);
   margin-bottom: 0.8rem;
 }
 
@@ -91,7 +91,7 @@
 .metric-box h3 {
   font-size: 36px;
   font-weight: 800;
-  color: var(--primary-green);
+  color: var(--color-leaf);
   margin-bottom: 0.3rem;
 }
 
@@ -99,7 +99,7 @@
   font-size: 14px;
   font-weight: 700;
   text-transform: uppercase;
-  color: var(--premium-gold);
+  color: var(--color-mustard);
   letter-spacing: 1px;
 }
 
@@ -144,7 +144,7 @@
 }
 
 .stats-overall-card {
-  background: var(--cream);
+  background: var(--color-bg);
   border: 1.5px solid #EAE5DB;
   border-radius: 24px;
   padding: 3.5rem 2rem;
@@ -155,13 +155,13 @@
 .stats-overall-card h2 {
   font-size: 76px;
   font-weight: 800;
-  color: var(--primary-green);
+  color: var(--color-leaf);
   line-height: 1;
   letter-spacing: -2px;
 }
 
 .stars-rating-row {
-  color: var(--premium-gold);
+  color: var(--color-mustard);
   font-size: 24px;
   margin: 0.8rem 0;
   letter-spacing: 2px;
@@ -169,7 +169,7 @@
 
 .stats-overall-card p {
   font-size: 14px;
-  color: var(--muted-text);
+  color: var(--color-muted);
   font-weight: 500;
 }
 
@@ -189,7 +189,7 @@
   width: 60px;
   font-size: 13px;
   font-weight: 700;
-  color: var(--dark-text);
+  color: var(--color-ink);
 }
 
 .bar-track {
@@ -203,7 +203,7 @@
 
 .bar-fill {
   height: 100%;
-  background-color: var(--premium-gold);
+  background-color: var(--color-mustard);
   border-radius: 10px;
 }
 
@@ -211,7 +211,7 @@
   width: 40px;
   font-size: 13px;
   font-weight: 700;
-  color: var(--muted-text);
+  color: var(--color-muted);
   text-align: right;
 }
 
@@ -282,14 +282,14 @@
 .video-review-card h4 {
   font-size: 16px;
   font-weight: 800;
-  color: var(--dark-text);
+  color: var(--color-ink);
   margin-bottom: 0.5rem;
 }
 
 .video-review-card p {
   font-size: 13.5px;
   line-height: 1.6;
-  color: var(--muted-text);
+  color: var(--color-muted);
 }
 
 /* 5. UGC Media Gallery */
@@ -330,7 +330,7 @@
 
 .ugc-item:hover {
   transform: scale(1.03);
-  border-color: var(--premium-gold);
+  border-color: var(--color-mustard);
   box-shadow: 0 10px 25px rgba(199, 154, 59, 0.1);
 }
 
@@ -369,13 +369,13 @@
 .instagram-box h3 {
   font-size: 22px;
   font-weight: 800;
-  color: var(--dark-text);
+  color: var(--color-ink);
   margin-bottom: 0.8rem;
 }
 
 .instagram-box p {
   font-size: 15px;
-  color: var(--muted-text);
+  color: var(--color-muted);
   margin-bottom: 2rem;
   max-width: 500px;
   line-height: 1.6;
@@ -385,7 +385,7 @@
   height: 48px;
   padding: 0 32px;
   border-radius: 30px;
-  background-color: var(--primary-green);
+  background-color: var(--color-leaf);
   color: white;
   font-weight: 700;
   font-size: 14px;
@@ -435,7 +435,7 @@
 .feed-title {
   font-size: 22px;
   font-weight: 800;
-  color: var(--dark-text);
+  color: var(--color-ink);
   margin-bottom: 2rem;
   border-bottom: 2px solid #EAE5DB;
   padding-bottom: 0.8rem;
@@ -465,17 +465,17 @@
 .tc-author {
   font-size: 16px;
   font-weight: 700;
-  color: var(--dark-text);
+  color: var(--color-ink);
 }
 
 .tc-date {
   font-size: 13px;
-  color: var(--muted-text);
+  color: var(--color-muted);
   font-weight: 500;
 }
 
 .tc-stars {
-  color: var(--premium-gold);
+  color: var(--color-mustard);
   font-size: 13px;
   margin-bottom: 0.8rem;
   letter-spacing: 2px;
@@ -484,7 +484,7 @@
 .tc-text {
   font-size: 14.5px;
   line-height: 1.6;
-  color: var(--muted-text);
+  color: var(--color-muted);
   font-style: italic;
   font-weight: 500;
 }
@@ -501,7 +501,7 @@
 .submit-form-card h3 {
   font-size: 22px;
   font-weight: 800;
-  color: var(--dark-text);
+  color: var(--color-ink);
   margin-bottom: 2rem;
   letter-spacing: -0.5px;
 }
@@ -521,7 +521,7 @@
 .form-group-row label {
   font-size: 13px;
   font-weight: 700;
-  color: var(--dark-text);
+  color: var(--color-ink);
   text-transform: uppercase;
   letter-spacing: 1px;
 }
@@ -533,9 +533,9 @@
   padding: 14px;
   border: 2px solid #EAE5DB;
   border-radius: 10px;
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 15px;
-  color: var(--dark-text);
+  color: var(--color-ink);
   background-color: #FAF9F6;
   transition: all 0.3s ease;
 }
@@ -544,7 +544,7 @@
 .form-field-select:focus,
 .form-field-area:focus {
   outline: none;
-  border-color: var(--primary-green);
+  border-color: var(--color-leaf);
   background-color: white;
 }
 
@@ -556,7 +556,7 @@
 .submit-review-form-btn {
   height: 52px;
   border: none;
-  background-color: var(--primary-green);
+  background-color: var(--color-leaf);
   color: white;
   border-radius: 10px;
   font-weight: 700;
@@ -584,7 +584,7 @@
   height: 60px;
   border-radius: 50%;
   background-color: rgba(47, 94, 59, 0.08);
-  color: var(--primary-green);
+  color: var(--color-leaf);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -596,12 +596,12 @@
 .review-submit-success-state h4 {
   font-size: 20px;
   font-weight: 800;
-  color: var(--dark-text);
+  color: var(--color-ink);
   margin-bottom: 0.5rem;
 }
 
 .review-submit-success-state p {
   font-size: 15px;
-  color: var(--muted-text);
+  color: var(--color-muted);
   line-height: 1.6;
 }

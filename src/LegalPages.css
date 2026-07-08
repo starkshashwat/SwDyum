@@ -2,7 +2,7 @@
   padding: 120px 20px 60px;
   min-height: 80vh;
   background-color: var(--color-background);
-  color: var(--color-text);
+  color: var(--color-ink);
 }
 
 .legal-container {
@@ -18,7 +18,7 @@
 .legal-title {
   font-family: var(--font-heading);
   font-size: 2.5rem;
-  color: var(--color-primary);
+  color: var(--color-chili);
   margin-bottom: 5px;
   text-align: center;
 }
@@ -44,7 +44,7 @@
 
 .legal-section h2 {
   font-family: var(--font-heading);
-  color: var(--color-primary);
+  color: var(--color-chili);
   font-size: 1.5rem;
   margin-bottom: 15px;
   border-bottom: 1px solid #eee;

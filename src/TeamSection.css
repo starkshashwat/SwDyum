@@ -10,7 +10,7 @@
 }
 
 .team-subtitle {
-  color: var(--primary-green);
+  color: var(--color-leaf);
   font-size: 24px;
   font-family: 'Brush Script MT', cursive, sans-serif;
   font-style: italic;
@@ -21,7 +21,7 @@
 .team-headline {
   font-size: 42px;
   font-weight: 800;
-  color: var(--dark-text);
+  color: var(--color-ink);
   line-height: 1.3;
 }
 
@@ -72,13 +72,13 @@
 .team-name {
   font-size: 24px;
   font-weight: 800;
-  color: var(--dark-text);
+  color: var(--color-ink);
   margin-bottom: 0.5rem;
 }
 
 .team-role {
   font-size: 16px;
-  color: var(--primary-green);
+  color: var(--color-leaf);
   font-weight: 600;
 }
 

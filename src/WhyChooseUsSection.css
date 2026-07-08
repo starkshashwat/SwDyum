@@ -54,13 +54,13 @@
 .feature-title {
   font-size: 18px;
   font-weight: 800;
-  color: var(--dark-text);
+  color: var(--color-ink);
   margin-bottom: 0.8rem;
 }
 
 .feature-desc {
   font-size: 14px;
-  color: var(--muted-text);
+  color: var(--color-muted);
   line-height: 1.6;
 }
 
@@ -70,7 +70,7 @@
 }
 
 .why-subtitle {
-  color: var(--primary-green);
+  color: var(--color-leaf);
   font-size: 24px;
   font-family: 'Brush Script MT', cursive, sans-serif;
   font-style: italic;
@@ -81,14 +81,14 @@
 .why-headline {
   font-size: 42px;
   font-weight: 800;
-  color: var(--dark-text);
+  color: var(--color-ink);
   line-height: 1.2;
   margin-bottom: 2rem;
 }
 
 .why-text {
   font-size: 16px;
-  color: var(--muted-text);
+  color: var(--color-muted);
   line-height: 1.8;
   margin-bottom: 1.5rem;
 }
@@ -136,7 +136,7 @@
 .stat-number {
   font-size: 36px;
   font-weight: 800;
-  color: var(--dark-text);
+  color: var(--color-ink);
   line-height: 1;
   margin-bottom: 0.2rem;
 }
@@ -148,7 +148,7 @@
 .stat-label {
   font-size: 14px;
   font-weight: 600;
-  color: var(--muted-text);
+  color: var(--color-muted);
 }
 
 /* Responsive */

@@ -2,7 +2,7 @@
   position: relative;
   width: 100vw;
   padding: 10rem 0;
-  background-color: var(--cream);
+  background-color: var(--color-bg);
   overflow: hidden;
 }
 
@@ -19,7 +19,7 @@
 
 .bg-sketch {
   position: absolute;
-  color: var(--premium-gold);
+  color: var(--color-mustard);
   opacity: 0.035;
   transition: opacity 0.5s ease;
 }
@@ -62,10 +62,10 @@
 }
 
 .benefits-eyebrow {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 14px;
   font-weight: 700;
-  color: var(--premium-gold);
+  color: var(--color-mustard);
   letter-spacing: 4px;
   text-transform: uppercase;
   margin-bottom: 2rem;
@@ -73,19 +73,19 @@
 }
 
 .benefits-headline {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 64px;
   font-weight: 800;
-  color: var(--dark-text);
+  color: var(--color-ink);
   line-height: 1.15;
   letter-spacing: -1.5px;
   margin-bottom: 2.5rem;
 }
 
 .benefits-subtext {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 20px;
-  color: var(--muted-text);
+  color: var(--color-muted);
   line-height: 1.75;
   max-width: 650px;
   margin: 0 auto;
@@ -169,17 +169,17 @@
 }
 
 .benefit-title {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 24px;
   font-weight: 700;
-  color: var(--dark-text);
+  color: var(--color-ink);
   letter-spacing: -0.5px;
 }
 
 .benefit-description {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 17px;
-  color: var(--muted-text);
+  color: var(--color-muted);
   line-height: 1.65;
 }
 
@@ -414,21 +414,21 @@
 .benefits-footer .divider-line {
   width: 140px;
   height: 1px;
-  background: linear-gradient(to right, transparent, var(--premium-gold), transparent);
+  background: linear-gradient(to right, transparent, var(--color-mustard), transparent);
 }
 
 .benefits-footer .divider-diamond {
   width: 8px;
   height: 8px;
-  background-color: var(--premium-gold);
+  background-color: var(--color-mustard);
   transform: rotate(45deg);
 }
 
 .footer-statement {
-  font-family: var(--font-family);
+  font-family: var(--font-body);
   font-size: 22px;
   font-weight: 600;
-  color: var(--primary-green);
+  color: var(--color-leaf);
   letter-spacing: -0.2px;
 }
 
