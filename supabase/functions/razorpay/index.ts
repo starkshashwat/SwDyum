@@ -33,7 +33,8 @@ async function createRazorpayOrder(amount: number, receipt: string) {
     throw new Error(`Failed to create order: ${response.statusText}`);
   }
 
-  return await response.json();
+  const orderData = await response.json();
+  return { ...orderData, key_id: keyId };
 }
 
 async function verifyPaymentSignature(orderId: string, paymentId: string, signature: string) {

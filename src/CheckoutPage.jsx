@@ -165,7 +165,16 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
       created_at: new Date().toISOString()
     };
 
-    const { error: orderError } = await supabase.from('orders').insert([orderData]);
+    let { error: orderError } = await supabase.from('orders').insert([orderData]);
+    
+    // Fallback: If profile doesn't exist in DB (e.g. Google Auth without trigger), 
+    // the foreign key constraint will fail. Retry anonymously.
+    if (orderError && orderError.message && orderError.message.includes('orders_customer_id_fkey')) {
+      orderData.customer_id = null;
+      const retry = await supabase.from('orders').insert([orderData]);
+      orderError = retry.error;
+    }
+
     if (orderError) throw orderError;
     
     const orderItems = cart.map(item => ({
@@ -202,14 +211,13 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
       if (data?.error) throw new Error(data.error);
 
       const rzpOrderId = data.order.id;
+      const backendKeyId = data.order.key_id;
       
       setProcessingStep('Creating order...');
       const internalOrderId = await createPendingOrder(rzpOrderId);
 
-      const keyId = import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_YourTestKeyId'; 
-
       const options = {
-        key: keyId,
+        key: backendKeyId,
         amount: Math.round(total * 100),
         currency: 'INR',
         name: 'Swadyum',
