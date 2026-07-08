@@ -98,19 +98,19 @@ export default function WhatsAppLoginModal({ isOpen, onClose, onSuccess }) {
   return (
     <AnimatePresence>
       {isOpen && (
-        <>
-          <motion.div 
-            className="wa-modal-overlay"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-          />
+        <motion.div 
+          className="wa-modal-overlay"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          onClick={onClose}
+        >
           <motion.div 
             className="wa-modal-container"
-            initial={{ opacity: 0, scale: 0.95, y: "-40%", x: "0" }}
-            animate={{ opacity: 1, scale: 1, y: "0", x: "0" }}
-            exit={{ opacity: 0, scale: 0.95, y: "-40%", x: "0" }}
+            onClick={(e) => e.stopPropagation()}
+            initial={{ opacity: 0, scale: 0.95, y: -20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: -20 }}
           >
             <button className="wa-modal-close" onClick={onClose}>
               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -204,7 +204,7 @@ export default function WhatsAppLoginModal({ isOpen, onClose, onSuccess }) {
               </form>
             )}
           </motion.div>
-        </>
+        </motion.div>
       )}
     </AnimatePresence>
   );

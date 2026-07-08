@@ -67,7 +67,7 @@
 }
 
 .wa-modal-title {
-  font-family: 'Fraunces', serif;
+  font-family: var(--font-heading);
   font-size: 2rem;
   color: #2D2321;
   margin-bottom: 12px;
@@ -76,7 +76,7 @@
 }
 
 .wa-modal-subtitle {
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-body);
   font-size: 1rem;
   color: #5C5553;
   line-height: 1.5;
@@ -134,7 +134,7 @@
   color: #2D2321;
   outline: none;
   width: 100%;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-body);
   font-weight: 500;
 }
 
@@ -196,7 +196,7 @@
   transition: all 0.2s ease;
   box-shadow: 0 4px 12px rgba(193, 64, 43, 0.3);
   margin-top: 12px;
-  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-family: var(--font-body);
 }
 
 .wa-submit-btn:hover:not(:disabled) {
