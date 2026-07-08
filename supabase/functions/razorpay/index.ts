@@ -109,7 +109,7 @@ serve(async (req) => {
     }
 
     // --- Webhook Handling ---
-    if (body.event === 'payment.captured' || body.event === 'order.paid') {
+    if (body.entity === 'event') {
       const signature = req.headers.get('x-razorpay-signature');
       if (!signature) {
         return new Response('Missing signature', { status: 400 });
@@ -120,34 +120,38 @@ serve(async (req) => {
         return new Response('Invalid signature', { status: 400 });
       }
 
-      // Initialize Supabase admin client to bypass RLS
-      const supabaseAdmin = createClient(
-        Deno.env.get('SUPABASE_URL') ?? '',
-        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-      );
+      if (body.event === 'payment.captured' || body.event === 'order.paid') {
+        // Initialize Supabase admin client to bypass RLS
+        const supabaseAdmin = createClient(
+          Deno.env.get('SUPABASE_URL') ?? '',
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+        );
 
-      let orderId, paymentId;
+        let orderId, paymentId;
 
-      if (body.event === 'payment.captured') {
-        const payment = body.payload.payment.entity;
-        orderId = payment.order_id;
-        paymentId = payment.id;
-      } else if (body.event === 'order.paid') {
-        const order = body.payload.order.entity;
-        orderId = order.id;
-      }
+        if (body.event === 'payment.captured') {
+          const payment = body.payload.payment.entity;
+          orderId = payment.order_id;
+          paymentId = payment.id;
+        } else if (body.event === 'order.paid') {
+          const order = body.payload.order.entity;
+          orderId = order.id;
+        }
 
-      if (orderId) {
-        const { error } = await supabaseAdmin
-          .from('orders')
-          .update({ status: 'Paid', payment_id: paymentId })
-          .eq('payment_id', orderId);
+        if (orderId) {
+          const { error } = await supabaseAdmin
+            .from('orders')
+            .update({ status: 'Paid', payment_id: paymentId })
+            .eq('payment_id', orderId);
 
-        if (error) {
-          console.error('Error updating order:', error);
-          return new Response('Database error', { status: 500 });
+          if (error) {
+            console.error('Error updating order:', error);
+            return new Response('Database error', { status: 500 });
+          }
         }
       }
+      
+      // Always return 200 OK for valid webhooks to prevent Razorpay from retrying/disabling
       return new Response('ok', { status: 200, headers: corsHeaders });
     }
 
