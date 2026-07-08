@@ -101,6 +101,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
       payment_method: 'Online / Razorpay',
       payment_id: razorpayOrderId, // Temporarily store RZP Order ID here
       shipping_details: shippingDetails,
+      items: cart, // Added items to satisfy NOT NULL constraint
       status: 'Pending',
       created_at: new Date().toISOString()
     };
