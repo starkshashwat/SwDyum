@@ -26,7 +26,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
     city: currentUser?.city || '',
     state: currentUser?.state || '',
     zip: currentUser?.zip || '',
-    paymentMethod: 'cod',
+    paymentMethod: 'online',
   });
 
   const [formErrors, setFormErrors] = useState({});
@@ -292,11 +292,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
     e.preventDefault();
     if (!validateForm()) return;
 
-    if (formData.paymentMethod === 'cod') {
-      await handleCodFlow();
-    } else {
-      await handlePrepaidFlow();
-    }
+    await handlePrepaidFlow();
   };
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -538,10 +534,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
 
                 <div className="payment-options-list">
                   {[
-                    { value: 'cod', icon: '💵', label: 'Cash on Delivery', desc: 'Pay cash when your package arrives' },
-                    { value: 'upi', icon: '📱', label: 'UPI (PhonePe / GPay / Paytm)', desc: 'Instant payment via Razorpay' },
-                    { value: 'card', icon: '💳', label: 'Credit / Debit Card', desc: 'Visa, Mastercard, RuPay — via Razorpay' },
-                    { value: 'netbanking', icon: '🏦', label: 'Net Banking', desc: 'All major banks supported — via Razorpay' },
+                    { value: 'online', icon: '🔒', label: 'Secure Online Payment', desc: 'UPI, Cards, NetBanking via Razorpay' },
                   ].map((method) => (
                     <label
                       key={method.value}

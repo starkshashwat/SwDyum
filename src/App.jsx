@@ -25,7 +25,7 @@ import SignupPage from './SignupPage';
 import ForgotPasswordPage from './ForgotPasswordPage';
 import AccountPage from './AccountPage';
 import OrderDetailsPage from './OrderDetailsPage';
-import SalesPop from './SalesPop';
+
 import CartDrawer from './components/cart/CartDrawer';
 import WhatsAppLoginModal from './components/auth/WhatsAppLoginModal';
 import PrivacyPolicyPage from './PrivacyPolicyPage';
@@ -371,7 +371,7 @@ function App() {
       )}
 
       <Footer onNavigate={handleNavigate} />
-      <SalesPop />
+
       <WhatsAppLoginModal 
         isOpen={isWaModalOpen} 
         onClose={() => {
