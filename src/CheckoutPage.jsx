@@ -146,6 +146,9 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
     const orderData = {
       id: orderId,
       customer_id: customerId,
+      customer_name: formData.name,
+      customer_email: formData.email,
+      customer_phone: formData.phone,
       subtotal,
       shipping_fee: shippingFee,
       cod_fee: 0,
@@ -153,11 +156,15 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
       total,
       payment_method: 'Online / Razorpay',
       payment_id: razorpayOrderId, // Temporarily store RZP Order ID here
+      razorpay_order_id: razorpayOrderId,
       shipping_details: shippingDetails,
-      shipping: shippingFee, // Added to satisfy NOT NULL constraint on manual column
+      billing_details: shippingDetails, // Same as shipping for now
+      shipping: shippingFee,
       coupon_code: appliedCoupon ? appliedCoupon.code : null,
-      items: cart, // Added items to satisfy NOT NULL constraint
+      items: cart,
       status: 'Pending',
+      payment_status: 'Pending',
+      order_status: 'Pending',
       created_at: new Date().toISOString()
     };
 
@@ -177,14 +184,39 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
       order_id: orderId,
       product_name: item.name,
       weight_label: item.weight,
+      sku: item.sku || '',
       subscription_type: item.subscription,
       quantity: item.quantity,
       unit_price: item.price,
-      total_price: item.price * item.quantity
+      total_price: item.price * item.quantity,
+      final_price: item.price * item.quantity
     }));
     
     const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
     if (itemsError) throw itemsError;
+
+    // Save address for future orders if user is logged in
+    if (currentUser && currentUser.id) {
+      try {
+        const { data: existingAddrs } = await supabase.from('addresses')
+          .select('id').eq('customer_id', currentUser.id);
+        if (!existingAddrs || existingAddrs.length === 0) {
+          await supabase.from('addresses').insert([{
+            customer_id: currentUser.id,
+            label: 'Home',
+            full_name: formData.name,
+            phone: formData.phone,
+            email: formData.email,
+            street: formData.address,
+            city: formData.city,
+            state: formData.state,
+            pin_code: formData.zip,
+            country: 'India',
+            is_default: true
+          }]);
+        }
+      } catch (e) { /* Address save is non-critical */ }
+    }
 
     return orderId;
   };

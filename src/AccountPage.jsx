@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './AccountPage.css';
-import { mockDb } from './mockDb';
 import { supabase } from './supabaseClient';
+import AddressManager from './AddressManager';
 
 function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
   const [activeTab, setActiveTab] = useState('profile');
@@ -18,24 +18,31 @@ function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
   const [profileSuccess, setProfileSuccess] = useState(false);
   const [profileError, setProfileError] = useState('');
 
-  // Address Form States
-  const [addressData, setAddressData] = useState({
-    address: currentUser?.address || '',
-    city: currentUser?.city || '',
-    state: currentUser?.state || '',
-    zip: currentUser?.zip || ''
-  });
-  const [addressSuccess, setAddressSuccess] = useState(false);
-  const [addressError, setAddressError] = useState('');
-
   // Fetch orders on load or tab change
   useEffect(() => {
     const fetchOrders = async () => {
-      if (currentUser) {
-        const customerOrders = await mockDb.getOrdersByCustomer(currentUser.id);
-        // Sort orders by date descending
-        customerOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
-        setOrders(customerOrders);
+      if (currentUser && activeTab === 'orders') {
+        const { data: customerOrders, error } = await supabase
+          .from('orders')
+          .select(`
+            id,
+            created_at,
+            status,
+            order_status,
+            payment_status,
+            total,
+            order_items (
+              product_name,
+              weight_label,
+              quantity
+            )
+          `)
+          .eq('customer_id', currentUser.id)
+          .order('created_at', { ascending: false });
+
+        if (!error && customerOrders) {
+          setOrders(customerOrders);
+        }
       }
     };
     fetchOrders();
@@ -46,54 +53,27 @@ function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
     setProfileSuccess(false);
     setProfileError('');
 
-    if (!profileData.name.trim() || !profileData.email.trim() || !profileData.phone.trim()) {
-      setProfileError('All profile fields are required.');
+    if (!profileData.name.trim() || !profileData.phone.trim()) {
+      setProfileError('Name and phone fields are required.');
       return;
     }
 
-    const updated = await mockDb.updateCustomer(currentUser.id, {
-      name: profileData.name,
-      email: profileData.email,
-      phone: profileData.phone
-    });
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({
+        name: profileData.name,
+        phone: profileData.phone
+      })
+      .eq('id', currentUser.id)
+      .select()
+      .single();
 
-    if (updated && !updated.error) {
-      setCurrentUser(updated);
+    if (!error && data) {
+      setCurrentUser(data);
       setProfileSuccess(true);
       setTimeout(() => setProfileSuccess(false), 3000);
     } else {
-      setProfileError(updated?.error || 'Failed to update profile.');
-    }
-  };
-
-  const handleAddressSubmit = async (e) => {
-    e.preventDefault();
-    setAddressSuccess(false);
-    setAddressError('');
-
-    if (!addressData.address.trim() || !addressData.city.trim() || !addressData.state.trim() || !addressData.zip.trim()) {
-      setAddressError('All address fields are required.');
-      return;
-    }
-
-    if (!/^\d{6}$/.test(addressData.zip)) {
-      setAddressError('ZIP/PIN code must be exactly 6 digits.');
-      return;
-    }
-
-    const updated = await mockDb.updateCustomer(currentUser.id, {
-      address: addressData.address,
-      city: addressData.city,
-      state: addressData.state,
-      zip: addressData.zip
-    });
-
-    if (updated) {
-      setCurrentUser(updated);
-      setAddressSuccess(true);
-      setTimeout(() => setAddressSuccess(false), 3000);
-    } else {
-      setAddressError('Failed to update address.');
+      setProfileError(error?.message || 'Failed to update profile.');
     }
   };
 
@@ -167,7 +147,7 @@ function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
                 {currentUser?.name ? currentUser.name.charAt(0).toUpperCase() : 'U'}
               </div>
               <h3 className="user-sidebar-name">{currentUser?.name}</h3>
-              <span className="user-sidebar-role">Artisanal Collector</span>
+              <span className="user-sidebar-role">Customer</span>
             </div>
 
             <nav className="sidebar-nav-menu">
@@ -182,7 +162,6 @@ function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
                 onClick={() => setActiveTab('orders')}
               >
                 <span className="sidebar-nav-icon">🏺</span> Order History
-                {orders.length > 0 && <span className="sidebar-order-badge">{orders.length}</span>}
               </button>
               <button 
                 className={`sidebar-nav-item ${activeTab === 'addresses' ? 'active' : ''}`}
@@ -216,7 +195,7 @@ function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
                 <p className="tab-description">Update your personal contact details below to keep your records updated.</p>
                 <div className="tab-divider"></div>
 
-                {(!currentUser?.name || !currentUser?.email) && (
+                {(!currentUser?.name) && (
                   <div className="incomplete-profile-banner">
                     <div className="banner-icon-container">
                       <svg className="banner-icon" viewBox="0 0 20 20" fill="currentColor">
@@ -225,7 +204,7 @@ function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
                     </div>
                     <div className="banner-content">
                       <p className="banner-text">
-                        Please complete your profile to continue. We need your Full Name and Email Address.
+                        Please complete your profile. We need your Full Name.
                       </p>
                     </div>
                   </div>
@@ -254,7 +233,9 @@ function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
                         type="email" 
                         id="profile-email" 
                         value={profileData.email}
-                        onChange={(e) => setProfileData(prev => ({ ...prev, email: e.target.value }))}
+                        disabled
+                        className="bg-gray-100 cursor-not-allowed opacity-70"
+                        title="Email cannot be changed"
                       />
                     </div>
                     <div className="tab-form-group">
@@ -303,29 +284,32 @@ function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
                         </tr>
                       </thead>
                       <tbody>
-                        {orders.map((order) => (
-                          <tr key={order.id}>
-                            <td className="order-id-cell">#{order.id}</td>
-                            <td>{formatDate(order.date)}</td>
-                            <td>
-                              <span className={`status-badge ${order.status.toLowerCase()}`}>
-                                {order.status}
-                              </span>
-                            </td>
-                            <td className="order-items-cell">
-                              {order.items.map(item => `${item.name} (${item.weight})`).join(', ')}
-                            </td>
-                            <td className="order-total-cell">₹{order.total}</td>
-                            <td className="action-cell">
-                              <button 
-                                className="order-details-view-btn"
-                                onClick={() => onNavigate(`order-details-${order.id}`)}
-                              >
-                                View Details ➔
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
+                        {orders.map((order) => {
+                          const status = order.order_status || order.status;
+                          return (
+                            <tr key={order.id}>
+                              <td className="order-id-cell font-mono text-xs">#{order.id.split('-').slice(-2).join('-')}</td>
+                              <td>{formatDate(order.created_at)}</td>
+                              <td>
+                                <span className={`status-badge ${status.toLowerCase()}`}>
+                                  {status}
+                                </span>
+                              </td>
+                              <td className="order-items-cell text-sm">
+                                {order.order_items ? order.order_items.map(item => `${item.product_name} (${item.quantity}x)`).join(', ') : 'N/A'}
+                              </td>
+                              <td className="order-total-cell font-bold">₹{order.total}</td>
+                              <td className="action-cell">
+                                <button 
+                                  className="order-details-view-btn"
+                                  onClick={() => onNavigate(`order-details-${order.id}`)}
+                                >
+                                  View Details ➔
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -336,59 +320,11 @@ function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
             {/* Panel 3: Addresses Tab */}
             {activeTab === 'addresses' && (
               <div className="content-tab-card">
-                <h2 className="tab-title">Default Shipping Location</h2>
-                <p className="tab-description">Configure your primary address details to automatically speed up checkouts.</p>
+                <h2 className="tab-title">Shipping Addresses</h2>
+                <p className="tab-description">Manage your shipping addresses for faster checkout.</p>
                 <div className="tab-divider"></div>
-
-                <form onSubmit={handleAddressSubmit} className="tab-form">
-                  {addressSuccess && <div className="form-success-banner">✓ Address details saved successfully!</div>}
-                  {addressError && <div className="form-error-banner">{addressError}</div>}
-
-                  <div className="tab-form-row">
-                    <div className="tab-form-group">
-                      <label htmlFor="addr-street">Street Address</label>
-                      <textarea 
-                        id="addr-street" 
-                        value={addressData.address}
-                        onChange={(e) => setAddressData(prev => ({ ...prev, address: e.target.value }))}
-                        placeholder="House Number, Building Name, Street Name"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="tab-form-row split-three">
-                    <div className="tab-form-group">
-                      <label htmlFor="addr-city">City</label>
-                      <input 
-                        type="text" 
-                        id="addr-city" 
-                        value={addressData.city}
-                        onChange={(e) => setAddressData(prev => ({ ...prev, city: e.target.value }))}
-                      />
-                    </div>
-                    <div className="tab-form-group">
-                      <label htmlFor="addr-state">State</label>
-                      <input 
-                        type="text" 
-                        id="addr-state" 
-                        value={addressData.state}
-                        onChange={(e) => setAddressData(prev => ({ ...prev, state: e.target.value }))}
-                      />
-                    </div>
-                    <div className="tab-form-group">
-                      <label htmlFor="addr-zip">ZIP/PIN Code</label>
-                      <input 
-                        type="text" 
-                        id="addr-zip" 
-                        maxLength="6"
-                        value={addressData.zip}
-                        onChange={(e) => setAddressData(prev => ({ ...prev, zip: e.target.value }))}
-                      />
-                    </div>
-                  </div>
-
-                  <button type="submit" className="tab-save-btn">Save Address Changes</button>
-                </form>
+                
+                <AddressManager customerId={currentUser?.id} />
               </div>
             )}
 

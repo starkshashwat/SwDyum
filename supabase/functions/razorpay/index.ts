@@ -21,7 +21,7 @@ async function createRazorpayOrder(amount: number, receipt: string) {
       'Authorization': `Basic ${btoa(`${keyId}:${keySecret}`)}`
     },
     body: JSON.stringify({
-      amount: Math.round(amount * 100), // Razorpay expects amount in paise
+      amount: Math.round(amount * 100),
       currency: 'INR',
       receipt: receipt
     })
@@ -39,60 +39,215 @@ async function createRazorpayOrder(amount: number, receipt: string) {
 
 async function verifyPaymentSignature(orderId: string, paymentId: string, signature: string) {
   const keySecret = Deno.env.get('RAZORPAY_KEY_SECRET');
-  
-  if (!keySecret) {
-    throw new Error('Razorpay key secret is missing');
-  }
+  if (!keySecret) throw new Error('Razorpay key secret is missing');
 
   const data = `${orderId}|${paymentId}`;
-  
   const key = await crypto.subtle.importKey(
-    'raw',
-    new TextEncoder().encode(keySecret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
+    'raw', new TextEncoder().encode(keySecret),
+    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
   );
-
-  const signatureBuffer = await crypto.subtle.sign(
-    'HMAC',
-    key,
-    new TextEncoder().encode(data)
-  );
-
+  const signatureBuffer = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(data));
   const signatureHex = Array.from(new Uint8Array(signatureBuffer))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
-
+    .map(b => b.toString(16).padStart(2, '0')).join('');
   return signatureHex === signature;
 }
 
 async function verifyWebhookSignature(payloadText: string, signature: string) {
   const webhookSecret = Deno.env.get('RAZORPAY_WEBHOOK_SECRET');
-  if (!webhookSecret) {
-    console.error('RAZORPAY_WEBHOOK_SECRET is not set');
-    return false;
-  }
+  if (!webhookSecret) { console.error('RAZORPAY_WEBHOOK_SECRET is not set'); return false; }
 
   const key = await crypto.subtle.importKey(
-    'raw',
-    new TextEncoder().encode(webhookSecret),
-    { name: 'HMAC', hash: 'SHA-256' },
-    false,
-    ['sign']
+    'raw', new TextEncoder().encode(webhookSecret),
+    { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']
   );
-
-  const signatureBuffer = await crypto.subtle.sign(
-    'HMAC',
-    key,
-    new TextEncoder().encode(payloadText)
-  );
-
+  const signatureBuffer = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payloadText));
   const expectedSignature = Array.from(new Uint8Array(signatureBuffer))
-    .map(b => b.toString(16).padStart(2, '0'))
-    .join('');
-
+    .map(b => b.toString(16).padStart(2, '0')).join('');
   return expectedSignature === signature;
+}
+
+// ====================================================================
+// Post-Payment Processing — called after payment is confirmed
+// Creates payment record, updates order, reduces inventory,
+// tracks coupon usage, generates invoice, creates timeline entries.
+// Idempotent: checks if payment already processed before proceeding.
+// ====================================================================
+async function processPaymentCapture(supabaseAdmin: any, razorpayOrderId: string, razorpayPaymentId: string) {
+  // 1. Idempotency check — has this payment already been processed?
+  const { data: existingPayment } = await supabaseAdmin
+    .from('payments')
+    .select('id')
+    .eq('razorpay_payment_id', razorpayPaymentId)
+    .single();
+
+  if (existingPayment) {
+    console.log(`Payment ${razorpayPaymentId} already processed. Skipping.`);
+    return;
+  }
+
+  // 2. Find the order by the Razorpay Order ID stored in payment_id during checkout
+  const { data: order, error: orderFetchError } = await supabaseAdmin
+    .from('orders')
+    .select('*')
+    .eq('payment_id', razorpayOrderId)
+    .single();
+
+  if (orderFetchError || !order) {
+    // Try razorpay_order_id column as fallback
+    const { data: order2 } = await supabaseAdmin
+      .from('orders')
+      .select('*')
+      .eq('razorpay_order_id', razorpayOrderId)
+      .single();
+    if (!order2) {
+      console.error(`Order not found for Razorpay order ${razorpayOrderId}`);
+      return;
+    }
+    // Use this order instead
+    return await _processOrder(supabaseAdmin, order2, razorpayOrderId, razorpayPaymentId);
+  }
+
+  await _processOrder(supabaseAdmin, order, razorpayOrderId, razorpayPaymentId);
+}
+
+async function _processOrder(supabaseAdmin: any, order: any, razorpayOrderId: string, razorpayPaymentId: string) {
+  const orderId = order.id;
+
+  // 3. Create payment record
+  await supabaseAdmin.from('payments').insert([{
+    order_id: orderId,
+    razorpay_payment_id: razorpayPaymentId,
+    razorpay_order_id: razorpayOrderId,
+    payment_method: 'Online / Razorpay',
+    amount: order.total,
+    currency: 'INR',
+    status: 'Paid',
+    payment_date: new Date().toISOString()
+  }]);
+
+  // 4. Update order status
+  const estimatedDelivery = new Date();
+  estimatedDelivery.setDate(estimatedDelivery.getDate() + 7); // 5-7 days
+
+  await supabaseAdmin
+    .from('orders')
+    .update({
+      status: 'Paid',
+      payment_status: 'Paid',
+      order_status: 'Confirmed',
+      payment_id: razorpayPaymentId,
+      razorpay_order_id: razorpayOrderId,
+      estimated_delivery: estimatedDelivery.toISOString().split('T')[0],
+      updated_at: new Date().toISOString()
+    })
+    .eq('id', orderId);
+
+  // 5. Timeline entries
+  await supabaseAdmin.from('order_timeline').insert([
+    { order_id: orderId, event: 'Payment Received', note: `Razorpay Payment ID: ${razorpayPaymentId}`, created_by: 'system' },
+    { order_id: orderId, event: 'Order Confirmed', note: 'Payment verified successfully', created_by: 'system' }
+  ]);
+
+  // 6. Process inventory reduction
+  const { data: items } = await supabaseAdmin
+    .from('order_items')
+    .select('*')
+    .eq('order_id', orderId);
+
+  if (items && items.length > 0) {
+    for (const item of items) {
+      // Find product by name
+      const { data: productData } = await supabaseAdmin
+        .from('products')
+        .select('id')
+        .ilike('name', item.product_name)
+        .single();
+
+      if (productData) {
+        // Find variant
+        const { data: variant } = await supabaseAdmin
+          .from('product_variants')
+          .select('id, stock_quantity')
+          .eq('product_id', productData.id)
+          .eq('weight_label', item.weight_label)
+          .single();
+
+        if (variant) {
+          // Log inventory change — DB trigger auto-updates stock_quantity
+          await supabaseAdmin.from('inventory_logs').insert([{
+            variant_id: variant.id,
+            change_type: 'Order Placed',
+            quantity_changed: -item.quantity,
+            note: `Order ${orderId}`
+          }]);
+        }
+      }
+    }
+
+    // Timeline entry for inventory
+    await supabaseAdmin.from('order_timeline').insert([{
+      order_id: orderId,
+      event: 'Inventory Reduced',
+      note: `${items.length} item(s) deducted from stock`,
+      created_by: 'system'
+    }]);
+  }
+
+  // 7. Track coupon usage
+  if (order.coupon_code) {
+    const { data: couponData } = await supabaseAdmin
+      .from('coupons')
+      .select('id, times_used')
+      .eq('code', order.coupon_code)
+      .single();
+
+    if (couponData) {
+      // Increment times_used
+      await supabaseAdmin
+        .from('coupons')
+        .update({ times_used: (couponData.times_used || 0) + 1 })
+        .eq('id', couponData.id);
+
+      // Create coupon_usage record
+      await supabaseAdmin.from('coupon_usage').insert([{
+        coupon_id: couponData.id,
+        customer_id: order.customer_id,
+        order_id: orderId,
+        discount_amount: order.discount_amount || 0
+      }]);
+    }
+  }
+
+  // 8. Auto-generate invoice
+  const shippingDetails = order.shipping_details || {};
+  const productDetails = items ? items.map((item: any) => ({
+    name: item.product_name,
+    sku: item.sku || '',
+    variant: item.weight_label,
+    quantity: item.quantity,
+    unit_price: item.unit_price,
+    discount: item.discount || 0,
+    final_price: item.total_price
+  })) : [];
+
+  await supabaseAdmin.from('invoices').insert([{
+    order_id: orderId,
+    invoice_date: new Date().toISOString(),
+    customer_name: shippingDetails.name || order.customer_name || '',
+    customer_email: shippingDetails.email || order.customer_email || '',
+    customer_phone: shippingDetails.phone || order.customer_phone || '',
+    billing_address: order.billing_details || shippingDetails,
+    shipping_address: shippingDetails,
+    product_details: productDetails,
+    subtotal: order.subtotal,
+    tax: 0, // Future ready
+    discount: order.discount_amount || 0,
+    shipping_charges: order.shipping_fee || order.shipping || 0,
+    grand_total: order.total,
+    status: 'Generated'
+  }]);
+
+  console.log(`✅ Order ${orderId} fully processed: payment recorded, inventory reduced, invoice generated.`);
 }
 
 serve(async (req) => {
@@ -103,121 +258,41 @@ serve(async (req) => {
   try {
     const reqText = await req.text();
     let body;
-    try {
-      body = JSON.parse(reqText);
-    } catch(e) {
-      body = {};
-    }
+    try { body = JSON.parse(reqText); } catch(e) { body = {}; }
 
     // --- Webhook Handling ---
     if (body.entity === 'event') {
       const signature = req.headers.get('x-razorpay-signature');
-      if (!signature) {
-        return new Response('Missing signature', { status: 400 });
-      }
+      if (!signature) return new Response('Missing signature', { status: 400 });
 
       const isValid = await verifyWebhookSignature(reqText, signature);
-      if (!isValid) {
-        return new Response('Invalid signature', { status: 400 });
-      }
+      if (!isValid) return new Response('Invalid signature', { status: 400 });
 
       if (body.event === 'payment.captured' || body.event === 'order.paid') {
-        // Initialize Supabase admin client to bypass RLS
         const supabaseAdmin = createClient(
           Deno.env.get('SUPABASE_URL') ?? '',
           Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
         );
 
-        let orderId, paymentId;
+        let razorpayOrderId = '';
+        let razorpayPaymentId = '';
 
         if (body.event === 'payment.captured') {
           const payment = body.payload.payment.entity;
-          orderId = payment.order_id;
-          paymentId = payment.id;
+          razorpayOrderId = payment.order_id;
+          razorpayPaymentId = payment.id;
         } else if (body.event === 'order.paid') {
           const order = body.payload.order.entity;
-          orderId = order.id;
+          razorpayOrderId = order.id;
+          // For order.paid, we may not have payment ID directly
+          razorpayPaymentId = body.payload.payment?.entity?.id || '';
         }
 
-        if (orderId) {
-          const { error } = await supabaseAdmin
-            .from('orders')
-            .update({ status: 'Paid', payment_id: paymentId })
-            .eq('payment_id', orderId);
-
-          if (error) {
-            console.error('Error updating order:', error);
-            return new Response('Database error', { status: 500 });
-          }
-
-          // Fetch order to process inventory and coupon usage
-          const { data: orderDetails } = await supabaseAdmin
-            .from('orders')
-            .select('*')
-            .eq('payment_id', orderId)
-            .single();
-
-          if (orderDetails) {
-            // Process inventory reduction
-            const { data: items } = await supabaseAdmin
-              .from('order_items')
-              .select('*')
-              .eq('order_id', orderDetails.id);
-
-            if (items && items.length > 0) {
-              for (const item of items) {
-                // Find product by name
-                const { data: productData } = await supabaseAdmin
-                  .from('products')
-                  .select('id')
-                  .ilike('name', item.product_name)
-                  .single();
-
-                if (productData) {
-                  // Find variant by product_id and weight_label
-                  const { data: variant } = await supabaseAdmin
-                    .from('product_variants')
-                    .select('id, stock_quantity')
-                    .eq('product_id', productData.id)
-                    .eq('weight_label', item.weight_label)
-                    .single();
-
-                  if (variant) {
-                    // Log inventory change. This will trigger update_stock_from_log in DB
-                    // which automatically updates product_variants.stock_quantity
-                    await supabaseAdmin
-                      .from('inventory_logs')
-                      .insert([{
-                        variant_id: variant.id,
-                        change_type: 'Order Placed',
-                        quantity_changed: -item.quantity,
-                        note: `Order ${orderDetails.id}`
-                      }]);
-                  }
-                }
-              }
-            }
-
-            // Increment coupon usage
-            if (orderDetails.coupon_code) {
-               const { data: couponData } = await supabaseAdmin
-                 .from('coupons')
-                 .select('id, times_used')
-                 .eq('code', orderDetails.coupon_code)
-                 .single();
-               
-               if (couponData) {
-                 await supabaseAdmin
-                   .from('coupons')
-                   .update({ times_used: (couponData.times_used || 0) + 1 })
-                   .eq('id', couponData.id);
-               }
-            }
-          }
+        if (razorpayOrderId) {
+          await processPaymentCapture(supabaseAdmin, razorpayOrderId, razorpayPaymentId);
         }
       }
       
-      // Always return 200 OK for valid webhooks to prevent Razorpay from retrying/disabling
       return new Response('ok', { status: 200, headers: corsHeaders });
     }
 
@@ -227,8 +302,7 @@ serve(async (req) => {
     if (action === 'create_order') {
       if (!amount || !receipt) {
         return new Response(JSON.stringify({ error: 'Missing amount or receipt' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
       const order = await createRazorpayOrder(amount, receipt);
@@ -239,9 +313,8 @@ serve(async (req) => {
 
     if (action === 'verify_payment') {
       if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
-         return new Response(JSON.stringify({ error: 'Missing payment details' }), {
-          status: 400,
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        return new Response(JSON.stringify({ error: 'Missing payment details' }), {
+          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
         });
       }
       const isValid = await verifyPaymentSignature(razorpay_order_id, razorpay_payment_id, razorpay_signature);
@@ -251,15 +324,13 @@ serve(async (req) => {
     }
 
     return new Response(JSON.stringify({ error: 'Invalid action or event' }), {
-      status: 400,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
     
   } catch (error) {
     console.error('Function error:', error);
     return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });

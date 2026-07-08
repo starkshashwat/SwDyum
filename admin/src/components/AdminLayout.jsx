@@ -44,6 +44,7 @@ export default function AdminLayout() {
     { name: 'Products', path: '/products', icon: Package },
     { name: 'Inventory', path: '/inventory', icon: ClipboardList },
     { name: 'Orders', path: '/orders', icon: ShoppingCart },
+    { name: 'Invoices', path: '/invoices', icon: FileText },
     { name: 'Offers', path: '/offers', icon: Percent },
     { name: 'Coupons', path: '/coupons', icon: Tag },
     { name: 'Subscriptions', path: '/subscriptions', icon: RefreshCw },

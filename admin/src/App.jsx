@@ -20,6 +20,7 @@ import RecipesList from './pages/RecipesList';
 import SEOCenter from './pages/SEOCenter';
 import Inbox from './pages/Inbox';
 import AccountDeletionList from './pages/AccountDeletionList';
+import InvoicesList from './pages/InvoicesList';
 import './index.css';
 
 function App() {
@@ -46,6 +47,9 @@ function App() {
         {/* Orders */}
         <Route path="/orders" element={<OrdersList />} />
         <Route path="/orders/:id" element={<OrderDetails />} />
+
+        {/* Invoices */}
+        <Route path="/invoices" element={<InvoicesList />} />
         
         {/* Commerce & Promotions */}
         <Route path="/offers" element={<OffersList />} />

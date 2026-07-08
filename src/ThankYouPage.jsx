@@ -5,6 +5,7 @@ import './ThankYouPage.css';
 function ThankYouPage({ onNavigate }) {
   const [orderId, setOrderId] = useState(null);
   const [orderData, setOrderData] = useState(null);
+  const [orderItems, setOrderItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,6 +25,16 @@ function ThankYouPage({ onNavigate }) {
           if (!error && data) {
             setOrderData(data);
           }
+
+          const { data: items, error: itemsError } = await supabase
+            .from('order_items')
+            .select('*')
+            .eq('order_id', id);
+          
+          if (!itemsError && items) {
+             setOrderItems(items);
+          }
+
         } catch (err) {
           console.error("Failed to fetch order details", err);
         } finally {
@@ -59,6 +70,8 @@ function ThankYouPage({ onNavigate }) {
     );
   }
 
+  const shipping = orderData.shipping_details || {};
+
   return (
     <div className="thank-you-wrapper">
       <div className="thank-you-card">
@@ -79,30 +92,48 @@ function ThankYouPage({ onNavigate }) {
           
           <div className="detail-row">
             <span className="label">Order ID:</span>
-            <span className="val highlight">{orderData.id}</span>
+            <span className="val highlight font-mono">{orderData.id}</span>
           </div>
           
           <div className="detail-row">
             <span className="label">Payment Status:</span>
-            <span className="val status-paid">{orderData.status}</span>
+            <span className={`val ${orderData.payment_status === 'Paid' ? 'status-paid' : ''}`}>{orderData.payment_status || orderData.status}</span>
           </div>
           
           <div className="detail-row">
             <span className="label">Total Paid:</span>
-            <span className="val highlight">₹{orderData.total}</span>
+            <span className="val highlight font-bold">₹{orderData.total}</span>
           </div>
 
           <div className="detail-row">
             <span className="label">Estimated Delivery:</span>
-            <span className="val">3 – 5 Business Days</span>
+            <span className="val">{orderData.estimated_delivery ? new Date(orderData.estimated_delivery).toLocaleDateString('en-IN', {day: 'numeric', month: 'short', year: 'numeric'}) : '3 – 5 Business Days'}</span>
           </div>
         </div>
 
+        {orderItems && orderItems.length > 0 && (
+          <div className="order-items-box">
+             <h4>Items Ordered</h4>
+             <ul className="items-list">
+                {orderItems.map((item, idx) => (
+                  <li key={idx} className="item-row flex justify-between py-2 border-b border-gray-100 last:border-0 text-sm">
+                     <div>
+                       <p className="font-medium">{item.product_name}</p>
+                       <p className="text-xs text-gray-500">Qty: {item.quantity} | {item.weight_label}</p>
+                     </div>
+                     <div className="font-medium">₹{item.total_price}</div>
+                  </li>
+                ))}
+             </ul>
+          </div>
+        )}
+
         <div className="shipping-box">
           <h4>Shipping To:</h4>
-          <p><strong>{orderData.shipping_details.name}</strong></p>
-          <p>{orderData.shipping_details.address}</p>
-          <p>{orderData.shipping_details.city}, {orderData.shipping_details.state} - {orderData.shipping_details.zip}</p>
+          <p className="font-medium text-sm">{shipping.name || orderData.customer_name}</p>
+          <p className="text-sm text-gray-600">{shipping.address || [shipping.house_number, shipping.street].filter(Boolean).join(', ')}</p>
+          <p className="text-sm text-gray-600">{[shipping.city, shipping.state, shipping.zip || shipping.pin_code].filter(Boolean).join(', ')}</p>
+          {shipping.phone && <p className="text-sm text-gray-600 mt-1">📞 {shipping.phone}</p>}
         </div>
 
         <div className="action-buttons">
@@ -110,7 +141,7 @@ function ThankYouPage({ onNavigate }) {
             Track My Order
           </button>
           <button className="return-home-btn" onClick={() => onNavigate('shop')}>
-            Return to Home Page
+            Continue Shopping
           </button>
         </div>
       </div>
