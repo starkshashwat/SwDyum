@@ -10,7 +10,7 @@ async function run() {
   try {
     await client.connect();
     console.log('Connected to database.');
-    const sql = fs.readFileSync('migrations/schedule_cleanup_cron.sql', 'utf8');
+    const sql = fs.readFileSync('migrations/seed_products.sql', 'utf8');
     await client.query(sql);
     console.log('Migration executed successfully.');
   } catch (err) {
