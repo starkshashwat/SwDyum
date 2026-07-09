@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import './PdpProcessTimeline.css';
 
@@ -22,8 +21,8 @@ function PdpProcessTimeline() {
       <div className="timeline-container">
         <div className="timeline-line"></div>
         {steps.map((step, idx) => (
-          <motion.div 
-            className="timeline-item" 
+          <motion.div
+            className="timeline-item"
             key={idx}
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

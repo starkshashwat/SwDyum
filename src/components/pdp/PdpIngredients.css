@@ -1,5 +1,5 @@
 .pdp-ingredients-section {
-  padding: var(--space-16) var(--space-6);
+  padding: var(--space-14, 3.5rem) var(--space-4);
   background: var(--color-warm-bg);
 }
 
@@ -10,13 +10,13 @@
 
 .pdp-section-header.center {
   text-align: center;
-  margin-bottom: var(--space-12);
+  margin-bottom: var(--space-10);
 }
 
 .pdp-eyebrow {
   display: block;
   font-size: 0.8rem;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 2px;
   color: var(--color-chili);
@@ -25,45 +25,42 @@
 
 .pdp-heading {
   font-family: var(--font-heading);
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(1.6rem, 4vw, 2.6rem);
   color: var(--color-ink);
   margin-bottom: 12px;
   line-height: 1.1;
 }
 
 .pdp-subtext {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--color-muted);
   max-width: 600px;
   margin: 0 auto;
 }
 
 .pdp-ingredients-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 24px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-3);
 }
 
 .pdp-ingredient-card {
-  width: 200px;
   background: var(--color-card);
-  border-radius: var(--radius-xl);
+  border-radius: var(--radius-lg);
   overflow: hidden;
-  box-shadow: var(--shadow-md);
-  transition: transform 0.3s, box-shadow 0.3s;
-  cursor: pointer;
-  position: relative;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--duration-normal) var(--ease-out);
+  cursor: default;
+  border: 1px solid var(--color-border);
 }
 
 .pdp-ingredient-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-xl);
+  box-shadow: var(--shadow-lg);
 }
 
 .ing-img-wrap {
   width: 100%;
-  height: 160px;
+  height: 130px;
   overflow: hidden;
 }
 
@@ -71,62 +68,57 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+  transition: transform 0.4s var(--ease-out);
+}
+
+.pdp-ingredient-card:hover .ing-img-wrap img {
+  transform: scale(1.08);
 }
 
 .ing-info {
-  padding: 16px;
-  text-align: center;
+  padding: 14px;
   background: var(--color-card);
-  transition: background 0.3s;
 }
 
 .ing-info h4 {
   font-family: var(--font-heading);
-  font-size: 1.1rem;
+  font-size: 0.95rem;
   color: var(--color-ink);
-  margin: 0;
+  margin: 0 0 4px;
 }
 
-.ing-hover-content {
-  display: none;
-  animation: fadeIn 0.3s forwards;
-}
-
-.ing-hover-content p {
+.ing-benefit {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   line-height: 1.5;
-  color: white;
+  color: var(--color-muted);
 }
 
-.pdp-ingredient-card:hover .ing-info {
-  background: var(--color-chili);
-}
-
-.pdp-ingredient-card:hover .ing-info h4 {
-  display: none;
-}
-
-.pdp-ingredient-card:hover .ing-hover-content {
-  display: block;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(5px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-@media (max-width: 768px) {
-  .pdp-ingredient-card {
-    width: 160px;
+@media (min-width: 600px) {
+  .pdp-ingredients-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
   }
+
   .ing-img-wrap {
-    height: 130px;
+    height: 160px;
   }
 }
 
-@media (max-width: 480px) {
+@media (min-width: 900px) {
+  .pdp-ingredients-grid {
+    grid-template-columns: repeat(5, 1fr);
+  }
+
+  .pdp-ingredients-section {
+    padding: var(--space-16) var(--space-6);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .ing-img-wrap img,
   .pdp-ingredient-card {
-    width: calc(50% - 12px);
+    transition: none;
   }
 }

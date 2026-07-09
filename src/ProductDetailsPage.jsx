@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import './ProductDetailsPage.css';
 import { getProductBySlug, getRelatedProducts } from './data/products';
 
@@ -14,7 +14,7 @@ import PdpComboSection from './components/pdp/PdpComboSection';
 import PdpRelated from './components/pdp/PdpRelated';
 import PdpFaq from './components/pdp/PdpFaq';
 
-function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow, cart }) {
+function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow }) {
   const [p, setP] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState('250g');
@@ -58,11 +58,9 @@ function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow, cart })
         quantity={quantity}
         setQuantity={setQuantity}
         subscription={subscription}
-        setSubscription={setSubscription}
         addToCart={addToCart}
         onNavigate={onNavigate}
         handleBuyNow={handleBuyNow}
-        cart={cart}
       />
 
       {/* 2. STICKY PURCHASE BAR */}

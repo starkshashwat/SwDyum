@@ -203,7 +203,8 @@
   gap: var(--space-6);
 }
 
-.loading-text, .empty-text {
+.loading-text,
+.empty-text {
   text-align: center;
   color: var(--color-muted);
   font-style: italic;
@@ -211,8 +212,26 @@
 }
 
 .review-card {
-  padding: var(--space-6);
-  border-bottom: 1px solid var(--color-border);
+  padding: var(--space-5);
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  transition: transform var(--duration-normal) var(--ease-out), box-shadow var(--duration-normal) var(--ease-out);
+}
+
+.review-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-md);
+}
+
+.review-card::before {
+  content: '"';
+  display: block;
+  font-family: var(--font-heading);
+  font-size: 2.5rem;
+  line-height: 0.6;
+  color: var(--color-mustard);
+  margin-bottom: var(--space-2);
 }
 
 .review-header {
@@ -223,8 +242,35 @@
 }
 
 .reviewer-name {
-  font-weight: 700;
+  font-weight: 800;
   color: var(--color-ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reviewer-name::before {
+  content: '';
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--color-chili), var(--color-chili-light));
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.reviewer-name::after {
+  content: '✓';
+  font-size: 0.65rem;
+  color: #fff;
+  background: var(--color-chili);
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
 }
 
 .review-date {
@@ -270,10 +316,30 @@
     gap: var(--space-6);
     align-items: stretch;
   }
+
   .rating-progress-bars {
     max-width: 100%;
   }
+
   .rating-big {
     align-items: center;
+  }
+}
+
+@media (min-width: 900px) {
+  .reviews-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+  }
+
+  .review-card {
+    border-bottom: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .review-card {
+    transition: none;
   }
 }

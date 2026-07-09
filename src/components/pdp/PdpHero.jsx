@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './PdpHero.css';
 
@@ -22,11 +22,9 @@ function PdpHero({
   quantity,
   setQuantity,
   subscription,
-  setSubscription,
   addToCart,
   onNavigate,
   handleBuyNow,
-  cart,
 }) {
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [pincode, setPincode] = useState('');

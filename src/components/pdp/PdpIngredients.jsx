@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import './PdpIngredients.css';
 
@@ -21,25 +20,24 @@ function PdpIngredients({ ingredients = [] }) {
           <h2 className="pdp-heading">Pure Ingredients</h2>
           <p className="pdp-subtext">No preservatives, no synthetic colors. Just the wholesome goodness of nature.</p>
         </div>
-        
+
         <div className="pdp-ingredients-grid">
           {displayIngredients.map((ing, idx) => (
-            <motion.div 
-              key={idx} 
+            <motion.div
+              key={idx}
               className="pdp-ingredient-card"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true, margin: '-50px' }}
-              transition={{ duration: 0.5, delay: idx * 0.1 }}
+              transition={{ duration: 0.5, delay: idx * 0.08 }}
+              whileHover={{ y: -8 }}
             >
               <div className="ing-img-wrap">
-                <img src={ing.img} alt={ing.name} />
+                <img src={ing.img} alt={ing.name} loading="lazy" />
               </div>
               <div className="ing-info">
                 <h4>{ing.name}</h4>
-                <div className="ing-hover-content">
-                  <p>{ing.benefit}</p>
-                </div>
+                <p className="ing-benefit">{ing.benefit}</p>
               </div>
             </motion.div>
           ))}

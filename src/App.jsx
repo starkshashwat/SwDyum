@@ -174,7 +174,7 @@ function App() {
           ...item,
           image: item.image ? item.image.replace(/\.(png|jpg|jpeg)$/i, '.webp') : item.image
         }));
-      } catch (e) {}
+      } catch (e) { }
     }
     return [];
   });
@@ -312,15 +312,15 @@ function App() {
 
   return (
     <div className="app-container">
-      <Header 
-        currentPage={currentPage} 
-        onNavigate={handleNavigate} 
-        cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)} 
+      <Header
+        currentPage={currentPage}
+        onNavigate={handleNavigate}
+        cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)}
         onOpenCart={() => setIsCartOpen(true)}
         currentUser={currentUser}
       />
-      
-      <CartDrawer 
+
+      <CartDrawer
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
         cart={cart}
@@ -368,7 +368,7 @@ function App() {
       ) : currentPage.startsWith('category-') ? (
         <CategoryPage categorySlug={currentPage.substring('category-'.length)} onNavigate={handleNavigate} addToCart={addToCart} />
       ) : currentPage.startsWith('product-') ? (
-        <ProductDetailsPage slug={currentPage.substring('product-'.length)} onNavigate={handleNavigate} addToCart={addToCart} handleBuyNow={handleBuyNow} cart={cart} />
+        <ProductDetailsPage slug={currentPage.substring('product-'.length)} onNavigate={handleNavigate} addToCart={addToCart} handleBuyNow={handleBuyNow} />
       ) : (
         <>
           {/* ─── Hero Section ─── */}
@@ -386,8 +386,8 @@ function App() {
 
       <Footer onNavigate={handleNavigate} />
 
-      <WhatsAppLoginModal 
-        isOpen={isWaModalOpen} 
+      <WhatsAppLoginModal
+        isOpen={isWaModalOpen}
         onClose={() => {
           setIsWaModalOpen(false);
           setPendingCheckout(null);
@@ -397,7 +397,7 @@ function App() {
           setIsWaModalOpen(false);
           setToastMessage("Login successfully!");
           setTimeout(() => setToastMessage(''), 3000);
-          
+
           // Resume pending action
           if (pendingCheckout) {
             if (pendingCheckout.type === 'checkout') {
@@ -416,7 +416,7 @@ function App() {
       {/* Custom Toast Notification */}
       <AnimatePresence>
         {toastMessage && (
-          <motion.div 
+          <motion.div
             className="toast-notification"
             initial={{ opacity: 0, y: 50, x: "-50%" }}
             animate={{ opacity: 1, y: 0, x: "-50%" }}

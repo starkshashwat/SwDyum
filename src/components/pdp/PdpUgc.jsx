@@ -1,4 +1,3 @@
-import React from 'react';
 import { motion } from 'framer-motion';
 import './PdpUgc.css';
 
@@ -19,7 +18,7 @@ function PdpUgc() {
 
       <div className="ugc-grid">
         {ugcImages.map((src, idx) => (
-          <motion.div 
+          <motion.div
             key={idx}
             className="ugc-item"
             initial={{ opacity: 0, scale: 0.95 }}
