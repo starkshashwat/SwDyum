@@ -29,6 +29,25 @@ export default function Dashboard() {
     if (profile) fetchDashboardData();
   }, [profile, dateRange]);
 
+  // Realtime: refresh dashboard metrics when orders change.
+  // Debounced so a burst of webhook/cron updates only triggers one refetch.
+  useEffect(() => {
+    if (!profile) return;
+    let timer;
+    const channel = supabase
+      .channel('dashboard-orders-realtime')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'orders' }, () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => fetchDashboardData(), 800);
+      })
+      .subscribe();
+    return () => {
+      clearTimeout(timer);
+      supabase.removeChannel(channel);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile, dateRange]);
+
   const getDateFilter = () => {
     const now = new Date();
     switch (dateRange) {
@@ -189,9 +208,9 @@ export default function Dashboard() {
                   <BarChart data={revenueData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                     <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                    <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `₹${v >= 1000 ? (v/1000).toFixed(0) + 'k' : v}`} />
+                    <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `₹${v >= 1000 ? (v / 1000).toFixed(0) + 'k' : v}`} />
                     <Tooltip formatter={(v) => [`₹${Number(v).toLocaleString('en-IN')}`, 'Revenue']} />
-                    <Bar dataKey="revenue" fill="#000" radius={[4,4,0,0]} />
+                    <Bar dataKey="revenue" fill="#000" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : <div className="h-64 flex items-center justify-center text-gray-400">No revenue data</div>}
@@ -206,7 +225,7 @@ export default function Dashboard() {
                 ) : topProducts.map((product, i) => (
                   <div key={i} className="flex justify-between items-center p-3 hover:bg-gray-50 rounded-lg">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center font-bold text-gray-500 text-xs">#{i+1}</div>
+                      <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center font-bold text-gray-500 text-xs">#{i + 1}</div>
                       <span className="font-medium text-gray-900 text-sm">{product.name}</span>
                     </div>
                     <div className="text-right">

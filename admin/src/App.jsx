@@ -7,8 +7,8 @@ import CategoryEditor from './pages/CategoryEditor';
 import ProductsList from './pages/ProductsList';
 import ProductEditor from './pages/ProductEditor';
 import InventoryList from './pages/InventoryList';
-import OrdersList from './pages/OrdersList';
-import OrderDetails from './pages/OrderDetails';
+import OrdersManager from './pages/OrdersManager';
+import OrderRedirect from './pages/OrderRedirect';
 import CustomersList from './pages/CustomersList';
 import CustomerDetails from './pages/CustomerDetails';
 import ReviewsList from './pages/ReviewsList';
@@ -28,29 +28,29 @@ function App() {
     <Routes>
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="/login" element={<Login />} />
-      
+
       {/* Protected Admin Routes */}
       <Route element={<AdminLayout />}>
         <Route path="/dashboard" element={<Dashboard />} />
-        
+
         {/* Categories */}
         <Route path="/categories" element={<CategoriesList />} />
         <Route path="/categories/:id" element={<CategoryEditor />} />
-        
+
         {/* Products */}
         <Route path="/products" element={<ProductsList />} />
         <Route path="/products/:id" element={<ProductEditor />} />
 
         {/* Inventory */}
         <Route path="/inventory" element={<InventoryList />} />
-        
-        {/* Orders */}
-        <Route path="/orders" element={<OrdersList />} />
-        <Route path="/orders/:id" element={<OrderDetails />} />
+
+        {/* Orders — master-detail split view */}
+        <Route path="/orders" element={<OrdersManager />} />
+        <Route path="/orders/:id" element={<OrderRedirect />} />
 
         {/* Invoices */}
         <Route path="/invoices" element={<InvoicesList />} />
-        
+
         {/* Commerce & Promotions */}
         <Route path="/offers" element={<OffersList />} />
         <Route path="/coupons" element={<CouponsList />} />

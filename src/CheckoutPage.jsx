@@ -42,7 +42,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
   const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
 
   const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  
+
   let discountAmount = 0;
   if (appliedCoupon) {
     if (appliedCoupon.discount_type === 'percentage') {
@@ -63,7 +63,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
     if (!couponCode.trim()) return;
     setIsApplyingCoupon(true);
     setCouponError('');
-    
+
     try {
       const { data, error } = await supabase
         .from('coupons')
@@ -71,13 +71,13 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
         .eq('code', couponCode.trim().toUpperCase())
         .eq('is_active', true)
         .single();
-        
+
       if (error || !data) throw new Error('Invalid or expired coupon');
-      
+
       if (data.expiry_date && new Date(data.expiry_date) < new Date()) {
         throw new Error('This coupon has expired');
       }
-      
+
       setAppliedCoupon(data);
       setCouponCode('');
     } catch (err) {
@@ -87,7 +87,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
       setIsApplyingCoupon(false);
     }
   };
-  
+
   const handleRemoveCoupon = () => {
     setAppliedCoupon(null);
     setCouponError('');
@@ -120,17 +120,17 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
     if (!formData.name.trim()) errors.name = 'Name is required';
     if (!formData.email.trim()) errors.email = 'Email is required';
     else if (!/\S+@\S+\.\S+/.test(formData.email)) errors.email = 'Invalid email';
-    
+
     if (!formData.phone.trim()) errors.phone = 'Phone is required';
     else if (!/^\+?([0-9]\s?){10,12}$/.test(formData.phone.replace(/\s+/g, ''))) errors.phone = 'Invalid phone';
-    
+
     if (!formData.address.trim()) errors.address = 'Address is required';
     if (!formData.city.trim()) errors.city = 'City is required';
     if (!formData.state.trim()) errors.state = 'State is required';
-    
+
     if (!formData.zip.trim()) errors.zip = 'ZIP is required';
     else if (!/^\d{6}$/.test(formData.zip)) errors.zip = '6-digit ZIP required';
-    
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -165,11 +165,14 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
       status: 'Pending',
       payment_status: 'Pending',
       order_status: 'Pending',
+      // Checkout abandonment window: if payment is not captured within 30 min,
+      // the cleanup-pending-checkouts cron marks this order as 'failed'.
+      checkout_expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
       created_at: new Date().toISOString()
     };
 
     let { error: orderError } = await supabase.from('orders').insert([orderData]);
-    
+
     // Fallback: If profile doesn't exist in DB (e.g. Google Auth without trigger), 
     // the foreign key constraint will fail. Retry anonymously.
     if (orderError && orderError.message && orderError.message.includes('orders_customer_id_fkey')) {
@@ -179,7 +182,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
     }
 
     if (orderError) throw orderError;
-    
+
     const orderItems = cart.map(item => ({
       order_id: orderId,
       product_name: item.name,
@@ -191,7 +194,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
       total_price: item.price * item.quantity,
       final_price: item.price * item.quantity
     }));
-    
+
     const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
     if (itemsError) throw itemsError;
 
@@ -240,7 +243,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
 
       const rzpOrderId = data.order.id;
       const backendKeyId = data.order.key_id;
-      
+
       setProcessingStep('Creating order...');
       const internalOrderId = await createPendingOrder(rzpOrderId);
 
@@ -259,42 +262,42 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
         },
         theme: { color: '#C1402B' },
         handler: async function (response) {
-           setProcessingStep('Verifying payment...');
-           setIsProcessing(true);
-           try {
-             const { data: verifyData, error: verifyError } = await supabase.functions.invoke('razorpay', {
-               body: {
-                 action: 'verify_payment',
-                 razorpay_order_id: response.razorpay_order_id,
-                 razorpay_payment_id: response.razorpay_payment_id,
-                 razorpay_signature: response.razorpay_signature
-               }
-             });
-             
-             if (verifyError) throw verifyError;
-             if (verifyData?.error) throw new Error(verifyData.error);
-             if (!verifyData.success) throw new Error('Payment verification failed');
-             
-             setProcessingStep('Finalizing order...');
-             
-             // Update Order to Paid on Frontend (Webhook will also do this if frontend fails)
-             await supabase.from('orders')
-                .update({ status: 'Paid', payment_id: response.razorpay_payment_id })
-                .eq('id', internalOrderId);
+          setProcessingStep('Verifying payment...');
+          setIsProcessing(true);
+          try {
+            const { data: verifyData, error: verifyError } = await supabase.functions.invoke('razorpay', {
+              body: {
+                action: 'verify_payment',
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature
+              }
+            });
 
-             clearCart();
-             // Pass order ID via sessionStorage for ThankYouPage
-             sessionStorage.setItem('lastCompletedOrder', internalOrderId);
-             onNavigate('thank-you');
-             
-           } catch (err) {
-             console.error('Verification error:', err);
-             setFulfillError(`Payment verification failed: ${err.message}`);
-             setIsProcessing(false);
-           }
+            if (verifyError) throw verifyError;
+            if (verifyData?.error) throw new Error(verifyData.error);
+            if (!verifyData.success) throw new Error('Payment verification failed');
+
+            setProcessingStep('Finalizing order...');
+
+            // Update Order to Paid on Frontend (Webhook will also do this if frontend fails)
+            await supabase.from('orders')
+              .update({ status: 'Paid', payment_id: response.razorpay_payment_id })
+              .eq('id', internalOrderId);
+
+            clearCart();
+            // Pass order ID via sessionStorage for ThankYouPage
+            sessionStorage.setItem('lastCompletedOrder', internalOrderId);
+            onNavigate('thank-you');
+
+          } catch (err) {
+            console.error('Verification error:', err);
+            setFulfillError(`Payment verification failed: ${err.message}`);
+            setIsProcessing(false);
+          }
         },
         modal: {
-          ondismiss: function() {
+          ondismiss: function () {
             setIsProcessing(false);
           }
         }
@@ -302,8 +305,8 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
 
       const rzp1 = new window.Razorpay(options);
       rzp1.on('payment.failed', function (response) {
-         setFulfillError(`Payment failed: ${response.error.description}`);
-         setIsProcessing(false);
+        setFulfillError(`Payment failed: ${response.error.description}`);
+        setIsProcessing(false);
       });
       rzp1.open();
 
@@ -324,7 +327,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
     <div className="checkout-page-wrapper">
       <div className="checkout-container">
         <h1 className="checkout-page-title">Checkout</h1>
-        
+
         <div className="checkout-grid">
           {/* LEFT: Address Form */}
           <div className="checkout-form-section">
@@ -336,7 +339,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
                 </button>
               )}
             </div>
-            
+
             <form onSubmit={handleSubmit} className="premium-form">
               <div className="form-row split">
                 <div className="form-group">
@@ -350,7 +353,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
                   {formErrors.phone && <span className="error-text">{formErrors.phone}</span>}
                 </div>
               </div>
-              
+
               <div className="form-row">
                 <div className="form-group full-width">
                   <label>Email Address *</label>
@@ -400,7 +403,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
           <div className="checkout-summary-section">
             <div className="summary-card">
               <h2>Order Summary</h2>
-              
+
               <div className="summary-items-list">
                 {cart.map((item, idx) => (
                   <div key={idx} className="summary-item">
@@ -418,16 +421,16 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
               <div className="coupon-section">
                 {!appliedCoupon ? (
                   <div className="coupon-input-group">
-                    <input 
-                      type="text" 
-                      placeholder="Enter coupon code" 
-                      value={couponCode} 
+                    <input
+                      type="text"
+                      placeholder="Enter coupon code"
+                      value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                       disabled={isApplyingCoupon}
                     />
-                    <button 
+                    <button
                       type="button"
-                      onClick={handleApplyCoupon} 
+                      onClick={handleApplyCoupon}
                       disabled={!couponCode.trim() || isApplyingCoupon}
                       className="apply-coupon-btn"
                     >
@@ -467,7 +470,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
                   <span>₹{total}</span>
                 </div>
               </div>
-              
+
               {/* Desktop Pay Button */}
               <button onClick={handleSubmit} className="submit-order-btn desktop-only-pay" disabled={isProcessing}>
                 {isProcessing ? (

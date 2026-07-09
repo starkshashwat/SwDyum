@@ -264,6 +264,134 @@ async function _processOrder(supabaseAdmin: any, order: any, razorpayOrderId: st
   console.log(`✅ Order ${orderId} fully processed: payment recorded, inventory reduced, invoice generated.`);
 }
 
+// ====================================================================
+// Payment Failure Processing — called when Razorpay sends payment.failed
+// Marks the order as failed/cancelled, records the failed payment attempt,
+// and adds a timeline entry. Idempotent: skips if order is already terminal.
+// ====================================================================
+async function processPaymentFailure(supabaseAdmin: any, razorpayOrderId: string, razorpayPaymentId: string, reason: string, payment: any) {
+  // Find the order by razorpay_order_id (set during checkout) or payment_id.
+  let order: any = null;
+  const lookups = [
+    { column: 'razorpay_order_id', value: razorpayOrderId },
+    { column: 'payment_id', value: razorpayOrderId },
+  ];
+  for (const l of lookups) {
+    const { data } = await supabaseAdmin.from('orders').select('*').eq(l.column, l.value).single();
+    if (data) { order = data; break; }
+  }
+  if (!order) {
+    console.error(`Order not found for failed Razorpay order ${razorpayOrderId}`);
+    return;
+  }
+
+  // Idempotency: if the order is already Paid/Delivered, do not mark it failed.
+  const terminalPayment = ['Paid', 'Refunded', 'Partially Refunded'].includes(order.payment_status);
+  if (terminalPayment) {
+    console.log(`Order ${order.id} already ${order.payment_status}; ignoring payment.failed.`);
+    return;
+  }
+
+  const nowIso = new Date().toISOString();
+
+  // Record the failed payment attempt (idempotent on razorpay_payment_id).
+  if (razorpayPaymentId) {
+    const { data: existingPayment } = await supabaseAdmin
+      .from('payments').select('id').eq('razorpay_payment_id', razorpayPaymentId).single();
+    if (!existingPayment) {
+      await supabaseAdmin.from('payments').insert([{
+        order_id: order.id,
+        razorpay_payment_id: razorpayPaymentId,
+        razorpay_order_id: razorpayOrderId,
+        payment_method: payment?.method || 'Online / Razorpay',
+        amount: payment?.amount ? payment.amount / 100 : order.total,
+        currency: 'INR',
+        status: 'Failed',
+        failure_reason: reason,
+        payment_date: nowIso
+      }]);
+    }
+  }
+
+  // Mark the order failed + cancelled.
+  await supabaseAdmin.from('orders').update({
+    payment_status: 'Failed',
+    order_status: 'Cancelled',
+    status: 'Failed',
+    failed_at: nowIso,
+    failure_reason: reason,
+    updated_at: nowIso
+  }).eq('id', order.id);
+
+  await supabaseAdmin.from('order_timeline').insert([{
+    order_id: order.id,
+    event: 'Payment Failed',
+    note: `Razorpay: ${reason}${razorpayPaymentId ? ` (Payment ID: ${razorpayPaymentId})` : ''}`,
+    created_by: 'system'
+  }]);
+
+  console.log(`❌ Order ${order.id} marked failed: ${reason}`);
+}
+
+// ====================================================================
+// Payment Authorized Processing — called when Razorpay sends
+// payment.authorized (payment authorized but not yet captured).
+// Records an intermediate 'Authorized' state so the admin can see the
+// payment is in progress. Does NOT mark the order as Paid.
+// ====================================================================
+async function processPaymentAuthorized(supabaseAdmin: any, razorpayOrderId: string, razorpayPaymentId: string, payment: any) {
+  let order: any = null;
+  const lookups = [
+    { column: 'razorpay_order_id', value: razorpayOrderId },
+    { column: 'payment_id', value: razorpayOrderId },
+  ];
+  for (const l of lookups) {
+    const { data } = await supabaseAdmin.from('orders').select('*').eq(l.column, l.value).single();
+    if (data) { order = data; break; }
+  }
+  if (!order) {
+    console.error(`Order not found for authorized Razorpay order ${razorpayOrderId}`);
+    return;
+  }
+
+  // If already paid, nothing to do.
+  if (order.payment_status === 'Paid') return;
+
+  const nowIso = new Date().toISOString();
+
+  // Record the authorized payment attempt (idempotent).
+  if (razorpayPaymentId) {
+    const { data: existingPayment } = await supabaseAdmin
+      .from('payments').select('id').eq('razorpay_payment_id', razorpayPaymentId).single();
+    if (!existingPayment) {
+      await supabaseAdmin.from('payments').insert([{
+        order_id: order.id,
+        razorpay_payment_id: razorpayPaymentId,
+        razorpay_order_id: razorpayOrderId,
+        payment_method: payment?.method || 'Online / Razorpay',
+        amount: payment?.amount ? payment.amount / 100 : order.total,
+        currency: 'INR',
+        status: 'Authorized',
+        payment_date: nowIso
+      }]);
+    }
+  }
+
+  await supabaseAdmin.from('orders').update({
+    payment_status: 'Authorized',
+    updated_at: nowIso
+  }).eq('id', order.id);
+
+  await supabaseAdmin.from('order_timeline').insert([{
+    order_id: order.id,
+    event: 'Payment Authorized',
+    note: `Razorpay payment authorized — awaiting capture${razorpayPaymentId ? ` (Payment ID: ${razorpayPaymentId})` : ''}`,
+    created_by: 'system'
+  }]);
+
+  console.log(`🔐 Order ${order.id} payment authorized (awaiting capture).`);
+}
+
 serve(async (req) => {
   const cors = corsHeaders(req);
   if (req.method === 'OPTIONS') {
@@ -283,12 +411,12 @@ serve(async (req) => {
       const isValid = await verifyWebhookSignature(reqText, signature);
       if (!isValid) return new Response('Invalid signature', { status: 400, headers: cors });
 
-      if (body.event === 'payment.captured' || body.event === 'order.paid') {
-        const supabaseAdmin = createClient(
-          Deno.env.get('SUPABASE_URL') ?? '',
-          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-        );
+      const supabaseAdmin = createClient(
+        Deno.env.get('SUPABASE_URL') ?? '',
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+      );
 
+      if (body.event === 'payment.captured' || body.event === 'order.paid') {
         let razorpayOrderId = '';
         let razorpayPaymentId = '';
 
@@ -305,6 +433,26 @@ serve(async (req) => {
 
         if (razorpayOrderId) {
           await processPaymentCapture(supabaseAdmin, razorpayOrderId, razorpayPaymentId);
+        }
+      } else if (body.event === 'payment.failed') {
+        // ── Payment failed: mark the order as failed + record the attempt ──
+        const payment = body.payload?.payment?.entity || {};
+        const razorpayOrderId = payment.order_id || '';
+        const razorpayPaymentId = payment.id || '';
+        const reason = payment.error_description || payment.error_code
+          || payment.error_reason || 'Payment failed';
+
+        if (razorpayOrderId) {
+          await processPaymentFailure(supabaseAdmin, razorpayOrderId, razorpayPaymentId, reason, payment);
+        }
+      } else if (body.event === 'payment.authorized') {
+        // ── Payment authorized but not yet captured (intermediate state) ──
+        const payment = body.payload?.payment?.entity || {};
+        const razorpayOrderId = payment.order_id || '';
+        const razorpayPaymentId = payment.id || '';
+
+        if (razorpayOrderId) {
+          await processPaymentAuthorized(supabaseAdmin, razorpayOrderId, razorpayPaymentId, payment);
         }
       }
 
