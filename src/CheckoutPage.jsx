@@ -2,15 +2,36 @@ import React, { useState, useCallback, useEffect } from 'react';
 import './CheckoutPage.css';
 import { supabase } from './supabaseClient';
 
+const RAZORPAY_SCRIPT_URL = 'https://checkout.razorpay.com/v1/checkout.js';
+
 const loadRazorpayScript = () =>
   new Promise((resolve) => {
     if (window.Razorpay) { resolve(true); return; }
+    // Avoid duplicate script tags if invoked more than once.
+    const existing = document.querySelector(`script[src="${RAZORPAY_SCRIPT_URL}"]`);
+    if (existing) {
+      existing.addEventListener('load', () => resolve(!!window.Razorpay));
+      existing.addEventListener('error', () => resolve(false));
+      return;
+    }
     const script = document.createElement('script');
-    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
-    script.onload = () => resolve(true);
+    script.src = RAZORPAY_SCRIPT_URL;
+    script.async = true;
+    script.onload = () => resolve(!!window.Razorpay);
     script.onerror = () => resolve(false);
     document.body.appendChild(script);
   });
+
+// Retry the script load a couple of times — flaky networks shouldn't silently
+// kill checkout. Resolves true once window.Razorpay is available.
+const ensureRazorpayScript = async (retries = 2) => {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    const ok = await loadRazorpayScript();
+    if (ok && window.Razorpay) return true;
+    if (attempt < retries) await new Promise((r) => setTimeout(r, 800));
+  }
+  return false;
+};
 
 function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
   // If cart is empty, redirect back to shop
@@ -230,19 +251,28 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
     setProcessingStep('Initializing payment...');
 
     try {
-      const res = await loadRazorpayScript();
-      if (!res) throw new Error('Failed to load payment gateway.');
+      setProcessingStep('Loading secure payment gateway...');
+      const res = await ensureRazorpayScript();
+      if (!res || !window.Razorpay) {
+        throw new Error('Could not load the payment gateway. Please check your internet connection and try again.');
+      }
 
+      setProcessingStep('Creating payment order...');
       const receiptId = `rcpt_${Date.now()}`;
       const { data, error } = await supabase.functions.invoke('razorpay', {
         body: { action: 'create_order', amount: total, receipt: receiptId }
       });
 
-      if (error) throw error;
+      // supabase.functions.invoke returns an `error` only for transport-level
+      // failures. A 4xx/5xx from the function still arrives as `data` with an
+      // `error` field, so check both and surface the real message.
+      if (error) throw new Error(error.message || 'Payment service is unavailable.');
       if (data?.error) throw new Error(data.error);
+      if (!data?.order?.id) throw new Error('Payment order could not be created.');
 
       const rzpOrderId = data.order.id;
-      const backendKeyId = data.order.key_id;
+      const backendKeyId = data.order.key_id || import.meta.env.VITE_RAZORPAY_KEY_ID;
+      if (!backendKeyId) throw new Error('Payment key is not configured.');
 
       setProcessingStep('Creating order...');
       const internalOrderId = await createPendingOrder(rzpOrderId);

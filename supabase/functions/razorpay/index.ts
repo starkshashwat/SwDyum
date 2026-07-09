@@ -1,7 +1,9 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.31.0';
 
-// V18: Restrict CORS to known origins instead of '*'.
+// V19: Echo the request Origin so the frontend invoke works from any
+// deployment (production, www, preview, localhost). Webhook security is
+// still enforced via HMAC signature verification, not CORS.
 const ALLOWED_ORIGINS = [
   'https://swadyum.store',
   'https://www.swadyum.store',
@@ -12,7 +14,9 @@ const ALLOWED_ORIGINS = [
 
 function corsHeaders(req: Request) {
   const origin = req.headers.get('Origin');
-  const allow = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  // Echo the requesting origin when present; otherwise fall back to the first
+  // allowed origin (used for non-browser requests such as Razorpay webhooks).
+  const allow = origin || ALLOWED_ORIGINS[0];
   return {
     'Access-Control-Allow-Origin': allow,
     'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-razorpay-signature',
@@ -463,15 +467,25 @@ serve(async (req) => {
     const { action, amount, receipt, razorpay_order_id, razorpay_payment_id, razorpay_signature } = body;
 
     if (action === 'create_order') {
-      if (!amount || !receipt) {
-        return new Response(JSON.stringify({ error: 'Missing amount or receipt' }), {
+      if (!amount || amount <= 0 || !receipt) {
+        return new Response(JSON.stringify({ error: 'Missing or invalid amount/receipt' }), {
           status: 400, headers: { ...cors, 'Content-Type': 'application/json' }
         });
       }
-      const order = await createRazorpayOrder(amount, receipt);
-      return new Response(JSON.stringify({ order }), {
-        headers: { ...cors, 'Content-Type': 'application/json' },
-      });
+      try {
+        const order = await createRazorpayOrder(amount, receipt);
+        return new Response(JSON.stringify({ order }), {
+          headers: { ...cors, 'Content-Type': 'application/json' },
+        });
+      } catch (err: any) {
+        console.error('create_order failed:', err);
+        // Surface a meaningful message so the frontend can show what went wrong
+        // (e.g. missing keys, Razorpay API error) instead of a generic failure.
+        const message = err?.message || 'Failed to create Razorpay order';
+        return new Response(JSON.stringify({ error: message }), {
+          status: 502, headers: { ...cors, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     if (action === 'verify_payment') {
