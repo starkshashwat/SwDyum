@@ -1,14 +1,29 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+// V18: Restrict CORS to known origins instead of '*'.
+const ALLOWED_ORIGINS = [
+  'https://swadyum.store',
+  'https://www.swadyum.store',
+  'http://localhost:5173',
+  'http://localhost:4173',
+  'http://localhost:3000',
+];
+
+function corsHeaders(req: Request) {
+  const origin = req.headers.get('Origin');
+  const allow = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allow,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+    'Vary': 'Origin',
+  };
 }
 
 serve(async (req) => {
+  const cors = corsHeaders(req);
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: cors })
   }
 
   try {
@@ -26,7 +41,7 @@ serve(async (req) => {
 
     if (userError || !user) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...cors, 'Content-Type': 'application/json' },
         status: 401,
       })
     }
@@ -37,7 +52,7 @@ serve(async (req) => {
       if (body.reason) {
         reason = body.reason;
       }
-    } catch(e) {
+    } catch (e) {
       // no body or invalid json
     }
 
@@ -61,13 +76,14 @@ serve(async (req) => {
     return new Response(
       JSON.stringify({ success: true, message: 'Account deletion request submitted successfully.' }),
       {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...cors, 'Content-Type': 'application/json' },
         status: 200,
       }
     )
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // V17: do not leak internal error details to the client.
+    return new Response(JSON.stringify({ error: 'Failed to submit deletion request.' }), {
+      headers: { ...cors, 'Content-Type': 'application/json' },
       status: 400,
     })
   }

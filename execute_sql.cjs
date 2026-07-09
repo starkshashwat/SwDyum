@@ -10,7 +10,7 @@ async function run() {
   try {
     await client.connect();
     console.log('Connected to database.');
-    const sql = fs.readFileSync('create_account_deletion_table.sql', 'utf8');
+    const sql = fs.readFileSync('provision_admin.sql', 'utf8');
     await client.query(sql);
     console.log('Migration executed successfully.');
   } catch (err) {

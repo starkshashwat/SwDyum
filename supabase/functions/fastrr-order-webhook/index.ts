@@ -11,20 +11,22 @@ function arrayBufferToBase64(buffer: ArrayBuffer) {
   return btoa(binary);
 }
 
+// V18: Webhooks are called by Shiprocket servers, not browsers. Restrict CORS
+// and do not reflect arbitrary origins.
+const WEBHOOK_CORS = {
+  'Access-Control-Allow-Origin': 'https://checkout-api.shiprocket.com',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-api-hmac-sha256',
+};
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response('ok', {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-api-hmac-sha256',
-      }
-    });
+    return new Response('ok', { headers: WEBHOOK_CORS });
   }
 
   try {
     const rawBodyText = await req.text();
-    
+
     const secretKey = Deno.env.get('FASTRR_SECRET_KEY');
     const providedSignature = req.headers.get('x-api-hmac-sha256');
 
@@ -48,25 +50,25 @@ serve(async (req) => {
         console.warn(`⚠️ Shiprocket Order Webhook HMAC mismatch!`);
         return new Response(JSON.stringify({ error: 'Invalid HMAC signature' }), {
           status: 401,
-          headers: { 'Content-Type': 'application/json' }
+          headers: { ...WEBHOOK_CORS, 'Content-Type': 'application/json' }
         });
       }
     }
 
     const orderData = JSON.parse(rawBodyText);
     const { order_id, status, cart_data, shipping_address, payments } = orderData;
-    
+
     if (!order_id) {
-       return new Response('OK', { status: 200 });
+      return new Response('OK', { status: 200, headers: WEBHOOK_CORS });
     }
 
     // Initialize Supabase with Service Role Key to bypass RLS
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || Deno.env.get('VITE_SUPABASE_URL') || '';
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
-    
+
     if (!supabaseUrl || !supabaseServiceKey) {
       console.error('❌ Supabase URL or Service Role Key not configured.');
-      return new Response('Supabase config missing', { status: 500 });
+      return new Response('Supabase config missing', { status: 500, headers: WEBHOOK_CORS });
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
@@ -81,11 +83,11 @@ serve(async (req) => {
       await supabase.from('orders').update({
         status: status === 'SUCCESS' ? 'Paid' : (status === 'INITIATED' ? 'Pending' : 'Failed')
       }).eq('id', order_id);
-      return new Response('OK', { status: 200 });
+      return new Response('OK', { status: 200, headers: WEBHOOK_CORS });
     }
 
     console.log(`✨ Creating new order ${order_id} from webhook...`);
-    
+
     let total = 0;
     if (payments && payments.length > 0) {
       total = payments.reduce((sum: number, p: any) => sum + parseFloat(p.amount), 0);
@@ -108,7 +110,7 @@ serve(async (req) => {
 
     if (insertOrderError) {
       console.error('❌ Failed to insert order:', insertOrderError);
-      return new Response('Failed to insert order', { status: 500 });
+      return new Response('Failed to insert order', { status: 500, headers: WEBHOOK_CORS });
     }
 
     if (cart_data?.items && cart_data.items.length > 0) {
@@ -129,13 +131,14 @@ serve(async (req) => {
       }
     }
 
-    return new Response('OK', { status: 200 });
+    return new Response('OK', { status: 200, headers: WEBHOOK_CORS });
 
   } catch (err: any) {
     console.error('❌ Order Webhook Error:', err);
-    return new Response(JSON.stringify({ error: err.message }), {
+    // V17: do not leak internal error details to the caller.
+    return new Response(JSON.stringify({ error: 'Webhook processing failed.' }), {
       status: 500,
-      headers: { 'Content-Type': 'application/json' }
+      headers: { ...WEBHOOK_CORS, 'Content-Type': 'application/json' }
     });
   }
 });

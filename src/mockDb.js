@@ -73,7 +73,7 @@ export const mockDb = {
   saveLocalCustomer: (customerData) => {
     const customers = mockDb.getLocalCustomers();
     const existingIdx = customers.findIndex(c => c.id === customerData.id || c.email.toLowerCase() === customerData.email.toLowerCase());
-    
+
     if (existingIdx > -1) {
       customers[existingIdx] = { ...customers[existingIdx], ...customerData };
     } else {
@@ -104,7 +104,7 @@ export const mockDb = {
     try {
       // 1. Try Authenticating with Supabase Auth
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      
+
       if (error) {
         // Fallback to local storage credentials check
         const localCustomers = mockDb.getLocalCustomers();
@@ -119,7 +119,7 @@ export const mockDb = {
       }
 
       const user = data.user;
-      
+
       // 2. Fetch profile details from Profiles table
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
@@ -166,7 +166,7 @@ export const mockDb = {
       }
 
       const user = data.user;
-      
+
       // 2. Try inserting a row into the public profiles table
       const profile = {
         id: user.id,
@@ -195,13 +195,18 @@ export const mockDb = {
   },
 
   updateCustomer: async (customerId, updatedFields) => {
-    // Attempt Edge Function update first (bypasses RLS, covers both UUIDs and WhatsApp phone numbers)
+    // Attempt Edge Function update first (covers both UUIDs and WhatsApp phone numbers).
+    // V2: the edge function now requires a valid session token (Bearer header).
     try {
+      const sessionToken = localStorage.getItem('swadyum_session_token');
+      const headers = { 'Content-Type': 'application/json' };
+      if (sessionToken) {
+        headers['Authorization'] = `Bearer ${sessionToken}`;
+      }
+
       const response = await fetch('https://dligrptvajjsbzlcpjsk.supabase.co/functions/v1/whatsapp-auth', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers,
         body: JSON.stringify({
           action: 'update_profile',
           id: customerId,
@@ -331,7 +336,7 @@ export const mockDb = {
   createOrder: async (orderData) => {
     const orders = mockDb.getLocalOrders();
     const orderId = 'ord_' + (1000 + orders.length + 1);
-    
+
     const newOrder = {
       id: orderId,
       date: new Date().toISOString(),

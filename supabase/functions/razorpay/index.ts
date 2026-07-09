@@ -1,15 +1,29 @@
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.31.0';
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-razorpay-signature',
-};
+// V18: Restrict CORS to known origins instead of '*'.
+const ALLOWED_ORIGINS = [
+  'https://swadyum.store',
+  'https://www.swadyum.store',
+  'http://localhost:5173',
+  'http://localhost:4173',
+  'http://localhost:3000',
+];
+
+function corsHeaders(req: Request) {
+  const origin = req.headers.get('Origin');
+  const allow = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allow,
+    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-razorpay-signature',
+    'Vary': 'Origin',
+  };
+}
 
 async function createRazorpayOrder(amount: number, receipt: string) {
   const keyId = Deno.env.get('RAZORPAY_KEY_ID');
   const keySecret = Deno.env.get('RAZORPAY_KEY_SECRET');
-  
+
   if (!keyId || !keySecret) {
     throw new Error('Razorpay keys are missing from environment variables');
   }
@@ -251,22 +265,23 @@ async function _processOrder(supabaseAdmin: any, order: any, razorpayOrderId: st
 }
 
 serve(async (req) => {
+  const cors = corsHeaders(req);
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders });
+    return new Response('ok', { headers: cors });
   }
 
   try {
     const reqText = await req.text();
     let body;
-    try { body = JSON.parse(reqText); } catch(e) { body = {}; }
+    try { body = JSON.parse(reqText); } catch (e) { body = {}; }
 
     // --- Webhook Handling ---
     if (body.entity === 'event') {
       const signature = req.headers.get('x-razorpay-signature');
-      if (!signature) return new Response('Missing signature', { status: 400 });
+      if (!signature) return new Response('Missing signature', { status: 400, headers: cors });
 
       const isValid = await verifyWebhookSignature(reqText, signature);
-      if (!isValid) return new Response('Invalid signature', { status: 400 });
+      if (!isValid) return new Response('Invalid signature', { status: 400, headers: cors });
 
       if (body.event === 'payment.captured' || body.event === 'order.paid') {
         const supabaseAdmin = createClient(
@@ -292,8 +307,8 @@ serve(async (req) => {
           await processPaymentCapture(supabaseAdmin, razorpayOrderId, razorpayPaymentId);
         }
       }
-      
-      return new Response('ok', { status: 200, headers: corsHeaders });
+
+      return new Response('ok', { status: 200, headers: cors });
     }
 
     // --- Frontend API Handling ---
@@ -302,35 +317,36 @@ serve(async (req) => {
     if (action === 'create_order') {
       if (!amount || !receipt) {
         return new Response(JSON.stringify({ error: 'Missing amount or receipt' }), {
-          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          status: 400, headers: { ...cors, 'Content-Type': 'application/json' }
         });
       }
       const order = await createRazorpayOrder(amount, receipt);
       return new Response(JSON.stringify({ order }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...cors, 'Content-Type': 'application/json' },
       });
     }
 
     if (action === 'verify_payment') {
       if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
         return new Response(JSON.stringify({ error: 'Missing payment details' }), {
-          status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          status: 400, headers: { ...cors, 'Content-Type': 'application/json' }
         });
       }
       const isValid = await verifyPaymentSignature(razorpay_order_id, razorpay_payment_id, razorpay_signature);
       return new Response(JSON.stringify({ success: isValid }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: { ...cors, 'Content-Type': 'application/json' },
       });
     }
 
     return new Response(JSON.stringify({ error: 'Invalid action or event' }), {
-      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      status: 400, headers: { ...cors, 'Content-Type': 'application/json' }
     });
-    
+
   } catch (error) {
     console.error('Function error:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // V17: do not leak internal error details to the client.
+    return new Response(JSON.stringify({ error: 'An unexpected error occurred.' }), {
+      status: 500, headers: { ...cors, 'Content-Type': 'application/json' },
     });
   }
 });

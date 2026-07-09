@@ -10,7 +10,8 @@
 
 import express from 'express';
 import cors from 'cors';
-import { createHmac } from 'crypto';
+import { createHmac, timingSafeEqual } from 'crypto';
+import crypto from 'crypto';
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -223,21 +224,37 @@ async function fulfillWithShiprocket(orderId, orderData, shippingDetails, paymen
 app.post('/api/payment/create-razorpay-order', async (req, res) => {
   try {
     const { amount, receipt } = req.body;
+
+    // V14: Validate the amount server-side. Must be a positive number within
+    // a sane range (₹1 to ₹1,00,000). Prevents zero-rupee / negative exploits.
+    const numericAmount = Number(amount);
+    if (!Number.isFinite(numericAmount) || numericAmount < 1 || numericAmount > 100000) {
+      return res.status(400).json({ error: 'Invalid order amount.' });
+    }
+
     const keyId = process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
 
-    if (!keyId || keyId.includes('rzp_test_YOUR') || !keySecret || keySecret.includes('YOUR_KEY')) {
-      // Dev mode: return a mock Razorpay order so the app doesn't crash
-      console.warn('⚠️  Razorpay not configured — returning mock order (dev mode)');
+    // V11: Mock mode is only allowed when explicitly enabled via env, so a
+    // misconfigured production deployment never silently skips real payments.
+    const MOCK_PAYMENTS = process.env.MOCK_PAYMENTS === 'true';
+    const keysConfigured = keyId && !keyId.includes('rzp_test_YOUR') && keySecret && !keySecret.includes('YOUR_KEY');
+
+    if (!keysConfigured) {
+      if (!MOCK_PAYMENTS) {
+        console.error('❌ Razorpay keys not configured and MOCK_PAYMENTS is not enabled. Rejecting.');
+        return res.status(500).json({ error: 'Payments are not configured.' });
+      }
+      console.warn('⚠️  Razorpay not configured — returning mock order (MOCK_PAYMENTS=true)');
       return res.json({
         razorpay_order_id: `mock_order_${Date.now()}`,
-        amount: amount * 100,
+        amount: numericAmount * 100,
         currency: 'INR',
         mock: true,
       });
     }
 
-    console.log(`💳 Creating Razorpay order: ₹${amount} | Receipt: ${receipt}`);
+    console.log(`💳 Creating Razorpay order: ₹${numericAmount} | Receipt: ${receipt}`);
 
     const response = await fetch('https://api.razorpay.com/v1/orders', {
       method: 'POST',
@@ -246,7 +263,7 @@ app.post('/api/payment/create-razorpay-order', async (req, res) => {
         Authorization: `Basic ${Buffer.from(`${keyId}:${keySecret}`).toString('base64')}`,
       },
       body: JSON.stringify({
-        amount: Math.round(amount * 100), // paise
+        amount: Math.round(numericAmount * 100), // paise
         currency: 'INR',
         receipt,
         notes: { source: 'Swadyum Pickles' },
@@ -264,7 +281,8 @@ app.post('/api/payment/create-razorpay-order', async (req, res) => {
     });
   } catch (err) {
     console.error('❌ Razorpay create-order error:', err.message);
-    res.status(500).json({ error: err.message });
+    // V17: do not leak internal error details to the client.
+    res.status(500).json({ error: 'Failed to create payment order.' });
   }
 });
 
@@ -287,33 +305,59 @@ app.post('/api/fulfill-order', async (req, res) => {
 
     // ── Step 1: Verify Razorpay Payment (skip for COD) ────────────────────────
     if (paymentMethod !== 'COD') {
-      if (!razorpay_payment_id || !razorpay_signature) {
+      if (!razorpay_payment_id || !razorpay_signature || !razorpay_order_id) {
         return res.status(400).json({ error: 'Payment details missing for prepaid order.' });
       }
 
       const keySecret = process.env.RAZORPAY_KEY_SECRET;
+      const keysConfigured = keySecret && !keySecret.includes('YOUR_KEY');
+      const MOCK_PAYMENTS = process.env.MOCK_PAYMENTS === 'true';
 
-      // If secret is configured (not placeholder), verify the signature
-      if (keySecret && !keySecret.includes('YOUR_KEY')) {
+      // V11: Fail closed. If keys are not configured, we only proceed when
+      // MOCK_PAYMENTS is explicitly enabled AND the payment id is a mock id.
+      // We never skip verification for a real-looking payment id.
+      if (!keysConfigured) {
+        if (!MOCK_PAYMENTS || !razorpay_payment_id.startsWith('mock_')) {
+          console.error('❌ Razorpay secret not configured and request is not a mock. Rejecting.');
+          return res.status(500).json({ error: 'Payment verification is not configured.' });
+        }
+        console.warn('⚠️  Mock payment accepted (MOCK_PAYMENTS=true).');
+      } else {
         const expectedSignature = createHmac('sha256', keySecret)
           .update(`${razorpay_order_id}|${razorpay_payment_id}`)
           .digest('hex');
 
-        if (expectedSignature !== razorpay_signature) {
+        // Use timingSafeEqual to avoid timing attacks.
+        const a = Buffer.from(expectedSignature, 'hex');
+        const b = Buffer.from(razorpay_signature, 'hex');
+        if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
           console.error('❌ Razorpay signature mismatch!');
           return res.status(400).json({
             error: 'Payment verification failed. Possible tampering detected.',
           });
         }
         console.log(`✅ Razorpay payment verified: ${razorpay_payment_id}`);
-      } else {
-        // Mock mode: signature starts with 'mock_' — skip verification
-        if (!razorpay_payment_id.startsWith('mock_')) {
-          console.warn('⚠️  Razorpay secret not configured — skipping signature verification');
-        }
       }
     } else {
       console.log('📦 COD order — skipping payment verification');
+    }
+
+    // V14: Basic server-side cart validation. Reject obviously malformed
+    // order data before forwarding to Shiprocket. (Full price recomputation
+    // from authoritative product data should be added once a cart store exists.)
+    if (!orderData || !Array.isArray(orderData.items) || orderData.items.length === 0) {
+      return res.status(400).json({ error: 'Order must contain at least one item.' });
+    }
+    for (const item of orderData.items) {
+      if (!item || typeof item.quantity !== 'number' || item.quantity < 1 || item.quantity > 99) {
+        return res.status(400).json({ error: 'Invalid item quantity.' });
+      }
+      if (typeof item.price !== 'number' || item.price < 0) {
+        return res.status(400).json({ error: 'Invalid item price.' });
+      }
+    }
+    if (typeof orderData.total !== 'number' || orderData.total < 0) {
+      return res.status(400).json({ error: 'Invalid order total.' });
     }
 
     // ── Step 2: Fulfill with Shiprocket ───────────────────────────────────────
@@ -347,7 +391,8 @@ app.post('/api/fulfill-order', async (req, res) => {
 
   } catch (err) {
     console.error('❌ fulfill-order error:', err.message);
-    res.status(500).json({ error: err.message });
+    // V17: do not leak internal error details to the client.
+    res.status(500).json({ error: 'Failed to fulfill order.' });
   }
 });
 
@@ -370,6 +415,37 @@ app.get('/api/shiprocket/track/:awb', async (req, res) => {
 // SHIPROCKET FASTRR CHECKOUT ENDPOINTS
 // ═══════════════════════════════════════════════════════════════════════════════
 
+// V16: Allow-list of trusted redirect URLs for Fastrr checkout.
+const ALLOWED_REDIRECT_ORIGINS = [
+  'https://swadyum.store',
+  'https://www.swadyum.store',
+  'http://localhost:5173',
+  'http://localhost:4173',
+  'http://localhost:3000',
+];
+
+function isAllowedRedirect(url) {
+  if (!url) return false;
+  try {
+    const parsed = new URL(url);
+    return ALLOWED_REDIRECT_ORIGINS.includes(`${parsed.protocol}//${parsed.host}`);
+  } catch {
+    return false;
+  }
+}
+
+// V15: Cap pagination to prevent unbounded queries.
+const MAX_PAGE_LIMIT = 100;
+function parsePagination(query) {
+  let page = parseInt(query.page) || 1;
+  let limit = parseInt(query.limit) || 50;
+  if (!Number.isFinite(page) || page < 1) page = 1;
+  if (!Number.isFinite(limit) || limit < 1) limit = 50;
+  if (limit > MAX_PAGE_LIMIT) limit = MAX_PAGE_LIMIT;
+  const offset = (page - 1) * limit;
+  return { page, limit, offset };
+}
+
 app.post('/api/fastrr/access-token', async (req, res) => {
   try {
     const { cart_data, redirect_url } = req.body;
@@ -380,14 +456,19 @@ app.post('/api/fastrr/access-token', async (req, res) => {
       return res.status(500).json({ error: 'Fastrr API or Secret Key not configured' });
     }
 
+    // V16: Validate redirect_url against the allow-list to prevent open redirect.
+    const finalRedirectUrl = isAllowedRedirect(redirect_url)
+      ? redirect_url
+      : (process.env.PUBLIC_STORE_URL || 'https://swadyum.store');
+
     const payload = {
       cart_data,
-      redirect_url: redirect_url || "http://localhost:5173",
+      redirect_url: finalRedirectUrl,
       timestamp: new Date().toISOString()
     };
 
     const payloadStr = JSON.stringify(payload);
-    
+
     // Calculate HMAC SHA256 using the Secret Key
     const hmac = createHmac('sha256', secretKey)
       .update(payloadStr)
@@ -406,7 +487,7 @@ app.post('/api/fastrr/access-token', async (req, res) => {
     });
 
     const data = await response.json();
-    
+
     if (!response.ok) {
       console.error('❌ Fastrr token error:', data);
       return res.status(response.status).json({ error: data.message || 'Failed to generate Fastrr token' });
@@ -427,9 +508,7 @@ app.post('/api/fastrr/access-token', async (req, res) => {
 app.get('/api/shiprocket/products', async (req, res) => {
   if (!supabase) return res.status(500).json({ error: 'Supabase not configured' });
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50;
-    const offset = (page - 1) * limit;
+    const { page, limit, offset } = parsePagination(req.query);
 
     const { data: products, error, count } = await supabase
       .from('products')
@@ -512,9 +591,7 @@ app.get('/api/shiprocket/collections/:id/products', async (req, res) => {
   if (!supabase) return res.status(500).json({ error: 'Supabase not configured' });
   try {
     const { id } = req.params;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 50;
-    const offset = (page - 1) * limit;
+    const { page, limit, offset } = parsePagination(req.query);
 
     const { data: products, error, count } = await supabase
       .from('products')
@@ -626,7 +703,7 @@ async function fetchAndFormatCollection(categoryId) {
     .select('*')
     .eq('id', categoryId)
     .single();
-    
+
   if (error || !c) return null;
 
   return {
@@ -647,7 +724,7 @@ const syncTimeouts = {};
 function triggerShiprocketProductSync(productId) {
   if (!productId) return;
   if (syncTimeouts[`prod_${productId}`]) clearTimeout(syncTimeouts[`prod_${productId}`]);
-  
+
   syncTimeouts[`prod_${productId}`] = setTimeout(async () => {
     try {
       console.log(`🔄 Syncing product ${productId} to Shiprocket...`);
@@ -667,7 +744,7 @@ function triggerShiprocketProductSync(productId) {
 
       const res = await fetch(SHIPROCKET_WH_PRODUCT, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'X-Api-Key': apiKey,
           'X-Api-HMAC-SHA256': hmac
@@ -685,7 +762,7 @@ function triggerShiprocketProductSync(productId) {
 function triggerShiprocketCollectionSync(categoryId) {
   if (!categoryId) return;
   if (syncTimeouts[`cat_${categoryId}`]) clearTimeout(syncTimeouts[`cat_${categoryId}`]);
-  
+
   syncTimeouts[`cat_${categoryId}`] = setTimeout(async () => {
     try {
       console.log(`🔄 Syncing collection ${categoryId} to Shiprocket...`);
@@ -705,7 +782,7 @@ function triggerShiprocketCollectionSync(categoryId) {
 
       const res = await fetch(SHIPROCKET_WH_COLLECTION, {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'X-Api-Key': apiKey,
           'X-Api-HMAC-SHA256': hmac
@@ -754,23 +831,40 @@ app.post('/api/webhooks/shiprocket/order', async (req, res) => {
     const secretKey = process.env.FASTRR_SECRET_KEY;
     const providedSignature = req.headers['x-api-hmac-sha256'];
 
-    if (secretKey && providedSignature) {
-      const calculatedSignature = createHmac('sha256', secretKey).update(rawBody).digest('base64');
-      if (calculatedSignature !== providedSignature) {
-        console.warn(`⚠️ Shiprocket Order Webhook HMAC mismatch! Expected ${calculatedSignature}, got ${providedSignature}`);
-        // During early testing, we might just warn, but usually we would return 401
+    // V12: Fail closed. When the secret is configured, the webhook MUST be
+    // signed correctly. A missing or mismatched signature is rejected with 401
+    // so attackers cannot forge order webhooks.
+    if (secretKey) {
+      if (!providedSignature) {
+        console.error('❌ Shiprocket webhook rejected: missing HMAC signature.');
+        return res.status(401).json({ error: 'Missing signature.' });
       }
+      const calculatedSignature = createHmac('sha256', secretKey).update(rawBody).digest('base64');
+      const a = Buffer.from(calculatedSignature, 'base64');
+      const b = Buffer.from(providedSignature, 'base64');
+      if (a.length !== b.length || !timingSafeEqual(a, b)) {
+        console.error('❌ Shiprocket webhook rejected: HMAC signature mismatch.');
+        return res.status(401).json({ error: 'Invalid signature.' });
+      }
+    } else {
+      // No secret configured — reject in production. Allow only if explicitly
+      // running in a dev/test mode.
+      if (process.env.MOCK_WEBHOOKS !== 'true') {
+        console.error('❌ Shiprocket webhook rejected: FASTRR_SECRET_KEY not configured.');
+        return res.status(500).json({ error: 'Webhook verification not configured.' });
+      }
+      console.warn('⚠️  MOCK_WEBHOOKS=true — accepting unsigned webhook (dev only).');
     }
 
     const orderData = req.body;
-    
+
     if (!supabase) {
       console.error('❌ Supabase not initialized, cannot save order from webhook.');
       return res.status(200).send('OK'); // Must return 200 so Shiprocket stops retrying
     }
 
     const { order_id, status, cart_data, shipping_address, payment_type, payments } = orderData;
-    
+
     if (!order_id) return res.status(200).send('OK');
 
     console.log(`📥 Received Order Webhook from Shiprocket: ${order_id} [${status}]`);
@@ -788,7 +882,7 @@ app.post('/api/webhooks/shiprocket/order', async (req, res) => {
 
     // New Order - Insert it
     console.log(`✨ Creating new order ${order_id} from webhook...`);
-    
+
     let total = 0;
     if (payments && payments.length > 0) {
       total = payments.reduce((sum, p) => sum + parseFloat(p.amount), 0);
@@ -814,21 +908,21 @@ app.post('/api/webhooks/shiprocket/order', async (req, res) => {
 
     if (insertError) {
       console.error(`❌ DB Insert Error for order ${order_id}:`, insertError);
-      return res.status(200).send('OK'); 
+      return res.status(200).send('OK');
     }
 
     // Insert Items
     if (cart_data && cart_data.items) {
       const orderItems = cart_data.items.map(item => ({
         order_id: order_id,
-        variant_id: item.variant_id, 
+        variant_id: item.variant_id,
         product_name: item.name || `Variant ${item.variant_id}`,
         weight_label: item.weight || 'Unknown',
         quantity: item.quantity,
         unit_price: item.price || 0,
         total_price: (item.price || 0) * item.quantity
       }));
-      
+
       const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
       if (itemsError) {
         console.error(`❌ DB Insert Items Error for order ${order_id}:`, itemsError);
@@ -840,7 +934,7 @@ app.post('/api/webhooks/shiprocket/order', async (req, res) => {
 
   } catch (err) {
     console.error('❌ Order Webhook Error:', err);
-    res.status(200).send('OK'); 
+    res.status(200).send('OK');
   }
 });
 
