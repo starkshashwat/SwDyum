@@ -197,6 +197,7 @@ function App() {
           name: product.name,
           weight: weight,
           price: product.price || product.prices?.[weight] || product.base_price,
+          mrp: product.variants?.find(v => v.weight_label === weight)?.mrp || product.mrp || null,
           quantity: qty,
           image: product.image || product.images?.[0] || '/prod_mango.webp',
           subscription: subscription
