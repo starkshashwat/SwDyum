@@ -1,98 +1,162 @@
 .pdp-combo-section {
-  padding: var(--space-16) var(--space-6);
-  background: var(--color-ink); /* Dark luxury background */
-  color: white;
+  padding: var(--space-14, 3.5rem) var(--space-4);
+  background: linear-gradient(135deg, var(--color-ink), #0a3a20);
+  color: #fff;
+  position: relative;
+  overflow: hidden;
+}
+
+.pdp-combo-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(200, 220, 160, 0.12), transparent 50%);
+  pointer-events: none;
 }
 
 .pdp-combo-container {
-  max-width: 1200px;
+  max-width: 1180px;
   margin: 0 auto;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-8);
   align-items: center;
-  gap: var(--space-16);
+  position: relative;
 }
 
 .pdp-combo-content {
-  flex: 1;
+  z-index: 1;
 }
 
 .pdp-combo-eyebrow {
   display: block;
-  font-size: 0.85rem;
-  font-weight: 700;
+  font-size: 0.82rem;
+  font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 2px;
-  color: var(--color-mustard);
+  color: var(--color-mango);
   margin-bottom: var(--space-3);
 }
 
 .pdp-combo-heading {
   font-family: var(--font-heading);
-  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-size: clamp(1.8rem, 5vw, 3rem);
   line-height: 1.1;
-  color: white;
+  color: #fff;
   margin-bottom: var(--space-4);
+  letter-spacing: -0.5px;
 }
 
 .pdp-combo-desc {
-  font-size: 1.1rem;
+  font-size: 1rem;
   line-height: 1.7;
-  color: rgba(255,255,255,0.8);
-  margin-bottom: var(--space-8);
-  max-width: 500px;
+  color: rgba(255, 255, 255, 0.82);
+  margin-bottom: var(--space-5);
+  max-width: 480px;
+}
+
+.pdp-combo-perks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-bottom: var(--space-6);
+}
+
+.pdp-combo-perk {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--color-mustard);
+  background: rgba(200, 220, 160, 0.12);
+  padding: 6px 12px;
+  border-radius: var(--radius-full);
 }
 
 .pdp-combo-btn {
-  background: var(--color-mustard);
+  background: var(--color-mango);
   color: var(--color-ink);
   border: none;
-  padding: 16px 32px;
+  padding: 15px 30px;
   border-radius: var(--radius-full);
-  font-weight: 700;
-  font-size: 1.1rem;
-  transition: all 0.3s;
+  font-weight: 800;
+  font-size: 1rem;
+  transition: all var(--duration-normal) var(--ease-out);
+  box-shadow: 0 8px 20px rgba(232, 168, 58, 0.3);
 }
 
 .pdp-combo-btn:hover {
-  background: white;
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+  background: #fff;
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
+}
+
+.pdp-combo-btn:active {
+  transform: translateY(0) scale(0.98);
 }
 
 .pdp-combo-image {
-  flex: 1;
   display: flex;
   justify-content: center;
+  z-index: 1;
 }
 
 .combo-spotlight {
+  position: relative;
   width: 100%;
-  aspect-ratio: 1/1;
-  background: radial-gradient(circle, rgba(200,220,160,0.15) 0%, transparent 70%);
+  max-width: 360px;
+  aspect-ratio: 1 / 1;
+  background: radial-gradient(circle, rgba(200, 220, 160, 0.18) 0%, transparent 70%);
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.combo-placeholder-img {
-  width: 80%;
-  height: 80%;
-  background: rgba(255,255,255,0.05);
-  border: 1px dashed rgba(255,255,255,0.2);
-  border-radius: var(--radius-lg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.2rem;
-  color: rgba(255,255,255,0.5);
+.combo-img {
+  width: 88%;
+  height: 88%;
+  object-fit: cover;
+  border-radius: var(--radius-xl);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
-@media (max-width: 900px) {
-  .pdp-combo-container {
-    flex-direction: column;
-    text-align: center;
+.combo-save-badge {
+  position: absolute;
+  top: 6%;
+  right: 6%;
+  background: var(--color-mango);
+  color: var(--color-ink);
+  font-weight: 900;
+  font-size: 0.85rem;
+  padding: 10px 14px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
+  animation: combo-badge-pulse 2.4s infinite;
+}
+
+@keyframes combo-badge-pulse {
+
+  0%,
+  100% {
+    transform: scale(1) rotate(-4deg);
   }
-  .pdp-combo-desc {
-    margin: 0 auto var(--space-8);
+
+  50% {
+    transform: scale(1.06) rotate(-4deg);
+  }
+}
+
+@media (min-width: 820px) {
+  .pdp-combo-section {
+    padding: var(--space-16) var(--space-6);
+  }
+
+  .pdp-combo-container {
+    grid-template-columns: 1.1fr 1fr;
+    gap: var(--space-16);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .combo-save-badge {
+    animation: none;
   }
 }

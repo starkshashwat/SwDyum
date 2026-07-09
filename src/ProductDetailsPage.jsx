@@ -11,6 +11,7 @@ import PdpTabs from './components/pdp/PdpTabs';
 import ReviewSection from './ReviewSection';
 import PdpUgc from './components/pdp/PdpUgc';
 import PdpComboSection from './components/pdp/PdpComboSection';
+import PdpRelated from './components/pdp/PdpRelated';
 import PdpFaq from './components/pdp/PdpFaq';
 
 function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow, cart }) {
@@ -30,7 +31,7 @@ function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow, cart })
         setQuantity(1);
         setSubscription('One Time');
         setLoading(false); // Stop loader immediately
-        
+
         // Fetch related asynchronously so it doesn't block
         getRelatedProducts(data.id, 4).then(related => {
           setP(prev => ({ ...prev, related }));
@@ -48,9 +49,9 @@ function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow, cart })
 
   return (
     <div className="pdp-wrapper">
-      
+
       {/* 1. HERO */}
-      <PdpHero 
+      <PdpHero
         product={p}
         selectedSize={selectedSize}
         setSelectedSize={setSelectedSize}
@@ -65,10 +66,13 @@ function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow, cart })
       />
 
       {/* 2. STICKY PURCHASE BAR */}
-      <PdpStickyBar 
+      <PdpStickyBar
         product={p}
         selectedSize={selectedSize}
+        quantity={quantity}
+        setQuantity={setQuantity}
         addToCart={addToCart}
+        handleBuyNow={handleBuyNow}
       />
 
       {/* 3. INGREDIENTS SHOWCASE */}
@@ -84,15 +88,20 @@ function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow, cart })
       <PdpTabs product={p} tabsData={p.pdp_config?.tabs} />
 
       {/* 7. REVIEWS */}
-      <ReviewSection productId={p.id} />
+      <div id="pdp-reviews">
+        <ReviewSection productId={p.id} />
+      </div>
 
       {/* 8. UGC (INSTAGRAM) */}
       <PdpUgc />
 
-      {/* 9. COMBO SECTION */}
+      {/* 9. RELATED PRODUCTS */}
+      <PdpRelated products={p.related} onNavigate={onNavigate} />
+
+      {/* 10. COMBO SECTION */}
       <PdpComboSection onNavigate={onNavigate} />
 
-      {/* 10. FAQ */}
+      {/* 11. FAQ */}
       <PdpFaq />
 
     </div>

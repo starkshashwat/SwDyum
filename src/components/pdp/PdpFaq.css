@@ -1,18 +1,22 @@
 .pdp-faq-section {
-  padding: var(--space-16) var(--space-6);
+  padding: var(--space-14, 3.5rem) var(--space-4);
   background: var(--color-bg);
 }
 
 .pdp-faq-container {
-  max-width: 800px;
+  max-width: 820px;
   margin: 0 auto;
 }
 
+.pdp-section-header.center {
+  text-align: center;
+  margin-bottom: var(--space-8);
+}
+
 .faq-list {
-  margin-top: var(--space-8);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .faq-item {
@@ -20,27 +24,60 @@
   border-radius: var(--radius-md);
   background: var(--color-card);
   overflow: hidden;
+  transition: box-shadow var(--duration-fast), border-color var(--duration-fast);
+}
+
+.faq-item.open {
+  border-color: var(--color-chili);
+  box-shadow: 0 8px 24px rgba(10, 90, 50, 0.08);
 }
 
 .faq-question {
   width: 100%;
   text-align: left;
-  padding: 20px 24px;
+  padding: 18px 20px;
   font-family: var(--font-heading);
-  font-size: 1.1rem;
-  font-weight: 600;
+  font-size: 1rem;
+  font-weight: 700;
   color: var(--color-ink);
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 12px;
   background: transparent;
   cursor: pointer;
+  transition: background var(--duration-fast);
+}
+
+.faq-question:hover {
+  background: var(--color-cream);
 }
 
 .faq-icon {
-  font-size: 1.5rem;
-  color: var(--color-chili);
-  font-weight: 400;
+  position: relative;
+  width: 22px;
+  height: 22px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.faq-icon-line {
+  position: absolute;
+  width: 14px;
+  height: 2px;
+  background: var(--color-chili);
+  border-radius: 2px;
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+
+.faq-icon-line.vertical {
+  transform: rotate(90deg);
+}
+
+.faq-icon-line.vertical.open {
+  transform: rotate(0deg);
 }
 
 .faq-answer-wrap {
@@ -48,7 +85,32 @@
 }
 
 .faq-answer {
-  padding: 0 24px 24px;
+  padding: 0 20px 20px;
   color: var(--color-muted);
-  line-height: 1.6;
+  line-height: 1.7;
+  font-size: 0.95rem;
+}
+
+@media (min-width: 768px) {
+  .pdp-faq-section {
+    padding: var(--space-16) var(--space-6);
+  }
+
+  .faq-question {
+    font-size: 1.1rem;
+    padding: 22px 24px;
+  }
+
+  .faq-answer {
+    padding: 0 24px 24px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+  .faq-item,
+  .faq-question,
+  .faq-icon-line {
+    transition: none;
+  }
 }

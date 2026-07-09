@@ -3,79 +3,199 @@
   bottom: 0;
   left: 0;
   width: 100%;
-  background: var(--color-bg);
-  box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
-  transform: translateY(100%);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 -6px 24px rgba(17, 32, 24, 0.12);
   z-index: 1000;
-  padding: 12px var(--space-6);
-}
-
-.pdp-sticky-bar.visible {
-  transform: translateY(0);
+  padding: 10px var(--space-4);
+  border-top: 1px solid var(--color-border);
 }
 
 .pdp-sticky-inner {
-  max-width: 1200px;
+  max-width: 1280px;
   margin: 0 auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: var(--space-3);
 }
 
 .pdp-sticky-product {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  min-width: 0;
 }
 
 .pdp-sticky-product img {
-  width: 50px;
-  height: 50px;
+  width: 48px;
+  height: 48px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.pdp-sticky-info {
+  min-width: 0;
 }
 
 .pdp-sticky-info h4 {
   margin: 0;
-  font-size: 1.1rem;
+  font-size: 0.92rem;
   font-family: var(--font-heading);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pdp-sticky-price-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.pdp-sticky-price {
+  font-weight: 800;
+  color: var(--color-ink);
+  font-size: 0.95rem;
+}
+
+.pdp-sticky-save {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--color-chili);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
 }
 
 .pdp-sticky-variant {
-  font-size: 0.9rem;
+  font-size: 0.78rem;
   color: var(--color-muted);
+  font-weight: 600;
+}
+
+.pdp-sticky-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.pdp-sticky-qty {
+  display: flex;
+  align-items: center;
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: var(--color-card);
+}
+
+.pdp-sticky-qty button {
+  width: 34px;
+  height: 40px;
+  font-size: 1.1rem;
+  color: var(--color-chili);
+  transition: background var(--duration-fast);
+}
+
+.pdp-sticky-qty button:hover {
+  background: var(--color-cream);
+}
+
+.pdp-sticky-qty button:active {
+  transform: scale(0.92);
+}
+
+.pdp-sticky-qty span {
+  min-width: 28px;
+  text-align: center;
+  font-weight: 800;
+  font-size: 0.9rem;
 }
 
 .pdp-sticky-add {
+  background: var(--color-card);
+  color: var(--color-chili);
+  border: 2px solid var(--color-chili);
+  padding: 10px 18px;
+  border-radius: var(--radius-md);
+  font-weight: 800;
+  transition: all var(--duration-fast) var(--ease-out);
+}
+
+.pdp-sticky-add:hover:not(:disabled) {
   background: var(--color-chili);
-  color: white;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+.pdp-sticky-add:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.pdp-sticky-buy {
+  background: linear-gradient(135deg, var(--color-chili), var(--color-chili-light));
+  color: #fff;
   border: none;
-  padding: 12px 32px;
-  border-radius: var(--radius-full);
-  font-weight: 700;
-  cursor: pointer;
-  transition: background 0.2s;
+  padding: 12px 22px;
+  border-radius: var(--radius-md);
+  font-weight: 800;
+  box-shadow: 0 6px 16px rgba(10, 90, 50, 0.25);
+  transition: all var(--duration-fast) var(--ease-out);
 }
 
-.pdp-sticky-add:hover {
-  background: var(--color-chili-dark);
+.pdp-sticky-buy:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 22px rgba(10, 90, 50, 0.35);
 }
 
-@media (min-width: 769px) {
-  .pdp-sticky-bar {
-    top: 0;
-    bottom: auto;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    transform: translateY(-100%);
+.pdp-sticky-buy:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.pdp-sticky-add:disabled,
+.pdp-sticky-buy:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Mobile: hide qty in sticky to keep thumb-friendly */
+@media (max-width: 600px) {
+  .pdp-sticky-qty {
+    display: none;
   }
-}
 
-@media (max-width: 768px) {
+  .pdp-sticky-product img {
+    width: 40px;
+    height: 40px;
+  }
+
   .pdp-sticky-info h4 {
-    font-size: 1rem;
+    font-size: 0.82rem;
+    max-width: 120px;
   }
+
+  .pdp-sticky-price-row {
+    gap: 6px;
+  }
+
+  .pdp-sticky-save {
+    display: none;
+  }
+
   .pdp-sticky-add {
-    padding: 10px 20px;
+    padding: 10px 14px;
+  }
+
+  .pdp-sticky-buy {
+    padding: 10px 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pdp-sticky-bar {
+    transition: none;
   }
 }
