@@ -73,34 +73,34 @@ function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow }) {
         handleBuyNow={handleBuyNow}
       />
 
-      {/* 3. INGREDIENTS SHOWCASE */}
+      {/* 3. INGREDIENTS SHOWCASE — "what's inside" */}
       <PdpIngredients ingredients={p.pure_ingredients} />
 
-      {/* 4. THE MAKING PROCESS (TIMELINE) */}
-      <PdpProcessTimeline />
-
-      {/* 5. TASTE PROFILE */}
+      {/* 4. TASTE PROFILE — "will I like it?" (moved up before process) */}
       <PdpTasteProfile tasteProfile={p.pdp_config?.taste_profile} />
 
-      {/* 6. TABS (INFO) */}
+      {/* 5. THE MAKING PROCESS (TIMELINE) — "how it's made" */}
+      <PdpProcessTimeline />
+
+      {/* 6. TABS (INFO) — full specs */}
       <PdpTabs product={p} tabsData={p.pdp_config?.tabs} />
 
-      {/* 7. REVIEWS */}
+      {/* 7. REVIEWS — social proof */}
       <div id="pdp-reviews">
         <ReviewSection productId={p.id} />
       </div>
 
-      {/* 8. UGC (INSTAGRAM) */}
+      {/* 8. UGC (COMMUNITY) */}
       <PdpUgc />
 
-      {/* 9. RELATED PRODUCTS */}
-      <PdpRelated products={p.related} onNavigate={onNavigate} />
+      {/* 9. FAQ — objection handling before upsell */}
+      <PdpFaq />
 
-      {/* 10. COMBO SECTION */}
+      {/* 10. COMBO SECTION — upsell once convinced */}
       <PdpComboSection onNavigate={onNavigate} />
 
-      {/* 11. FAQ */}
-      <PdpFaq />
+      {/* 11. RELATED PRODUCTS — broader cross-sell */}
+      <PdpRelated products={p.related} onNavigate={onNavigate} />
 
     </div>
   );

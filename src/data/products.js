@@ -92,6 +92,19 @@ export const getProductBySlug = async (slug) => {
     });
   }
 
+  // Real review aggregate — no fabricated numbers (honest fallback: 0 → hidden in UI)
+  let rating = 0;
+  let reviewsCount = 0;
+  const { data: reviewRows } = await supabase
+    .from('product_reviews')
+    .select('rating')
+    .eq('product_id', product.id)
+    .eq('is_approved', true);
+  if (reviewRows && reviewRows.length > 0) {
+    reviewsCount = reviewRows.length;
+    rating = Math.round((reviewRows.reduce((acc, r) => acc + (r.rating || 0), 0) / reviewsCount) * 10) / 10;
+  }
+
   return {
     id: product.id,
     name: product.name,
@@ -104,8 +117,8 @@ export const getProductBySlug = async (slug) => {
     prices: pricesMap,
     base_price: product.base_price,
     isBestseller: product.is_bestseller,
-    rating: 4.9,
-    reviewsCount: Math.floor(Math.random() * 50) + 10,
+    rating,
+    reviewsCount,
     stock: totalStock,
     variants: product.product_variants || [],
     pure_ingredients: product.pure_ingredients || [],

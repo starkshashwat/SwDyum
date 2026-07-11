@@ -41,6 +41,7 @@ function App() {
     if (path === '/about') return 'about';
     if (path === '/contact') return 'contact';
     if (path === '/recipes') return 'recipes';
+    if (path === '/thank-you') return 'thank-you';
     if (path === '/reviews') return 'reviews';
     if (path === '/privacy-policy') return 'privacy-policy';
     if (path === '/delete-account') return 'delete-account';

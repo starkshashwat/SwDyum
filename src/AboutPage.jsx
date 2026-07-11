@@ -131,14 +131,16 @@ function AboutPage({ onNavigate }) {
 
           <div className="about-values-grid">
             {values.map((val, i) => (
-              <motion.div 
-                className="about-value-card" 
+              <motion.div
+                className="about-value-card"
                 key={i}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
+                whileHover={{ y: -6 }}
               >
+                <div className="value-number">{String(i + 1).padStart(2, '0')}</div>
                 <div className="value-icon">{val.icon}</div>
                 <h3 className="value-title">{val.title}</h3>
                 <p className="value-desc">{val.desc}</p>
@@ -163,9 +165,14 @@ function AboutPage({ onNavigate }) {
               <p className="about-cta-desc">
                 Elevate your meals with our premium, sun-cured pickles. Prepared traditionally, packaged luxuriously.
               </p>
-              <button className="about-cta-btn" onClick={() => onNavigate('shop')}>
-                Shop Now
-              </button>
+              <motion.button
+                className="about-cta-btn"
+                onClick={() => onNavigate('shop')}
+                whileHover={{ y: -2 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                Shop the Collection
+              </motion.button>
             </div>
           </div>
         </div>

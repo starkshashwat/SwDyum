@@ -1,5 +1,5 @@
 .pdp-combo-section {
-  padding: var(--space-14, 3.5rem) var(--space-4);
+  padding: var(--pdp-section-y, 6rem) var(--space-4);
   background: linear-gradient(135deg, var(--color-ink), var(--color-primary-dark));
   color: var(--white);
   position: relative;
@@ -146,7 +146,7 @@
 
 @media (min-width: 820px) {
   .pdp-combo-section {
-    padding: var(--space-16) var(--space-6);
+    padding: var(--pdp-section-y, 6rem) var(--space-6);
   }
 
   .pdp-combo-container {

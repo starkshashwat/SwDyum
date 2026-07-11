@@ -162,8 +162,8 @@ function RecipePage({ onNavigate }) {
         <div className="recipe-grid-container">
           
           <div className="recipe-header">
-            <span className="recipe-eyebrow">The Making Of</span>
-            <h2 className="recipe-heading">How It's Formed</h2>
+            <span className="recipe-eyebrow">Straight From Our Kitchen</span>
+            <h2 className="recipe-heading">How Every Jar Is Made</h2>
           </div>
 
           <div className="recipe-grid">
@@ -228,31 +228,37 @@ function RecipePage({ onNavigate }) {
                           </div>
                           
                           <div className="recipe-cta-box">
-                            <p className="recipe-cta-text">Taste the authenticity of this traditional recipe without the wait.</p>
-                            <button className="recipe-shop-btn" onClick={() => onNavigate(`product-${recipe.productUsed.toLowerCase().replace(/ /g, '-')}`)}>
+                            <p className="recipe-cta-text">Love the recipe but short on time? Skip the two-week wait — we've already made it for you.</p>
+                            <motion.button
+                              className="recipe-shop-btn"
+                              onClick={() => onNavigate(`product-${recipe.productUsed.toLowerCase().replace(/ /g, '-')}`)}
+                              whileTap={{ scale: 0.98 }}
+                            >
                               Bring {recipe.productUsed} Home
-                            </button>
+                            </motion.button>
                           </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
                     
                     {!isExpanded && (
-                      <motion.button 
+                      <motion.button
                         layout
                         className="recipe-view-btn"
                         onClick={() => toggleExpand(recipe.id)}
+                        whileTap={{ scale: 0.97 }}
                       >
-                        View Preparation Method
+                        See the Full Recipe
                       </motion.button>
                     )}
                     {isExpanded && (
-                      <motion.button 
+                      <motion.button
                         layout
                         className="recipe-close-btn"
                         onClick={() => toggleExpand(recipe.id)}
+                        whileTap={{ scale: 0.97 }}
                       >
-                        Close Details
+                        Close Recipe
                       </motion.button>
                     )}
 

@@ -39,7 +39,7 @@ function PdpRelated({ products = [], onNavigate }) {
                                         <span className="pdp-related-price">₹{price}</span>
                                         <span className="pdp-related-mrp">₹{mrp}</span>
                                     </div>
-                                    <div className="pdp-related-stars">★★★★★ <span>(4.9)</span></div>
+                                    <span className="pdp-related-cta">View product →</span>
                                 </div>
                             </motion.button>
                         );

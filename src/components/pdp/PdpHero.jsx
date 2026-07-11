@@ -2,17 +2,36 @@ import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './PdpHero.css';
 
-const SpiceLevels = [
-  { id: 'mild', label: 'Mild', emoji: '🌶️', desc: 'Gentle warmth' },
-  { id: 'medium', label: 'Medium', emoji: '🌶️🌶️', desc: 'Balanced heat' },
-  { id: 'hot', label: 'Hot', emoji: '🌶️🌶️🌶️', desc: 'Bold & fiery' },
-];
+/* Refined line icons (replace emoji for a premium, consistent look) */
+const Icon = {
+  leaf: (
+    <svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 4 13c0-6 7-9 15-9 0 8-3 15-9 15z" /><path d="M4 21c1.5-5 5-8 9-9" /></svg>
+  ),
+  hand: (
+    <svg viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-4 0v5" /><path d="M14 10V4a2 2 0 0 0-4 0v6" /><path d="M10 10.5V6a2 2 0 0 0-4 0v8" /><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" /></svg>
+  ),
+  sun: (
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" /><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" /></svg>
+  ),
+  truck: (
+    <svg viewBox="0 0 24 24"><path d="M14 17V4a1 1 0 0 0-1-1H2a1 1 0 0 0-1 1v13" /><path d="M14 8h4l3 3v6h-7" /><circle cx="6.5" cy="17.5" r="2.5" /><circle cx="17.5" cy="17.5" r="2.5" /></svg>
+  ),
+  shield: (
+    <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+  ),
+  rupee: (
+    <svg viewBox="0 0 24 24"><path d="M6 3h12M6 8h12M15.5 3c0 4-3 5-6 5H6l7 8" /></svg>
+  ),
+  refresh: (
+    <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9" /><path d="M3 4v5h5" /></svg>
+  ),
+};
 
 const Benefits = [
-  { icon: '🌿', title: '100% Natural', sub: 'No preservatives' },
-  { icon: '👵', title: 'Grandma Recipe', sub: 'Small-batch craft' },
-  { icon: '☀️', title: 'Sun-Cured', sub: 'Authentic taste' },
-  { icon: '🚚', title: 'Fast Dispatch', sub: 'Ships in 24 hrs' },
+  { icon: Icon.leaf, title: '100% Natural', sub: 'No preservatives' },
+  { icon: Icon.hand, title: 'Grandma Recipe', sub: 'Small-batch craft' },
+  { icon: Icon.sun, title: 'Sun-Cured', sub: 'Authentic taste' },
+  { icon: Icon.truck, title: 'Fast Dispatch', sub: 'Ships in 24 hrs' },
 ];
 
 function PdpHero({
@@ -29,7 +48,6 @@ function PdpHero({
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const [pincode, setPincode] = useState('');
   const [deliveryMsg, setDeliveryMsg] = useState(null);
-  const [spiceLevel, setSpiceLevel] = useState('medium');
   const [adding, setAdding] = useState(false);
   const [added, setAdded] = useState(false);
 
@@ -59,7 +77,7 @@ function PdpHero({
       const options = { month: 'short', day: 'numeric' };
       const minDateStr = minDate.toLocaleDateString('en-IN', options);
       const maxDateStr = maxDate.toLocaleDateString('en-IN', options);
-      setDeliveryMsg(`Get it by ${minDateStr} - ${maxDateStr}`);
+      setDeliveryMsg(`Get it by ${minDateStr} – ${maxDateStr}`);
     } else {
       setDeliveryMsg('Please enter a valid 6-digit PIN code.');
     }
@@ -87,6 +105,9 @@ function PdpHero({
   const lowStock = variant?.stock_quantity !== undefined && variant.stock_quantity > 0 && variant.stock_quantity <= 8;
   const finalPrice = currentPrice * quantity;
   const unitPrice = currentPrice;
+
+  // Honest ratings: only render when real reviews exist
+  const hasRating = product.reviewsCount > 0 && product.rating > 0;
 
   return (
     <section className="pdp-hero" aria-label="Product overview">
@@ -121,13 +142,6 @@ function PdpHero({
                 <span className="pdp-discount-label">OFF</span>
               </div>
             )}
-
-            <div className="pdp-gallery-badge pdp-gallery-badge--360" aria-hidden="true">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M21.5 12a9.5 9.5 0 0 1-19 0M21.5 12a9.5 9.5 0 0 0-19 0" />
-                <path d="M12 21.5c4 0 6.5-4.5 6.5-9.5S16 2.5 12 2.5 5.5 7 5.5 12s2.5 9.5 6.5 9.5z" />
-              </svg>
-            </div>
           </div>
 
           <div className="pdp-thumbs" role="tablist" aria-label="Product images">
@@ -162,14 +176,15 @@ function PdpHero({
             <h1 className="pdp-title">{product.name}</h1>
           </div>
 
-          <div className="pdp-rating-row">
-            <div className="pdp-stars" aria-hidden="true">★★★★★</div>
-            <span className="pdp-rating-score">{product.rating || 4.9}</span>
-            <button className="pdp-review-link" onClick={() => document.getElementById('pdp-reviews')?.scrollIntoView({ behavior: 'smooth' })}>
-              ({(product.reviewsCount || 2348).toLocaleString('en-IN')} reviews)
-            </button>
-            <span className="pdp-verified">✓ Verified</span>
-          </div>
+          {hasRating && (
+            <div className="pdp-rating-row">
+              <div className="pdp-stars" aria-hidden="true">★★★★★</div>
+              <span className="pdp-rating-score">{product.rating}</span>
+              <button className="pdp-review-link" onClick={() => document.getElementById('pdp-reviews')?.scrollIntoView({ behavior: 'smooth' })}>
+                {product.reviewsCount.toLocaleString('en-IN')} verified review{product.reviewsCount !== 1 ? 's' : ''}
+              </button>
+            </div>
+          )}
 
           <p className="pdp-story">
             {product.short_description ||
@@ -180,7 +195,7 @@ function PdpHero({
           <div className="pdp-benefits">
             {Benefits.map((b) => (
               <div className="pdp-benefit" key={b.title}>
-                <span className="pdp-benefit-icon" aria-hidden="true">{b.icon}</span>
+                <span className="pdp-benefit-icon pdp-icon" aria-hidden="true">{b.icon}</span>
                 <span className="pdp-benefit-text">
                   <strong>{b.title}</strong>
                   <small>{b.sub}</small>
@@ -200,6 +215,7 @@ function PdpHero({
             )}
             <div className="pdp-price-unit">/ {selectedSize}</div>
           </div>
+          <p className="pdp-price-note">Inclusive of all taxes</p>
 
           {/* Urgency */}
           {(lowStock || outOfStock) && (
@@ -239,25 +255,6 @@ function PdpHero({
             </div>
           </div>
 
-          {/* Spice level */}
-          <div className="pdp-selector-group">
-            <label className="pdp-selector-label">Spice Level</label>
-            <div className="pdp-spice-selector" role="radiogroup" aria-label="Spice level">
-              {SpiceLevels.map((s) => (
-                <button
-                  key={s.id}
-                  className={`pdp-spice-btn ${spiceLevel === s.id ? 'active' : ''}`}
-                  onClick={() => setSpiceLevel(s.id)}
-                  role="radio"
-                  aria-checked={spiceLevel === s.id}
-                >
-                  <span className="pdp-spice-emoji" aria-hidden="true">{s.emoji}</span>
-                  <span className="pdp-spice-label">{s.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
           {/* Quantity + Add to cart */}
           <div className="pdp-action-row">
             <div className="pdp-qty-selector" role="group" aria-label="Quantity">
@@ -276,7 +273,7 @@ function PdpHero({
               <AnimatePresence mode="wait" initial={false}>
                 {added ? (
                   <motion.span key="added" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -6 }}>
-                    ✓ Added
+                    ✓ Added to Cart
                   </motion.span>
                 ) : adding ? (
                   <motion.span key="adding" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
@@ -307,6 +304,7 @@ function PdpHero({
             <div className="pdp-pincode-wrap">
               <input
                 type="text"
+                inputMode="numeric"
                 placeholder="Enter PIN code"
                 value={pincode}
                 onChange={(e) => setPincode(e.target.value.replace(/\D/g, ''))}
@@ -332,19 +330,19 @@ function PdpHero({
           {/* Trust badges */}
           <div className="pdp-trust-icons">
             <div className="trust-icon-item">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /></svg>
+              <span className="pdp-icon" aria-hidden="true">{Icon.shield}</span>
               <span>Secure Checkout</span>
             </div>
             <div className="trust-icon-item">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="1" y="3" width="15" height="13" /><polygon points="16 8 20 8 23 11 23 16 16 16 16 8" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg>
+              <span className="pdp-icon" aria-hidden="true">{Icon.truck}</span>
               <span>Free Shipping ₹799+</span>
             </div>
             <div className="trust-icon-item">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>
+              <span className="pdp-icon" aria-hidden="true">{Icon.rupee}</span>
               <span>COD Available</span>
             </div>
             <div className="trust-icon-item">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 12a9 9 0 1 0 9-9" /><path d="M3 4v5h5" /></svg>
+              <span className="pdp-icon" aria-hidden="true">{Icon.refresh}</span>
               <span>7-Day Returns</span>
             </div>
           </div>

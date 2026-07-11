@@ -1,16 +1,11 @@
 .pdp-related-section {
-    padding: var(--space-14, 3.5rem) var(--space-4);
-    background: var(--color-bg);
+    padding: var(--pdp-section-y, 6rem) var(--space-4);
+    background: var(--color-bg-warm);
 }
 
 .pdp-related-container {
     max-width: 1180px;
     margin: 0 auto;
-}
-
-.pdp-section-header.center {
-    text-align: center;
-    margin-bottom: var(--space-8);
 }
 
 .pdp-related-grid {
@@ -67,10 +62,10 @@
 }
 
 .pdp-related-info {
-    padding: var(--space-3);
+    padding: var(--space-4);
     display: flex;
     flex-direction: column;
-    gap: var(--space-1);
+    gap: var(--space-2);
 }
 
 .pdp-related-info h4 {
@@ -101,15 +96,15 @@
     text-decoration: line-through;
 }
 
-.pdp-related-stars {
-    font-size: 0.78rem;
-    color: var(--color-accent);
+.pdp-related-cta {
+    font-size: 0.8rem;
+    color: var(--color-primary);
     font-weight: 700;
+    transition: gap var(--motion-fast);
 }
 
-.pdp-related-stars span {
-    color: var(--color-muted);
-    font-weight: 600;
+.pdp-related-card:hover .pdp-related-cta {
+    color: var(--color-primary-dark);
 }
 
 @media (min-width: 600px) {
@@ -125,7 +120,7 @@
     }
 
     .pdp-related-section {
-        padding: var(--space-16) var(--space-6);
+        padding: var(--pdp-section-y, 6rem) var(--space-6);
     }
 }
 

@@ -28,10 +28,11 @@
 }
 
 .pdp-sticky-product img {
-  width: 48px;
-  height: 48px;
+  width: 50px;
+  height: 50px;
   object-fit: cover;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--color-border);
   flex-shrink: 0;
 }
 
@@ -86,7 +87,7 @@
 .pdp-sticky-qty {
   display: flex;
   align-items: center;
-  border: 2px solid var(--color-border);
+  border: 1.5px solid var(--color-border);
   border-radius: var(--radius-md);
   overflow: hidden;
   background: var(--color-surface);
@@ -136,7 +137,7 @@
 }
 
 .pdp-sticky-buy {
-  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
   color: var(--white);
   border: none;
   padding: var(--space-3) var(--space-5);

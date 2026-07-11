@@ -2,11 +2,20 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './PdpTabs.css';
 
+const I = {
+  shield: (<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></svg>),
+  recycle: (<svg viewBox="0 0 24 24"><path d="M7 19H4l2.5-4.3M17 19h3l-2-3.4M12 4 9.5 8.3M12 4l2.6 4.3M4.6 14.7 7 10.5M19.5 15.3 17 10.5" /></svg>),
+  leaf: (<svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 4 13c0-6 7-9 15-9 0 8-3 15-9 15z" /><path d="M4 21c1.5-5 5-8 9-9" /></svg>),
+  noChem: (<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M6 6l12 12" /></svg>),
+  return: (<svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9" /><path d="M3 4v5h5" /></svg>),
+  lock: (<svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2" /><path d="M8 11V8a4 4 0 0 1 8 0v3" /></svg>),
+};
+
 const AssuranceBadges = [
-  { icon: '🛡️', title: 'FSSAI Certified', sub: 'Safe & tested' },
-  { icon: '♻️', title: 'Glass Jar', sub: 'Eco packaging' },
-  { icon: '🌱', title: 'Vegan', sub: 'Plant-based' },
-  { icon: '🚫', title: 'No Preservatives', sub: 'Natural only' },
+  { icon: I.shield, title: 'FSSAI Certified', sub: 'Safe & tested' },
+  { icon: I.recycle, title: 'Glass Jar', sub: 'Eco packaging' },
+  { icon: I.leaf, title: 'Vegan', sub: 'Plant-based' },
+  { icon: I.noChem, title: 'No Preservatives', sub: 'Natural only' },
 ];
 
 function PdpTabs({ product, tabsData }) {
@@ -55,7 +64,7 @@ function PdpTabs({ product, tabsData }) {
         >
           {AssuranceBadges.map((b) => (
             <div className="pdp-assurance-badge" key={b.title}>
-              <span className="pdp-assurance-icon" aria-hidden="true">{b.icon}</span>
+              <span className="pdp-assurance-icon pdp-icon" aria-hidden="true">{b.icon}</span>
               <span className="pdp-assurance-text">
                 <strong>{b.title}</strong>
                 <small>{b.sub}</small>
@@ -116,14 +125,14 @@ function PdpTabs({ product, tabsData }) {
           transition={{ duration: 0.5 }}
         >
           <div className="pdp-return-item">
-            <span className="pdp-return-icon" aria-hidden="true">↩️</span>
+            <span className="pdp-return-icon pdp-icon-chip" aria-hidden="true">{I.return}</span>
             <div>
               <strong>7-Day Easy Returns</strong>
               <small>Unopened jars, hassle-free refund</small>
             </div>
           </div>
           <div className="pdp-return-item">
-            <span className="pdp-return-icon" aria-hidden="true">🔒</span>
+            <span className="pdp-return-icon pdp-icon-chip" aria-hidden="true">{I.lock}</span>
             <div>
               <strong>Secure Payments</strong>
               <small>Razorpay · UPI · Cards · COD</small>

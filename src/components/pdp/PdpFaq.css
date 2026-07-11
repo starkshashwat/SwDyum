@@ -1,16 +1,11 @@
 .pdp-faq-section {
-  padding: var(--space-14, 3.5rem) var(--space-4);
-  background: var(--color-bg);
+  padding: var(--pdp-section-y, 6rem) var(--space-4);
+  background: var(--color-surface);
 }
 
 .pdp-faq-container {
   max-width: 820px;
   margin: 0 auto;
-}
-
-.pdp-section-header.center {
-  text-align: center;
-  margin-bottom: var(--space-8);
 }
 
 .faq-list {
@@ -93,7 +88,7 @@
 
 @media (min-width: 768px) {
   .pdp-faq-section {
-    padding: var(--space-16) var(--space-6);
+    padding: var(--pdp-section-y, 6rem) var(--space-6);
   }
 
   .faq-question {

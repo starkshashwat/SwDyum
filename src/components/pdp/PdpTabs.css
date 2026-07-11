@@ -1,6 +1,6 @@
 .pdp-tabs-section {
-  padding: var(--space-12) var(--space-4);
-  background: var(--color-bg);
+  padding: var(--pdp-section-y, 6rem) var(--space-4);
+  background: var(--color-bg-warm);
 }
 
 .pdp-tabs-container {
@@ -33,8 +33,20 @@
 }
 
 .pdp-assurance-icon {
-  font-size: 1.5rem;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  background: var(--color-secondary-light);
+  color: var(--color-primary);
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pdp-assurance-icon svg {
+  width: 21px;
+  height: 21px;
 }
 
 .pdp-assurance-text {
@@ -64,9 +76,10 @@
 .pdp-quick-fact {
   display: flex;
   flex-direction: column;
-  gap: 2px;
-  padding: var(--space-3) var(--space-4);
-  background: var(--color-bg-warm);
+  gap: var(--space-1);
+  padding: var(--space-4);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
   border-left: 3px solid var(--color-primary);
 }
@@ -160,9 +173,9 @@
   gap: var(--space-3);
 }
 
-.pdp-return-icon {
-  font-size: 1.4rem;
-  flex-shrink: 0;
+.pdp-return-icon svg {
+  width: 22px;
+  height: 22px;
 }
 
 .pdp-return-item strong {

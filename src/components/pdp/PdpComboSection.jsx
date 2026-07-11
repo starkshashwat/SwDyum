@@ -12,7 +12,7 @@ function PdpComboSection({ onNavigate }) {
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
           >
-            <span className="pdp-combo-eyebrow">🎁 Save More · Bundle & Save</span>
+            <span className="pdp-combo-eyebrow">Save More · Bundle &amp; Save</span>
             <h2 className="pdp-combo-heading">Experience Bihar in One Box</h2>
             <p className="pdp-combo-desc">
               Curated combo gift sets — a perfect harmony of our finest pickles, beautifully packed for your loved ones. Save up to 20% when you bundle.
