@@ -29,7 +29,7 @@ const Icon = {
 
 const Benefits = [
   { icon: Icon.leaf, title: '100% Natural', sub: 'No preservatives' },
-  { icon: Icon.hand, title: 'Grandma Recipe', sub: 'Small-batch craft' },
+  { icon: Icon.shield, title: 'Moisture-Locked', sub: 'Humidity-controlled, dry-sealed' },
   { icon: Icon.sun, title: 'Sun-Cured', sub: 'Authentic taste' },
   { icon: Icon.truck, title: 'Fast Dispatch', sub: 'Ships in 24 hrs' },
 ];

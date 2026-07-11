@@ -15,7 +15,7 @@ const steps = [
   { icon: Icon.cut, title: 'Cut by Hand', desc: 'Meticulously prepped' },
   { icon: Icon.blend, title: 'Traditional Blend', desc: 'Aromatic spice mixing' },
   { icon: Icon.sun, title: 'Sun Cured', desc: 'Slow matured naturally' },
-  { icon: Icon.pack, title: 'Packed Fresh', desc: 'Sealed for goodness' },
+  { icon: Icon.pack, title: 'Sealed Moisture-Free', desc: 'Sealed for goodness' },
   { icon: Icon.deliver, title: 'Delivered', desc: 'Straight to your door' },
 ];
 

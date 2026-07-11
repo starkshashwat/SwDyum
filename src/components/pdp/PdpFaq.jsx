@@ -7,6 +7,7 @@ const faqs = [
   { q: 'Does it contain preservatives?', a: 'No, we do not use any chemical preservatives. We rely on traditional sun-curing, mustard oil, and salt for natural preservation.' },
   { q: 'Is it vegan?', a: 'Yes, all our pickles are 100% vegan and plant-based.' },
   { q: 'How should I store it?', a: 'Store in a cool, dry place away from direct sunlight. Always use a clean, dry spoon to prevent moisture from entering the jar.' },
+  { q: 'Kya isme fungus lag sakta hai?', a: 'Nahi, jab tak nami na jaaye. Jar humidity-controlled kitchen mein moisture-free seal hota hai — bas aap sookha chammach use karein aur tel ki parat upar rehne dein.' },
   { q: 'Can I refrigerate it?', a: 'Refrigeration is not necessary but can be done if you live in an extremely hot and humid climate. Otherwise, room temperature is perfect.' },
   { q: 'What is your return policy?', a: 'We offer 7-day easy returns on unopened jars. If your jar arrives damaged, contact us within 48 hours for a free replacement or full refund.' },
 ];

@@ -13,7 +13,7 @@ const I = {
 
 const AssuranceBadges = [
   { icon: I.shield, title: 'FSSAI Certified', sub: 'Safe & tested' },
-  { icon: I.recycle, title: 'Glass Jar', sub: 'Eco packaging' },
+  { icon: I.lock, title: 'Moisture-Free Packed', sub: 'No damp, no fungus' },
   { icon: I.leaf, title: 'Vegan', sub: 'Plant-based' },
   { icon: I.noChem, title: 'No Preservatives', sub: 'Natural only' },
 ];
@@ -36,7 +36,7 @@ function PdpTabs({ product, tabsData }) {
     },
     {
       name: 'Storage',
-      content: tabsData?.storage || 'Keep in a cool dry place.\n\nUse dry spoon only.\n\nBest consumed within 12 to 18 months of opening.',
+      content: tabsData?.storage || 'Humidity is the enemy — isliye hum humidity-controlled kitchen mein dry seal karte hain; aap bhi hamesha sookha chammach use karein.',
     },
     {
       name: 'Shipping',
