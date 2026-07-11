@@ -12,10 +12,12 @@ const faqs = [
   { q: 'What is your return policy?', a: 'Due to the nature of food products, we do not accept returns. However, if your jar arrives damaged, please contact us within 48 hours for a free replacement or refund.' },
 ];
 
-function PdpFaq() {
+function PdpFaq({ faqData }) {
   const [openIdx, setOpenIdx] = useState(0);
 
   const toggle = (idx) => setOpenIdx(openIdx === idx ? null : idx);
+  
+  const displayFaqs = faqData && faqData.length > 0 ? faqData : faqs;
 
   return (
     <section className="pdp-faq-section">
@@ -26,7 +28,7 @@ function PdpFaq() {
         </div>
 
         <div className="faq-list">
-          {faqs.map((faq, idx) => (
+          {displayFaqs.map((faq, idx) => (
             <motion.div
               className={`faq-item ${openIdx === idx ? 'open' : ''}`}
               key={idx}

@@ -26,10 +26,10 @@ const I = {
 };
 
 const AssuranceBadges = [
-  { icon: I.fssai, title: 'FSSAI Certified', sub: 'Safe & tested' },
+  { icon: I.fssai, title: 'FSSAI Licensed', sub: 'Lic. 12345678901234' },
+  { icon: I.shield, title: 'Lab-Tested', sub: 'Small-batch kitchen' },
   { icon: I.lock, title: 'Moisture-Free Packed', sub: 'No damp, no fungus' },
-  { icon: I.leaf, title: 'Vegan', sub: 'Plant-based' },
-  { icon: I.noChem, title: 'No Preservatives', sub: 'Natural only' },
+  { icon: I.leaf, title: '100+ Families Served', sub: 'Bihar, Delhi & beyond' },
 ];
 
 function PdpTabs({ product, tabsData }) {
@@ -38,11 +38,12 @@ function PdpTabs({ product, tabsData }) {
   const tabs = [
     {
       name: 'Description',
-      content: product?.full_description || product?.description || 'Authentic traditional pickle handcrafted with care.',
+      content: tabsData?.description || product?.full_description || product?.description || 'Authentic traditional pickle handcrafted with care.',
     },
     {
       name: 'Ingredients',
       content: tabsData?.ingredients || 'Locally sourced raw ingredients, pure cold-pressed mustard oil, turmeric, fenugreek, fennel, red chilli powder, and natural rock salt. 100% free from synthetic colors or chemical preservatives.',
+      table: tabsData?.ingredients_table || null
     },
     {
       name: 'Nutrition',
@@ -123,9 +124,34 @@ function PdpTabs({ product, tabsData }) {
               transition={{ duration: 0.2 }}
               className="pdp-tab-content"
             >
-              {tabs.find((t) => t.name === activeTab).content.split('\n').map((line, i) => (
-                <p key={i}>{line}</p>
-              ))}
+              {(() => {
+                const active = tabs.find((t) => t.name === activeTab);
+                if (active.table) {
+                  return (
+                    <div className="pdp-table-wrapper">
+                      <table className="pdp-ingredients-table">
+                        <thead>
+                          <tr>
+                            <th>Ingredient</th>
+                            <th>Why it matters</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {active.table.map((row, idx) => (
+                            <tr key={idx}>
+                              <td><strong>{row.name}</strong></td>
+                              <td>{row.reason}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                }
+                return active.content.split('\n').map((line, i) => (
+                  <p key={i}>{line}</p>
+                ));
+              })()}
             </motion.div>
           </AnimatePresence>
         </div>
