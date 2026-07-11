@@ -115,7 +115,7 @@ function PdpHero({
       <div className="pdp-offer-strip" role="status">
         <span className="pdp-offer-pulse" aria-hidden="true" />
         <span className="pdp-offer-text">
-          {discountPct > 0 ? `Flat ${discountPct}% OFF · ` : ''}Free shipping above ₹799 · COD available
+          {discountPct > 0 ? `Flat ${discountPct}% OFF · ` : ''}Free shipping above ₹799
         </span>
       </div>
 
@@ -338,12 +338,8 @@ function PdpHero({
               <span>Free Shipping ₹799+</span>
             </div>
             <div className="trust-icon-item">
-              <span className="pdp-icon" aria-hidden="true">{Icon.rupee}</span>
-              <span>COD Available</span>
-            </div>
-            <div className="trust-icon-item">
               <span className="pdp-icon" aria-hidden="true">{Icon.refresh}</span>
-              <span>7-Day Returns</span>
+              <span>No Returns</span>
             </div>
           </div>
         </div>

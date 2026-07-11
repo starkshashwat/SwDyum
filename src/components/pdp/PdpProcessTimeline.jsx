@@ -13,8 +13,8 @@ const Icon = {
 const steps = [
   { icon: Icon.harvest, title: 'Harvest', desc: 'Sourced from local farms' },
   { icon: Icon.cut, title: 'Cut by Hand', desc: 'Meticulously prepped' },
-  { icon: Icon.blend, title: 'Traditional Blend', desc: 'Aromatic spice mixing' },
   { icon: Icon.sun, title: 'Sun Cured', desc: 'Slow matured naturally' },
+  { icon: Icon.blend, title: 'Traditional Blend', desc: 'Aromatic spice mixing' },
   { icon: Icon.pack, title: 'Sealed Moisture-Free', desc: 'Sealed for goodness' },
   { icon: Icon.deliver, title: 'Delivered', desc: 'Straight to your door' },
 ];
