@@ -28,6 +28,7 @@ import AccountPage from './AccountPage';
 import OrderDetailsPage from './OrderDetailsPage';
 
 import CartDrawer from './components/cart/CartDrawer';
+import BottomNav from './components/BottomNav';
 import WhatsAppLoginModal from './components/auth/WhatsAppLoginModal';
 import PrivacyPolicyPage from './PrivacyPolicyPage';
 import DeleteAccountPage from './DeleteAccountPage';
@@ -329,6 +330,12 @@ function App() {
         removeFromCart={removeFromCart}
         addToCart={addToCart}
         onNavigate={handleNavigate}
+        currentUser={currentUser}
+        clearCart={clearCart}
+        onOpenLogin={() => {
+          setIsWaModalOpen(true);
+          setPendingCheckout({ type: 'checkout' });
+        }}
       />
       {currentPage === 'shop' ? (
         <ShopPage onNavigate={handleNavigate} addToCart={addToCart} />
@@ -386,6 +393,13 @@ function App() {
       )}
 
       <Footer onNavigate={handleNavigate} />
+
+      <BottomNav
+        currentPage={currentPage}
+        onNavigate={handleNavigate}
+        cartCount={cart.reduce((sum, i) => sum + i.quantity, 0)}
+        onOpenCart={() => setIsCartOpen(true)}
+      />
 
       <WhatsAppLoginModal
         isOpen={isWaModalOpen}

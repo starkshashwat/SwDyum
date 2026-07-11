@@ -552,6 +552,230 @@
   transform: translateY(-2px);
 }
 
+/* ─── CHECKOUT STEP IN DRAWER ─── */
+.checkout-mini-summary {
+  padding: 0 var(--space-6);
+  margin-bottom: var(--space-4);
+  border-bottom: 1px dashed var(--color-border);
+}
+
+.mini-summary-toggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: none;
+  border: none;
+  padding: var(--space-4) 0;
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  color: var(--color-ink);
+}
+
+.mini-summary-items {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding-bottom: var(--space-4);
+}
+
+.mini-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.mini-item img {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  background: var(--color-bg-warm);
+}
+
+.mini-item-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.mini-item-name {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+.mini-item-meta {
+  font-size: var(--text-xs);
+  color: var(--color-muted);
+}
+
+.mini-item-price {
+  font-weight: 600;
+  color: var(--color-ink);
+}
+
+/* Shipping Form in Drawer */
+.checkout-form-drawer {
+  padding: 0 var(--space-6) var(--space-6);
+}
+
+.form-section-title {
+  font-size: var(--text-lg);
+  font-weight: 600;
+  margin-bottom: var(--space-4);
+  color: var(--color-ink);
+}
+
+.autofill-btn {
+  width: 100%;
+  background: var(--color-bg-warm);
+  border: 1px dashed var(--color-primary);
+  color: var(--color-primary);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  margin-bottom: var(--space-5);
+  transition: background var(--motion-fast);
+}
+
+.autofill-btn:hover {
+  background: rgba(10, 90, 50, 0.05);
+}
+
+.drawer-checkout-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.form-row-drawer {
+  display: flex;
+  gap: var(--space-4);
+}
+
+.form-row-drawer.split > * {
+  flex: 1;
+}
+
+.form-row-drawer.triple > * {
+  flex: 1;
+}
+
+.field-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.field-group label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--color-muted);
+}
+
+.field-group input,
+.field-group textarea {
+  padding: var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  font-family: var(--font-body);
+  outline: none;
+  background: var(--color-bg-warm);
+  transition: border-color var(--motion-fast), background var(--motion-fast);
+}
+
+.field-group input:focus,
+.field-group textarea:focus {
+  border-color: var(--color-primary);
+  background: var(--white);
+}
+
+.field-group input.error,
+.field-group textarea.error {
+  border-color: var(--color-destructive);
+}
+
+.field-error {
+  font-size: 10px;
+  color: var(--color-destructive);
+}
+
+/* Drawer Coupon */
+.drawer-coupon-section {
+  margin-top: var(--space-2);
+  padding-top: var(--space-4);
+  border-top: 1px dashed var(--color-border);
+}
+
+.drawer-coupon-row {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.drawer-coupon-row input {
+  flex: 1;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  text-transform: uppercase;
+}
+
+.drawer-coupon-row button {
+  background: var(--color-ink);
+  color: var(--white);
+  border: none;
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: var(--text-sm);
+}
+
+.drawer-coupon-row button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.drawer-coupon-applied {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(10, 90, 50, 0.05);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--color-primary);
+  font-size: var(--text-sm);
+}
+
+.drawer-coupon-applied button {
+  background: none;
+  border: none;
+  color: var(--color-muted);
+  cursor: pointer;
+}
+
+.drawer-error-banner {
+  background: rgba(220, 38, 38, 0.1);
+  color: var(--color-destructive);
+  padding: var(--space-3);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-sm);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  margin-top: var(--space-4);
+}
+
+.pay-now-btn {
+  background: var(--color-primary);
+  /* other styles inherited from .checkout-btn */
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .cart-drawer {
@@ -575,5 +799,13 @@
   .item-image {
     width: 70px;
     height: 70px;
+  }
+  
+  .form-row-drawer.split {
+    flex-direction: column;
+  }
+  
+  .form-row-drawer.triple {
+    flex-direction: column;
   }
 }

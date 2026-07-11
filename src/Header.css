@@ -373,6 +373,17 @@
   }
 }
 
+/* Hide hamburger + header cart on mobile — bottom nav takes over */
+@media (max-width: 768px) {
+  .mobile-menu-btn {
+    display: none !important;
+  }
+
+  .cart-btn {
+    display: none !important;
+  }
+}
+
 /* ─── Notification Dot ───────────────────────────────────────────────────── */
 .icon-wrapper {
   position: relative;
