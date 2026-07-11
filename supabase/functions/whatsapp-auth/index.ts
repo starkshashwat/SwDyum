@@ -202,8 +202,23 @@ export default {
             }),
           });
           if (!res.ok) {
-            const apiResponse = await res.json();
-            throw new Error(apiResponse?.error?.message || "Failed to send OTP via Meta API");
+            // Surface the real WhatsApp/Meta reason (e.g. missing/mis-named
+            // template, expired token) instead of a generic 500, so the failure
+            // is actually diagnosable from the client. Remove the stored OTP so
+            // the cooldown does not block an immediate retry.
+            let metaMessage = "Failed to send OTP via WhatsApp.";
+            try {
+              const apiResponse = await res.json();
+              metaMessage = apiResponse?.error?.message || metaMessage;
+            } catch (_) {
+              /* non-JSON body */
+            }
+            console.error("WhatsApp send failed:", metaMessage);
+            await supabase.from("whatsapp_otps").delete().eq("phone", phone);
+            return new Response(
+              JSON.stringify({ error: `Could not send OTP via WhatsApp: ${metaMessage}` }),
+              { status: 502, headers: { ...cors, "Content-Type": "application/json" } }
+            );
           }
         } else {
           console.log(`[dev] Mocking OTP send to ${phone}`);

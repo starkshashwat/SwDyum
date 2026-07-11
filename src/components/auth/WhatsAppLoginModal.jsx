@@ -3,6 +3,23 @@ import { motion, AnimatePresence } from 'framer-motion';
 import './WhatsAppLoginModal.css';
 import { supabase } from '../../supabaseClient';
 
+// supabase-js reports a non-2xx Edge Function response as a generic
+// "Edge Function returned a non-2xx status code" error and puts the real
+// response body on error.context (a Response). Read it so the user sees the
+// actual reason (cooldown, invalid OTP, WhatsApp send failure, etc.).
+async function readFnErrorMessage(funcError, fallback) {
+  try {
+    const ctx = funcError?.context;
+    if (ctx && typeof ctx.json === 'function') {
+      const body = await ctx.json();
+      if (body?.error) return body.error;
+    }
+  } catch {
+    /* body not JSON or already consumed — fall through */
+  }
+  return funcError?.message || fallback;
+}
+
 export default function WhatsAppLoginModal({ isOpen, onClose, onSuccess }) {
   const [step, setStep] = useState(1);
   const [phone, setPhone] = useState('');
@@ -34,7 +51,7 @@ export default function WhatsAppLoginModal({ isOpen, onClose, onSuccess }) {
         body: { action: 'send', phone: formattedPhone }
       });
 
-      if (funcError) throw funcError;
+      if (funcError) throw new Error(await readFnErrorMessage(funcError, 'Failed to send OTP. Please try again.'));
       if (data?.error) throw new Error(data.error);
 
       setStep(2);
@@ -62,7 +79,7 @@ export default function WhatsAppLoginModal({ isOpen, onClose, onSuccess }) {
         body: { action: 'verify', phone: formattedPhone, otp: otpString, optIn }
       });
 
-      if (funcError) throw funcError;
+      if (funcError) throw new Error(await readFnErrorMessage(funcError, 'Invalid or expired OTP.'));
       if (data?.error) throw new Error(data.error);
 
       // Successfully verified. Store the signed session token (V1) and profile.
