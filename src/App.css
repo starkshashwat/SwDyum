@@ -16,13 +16,11 @@
 .hero-bg-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    100deg,
-    rgba(251, 245, 234, 0.97) 0%,
-    rgba(251, 245, 234, 0.92) 30%,
-    rgba(251, 245, 234, 0.65) 55%,
-    rgba(251, 245, 234, 0) 75%
-  );
+  background: linear-gradient(100deg,
+      rgba(244, 248, 245, 0.97) 0%,
+      rgba(244, 248, 245, 0.92) 30%,
+      rgba(244, 248, 245, 0.65) 55%,
+      rgba(244, 248, 245, 0) 75%);
   z-index: 1;
 }
 
@@ -40,7 +38,7 @@
 .hero-eyebrow {
   font-family: var(--font-body);
   font-size: var(--text-xs);
-  color: var(--color-chili);
+  color: var(--color-primary);
   font-weight: 700;
   display: block;
   letter-spacing: 3px;
@@ -61,7 +59,7 @@
   font-family: var(--font-heading);
   font-style: italic;
   font-weight: 400;
-  color: var(--color-chili);
+  color: var(--color-primary);
 }
 
 .hero-subtext {
@@ -98,8 +96,8 @@
 }
 
 .stars {
-  color: var(--color-mustard);
-  font-size: 18px;
+  color: var(--color-accent);
+  font-size: var(--text-lg);
   letter-spacing: 2px;
 }
 
@@ -125,12 +123,12 @@
 }
 
 .ind-bullet {
-  color: var(--color-leaf);
+  color: var(--color-primary);
   font-size: 10px;
   width: 8px;
   height: 8px;
-  border-radius: 50%;
-  background-color: var(--color-leaf);
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary);
   display: inline-block;
   flex-shrink: 0;
 }
@@ -157,12 +155,10 @@
   }
 
   .hero-bg-overlay {
-    background: linear-gradient(
-      180deg,
-      rgba(251, 245, 234, 0.95) 0%,
-      rgba(251, 245, 234, 0.88) 50%,
-      rgba(251, 245, 234, 0.7) 100%
-    );
+    background: linear-gradient(180deg,
+        rgba(244, 248, 245, 0.95) 0%,
+        rgba(244, 248, 245, 0.88) 50%,
+        rgba(244, 248, 245, 0.7) 100%);
   }
 
   .hero-content {
@@ -194,7 +190,7 @@
   .primary-cta,
   .secondary-cta {
     text-align: center;
-    padding: 16px 24px;
+    padding: var(--space-4) var(--space-6);
   }
 
   .trust-indicators {
@@ -220,21 +216,21 @@
 /* Custom Toast Notification */
 .toast-notification {
   position: fixed;
-  bottom: 24px;
+  bottom: var(--space-6);
   left: 50%;
   transform: translateX(-50%);
-  background-color: #2e7d32;
-  color: white;
-  padding: 12px 24px;
-  border-radius: 8px;
+  background-color: var(--color-primary);
+  color: var(--white);
+  padding: var(--space-3) var(--space-6);
+  border-radius: var(--radius-md);
   display: flex;
   align-items: center;
-  gap: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  gap: var(--space-3);
+  box-shadow: var(--shadow-lg);
   z-index: 9999;
   font-weight: 500;
 }
 
 .toast-notification svg {
-  color: white;
+  color: var(--white);
 }

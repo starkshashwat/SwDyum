@@ -5,7 +5,8 @@
   background-color: var(--color-bg);
   width: 100%;
   min-height: 100vh;
-  padding-top: 100px; /* Offset for sticky header */
+  padding-top: 100px;
+  /* Offset for sticky header */
 }
 
 /* 1. Hero Banner */
@@ -32,37 +33,40 @@
 }
 
 .reviews-hero-subtitle {
-  font-family: 'Brush Script MT', cursive, sans-serif;
-  font-size: 34px;
-  color: var(--color-mustard);
+  font-family: var(--font-body);
+  font-style: italic;
+  font-size: var(--text-3xl);
+  color: var(--color-accent);
   margin-bottom: 0.8rem;
 }
 
 .reviews-hero-title {
-  font-size: 50px;
+  font-size: var(--text-5xl);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 1.5px;
   line-height: 1.1;
   margin-bottom: 1rem;
-  text-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  text-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
 }
 
 .reviews-hero-desc {
-  font-size: 16px;
+  font-size: var(--text-base);
   line-height: 1.7;
   max-width: 600px;
-  color: #FAF6ED;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+  color: var(--white);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 
 @media (max-width: 768px) {
   .reviews-hero-section {
     height: 320px;
   }
+
   .reviews-hero-title {
     font-size: 32px;
   }
+
   .reviews-hero-desc {
     font-size: 14px;
   }
@@ -70,9 +74,9 @@
 
 /* 2. Trust Metrics Strip */
 .reviews-trust-metrics-section {
-  background-color: #FAF6ED;
+  background-color: var(--color-bg-warm);
   padding: 3rem 0;
-  border-bottom: 1px solid #EAE5DB;
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .metrics-container {
@@ -89,17 +93,17 @@
 }
 
 .metric-box h3 {
-  font-size: 36px;
+  font-size: var(--text-4xl);
   font-weight: 800;
-  color: var(--color-leaf);
+  color: var(--color-primary);
   margin-bottom: 0.3rem;
 }
 
 .metric-box p {
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 700;
   text-transform: uppercase;
-  color: var(--color-mustard);
+  color: var(--color-accent);
   letter-spacing: 1px;
 }
 
@@ -119,8 +123,8 @@
 /* 3. Rating Breakdown Statistics */
 .reviews-statistics-section {
   padding: 6rem 0;
-  background-color: white;
-  border-bottom: 1px solid #EAE5DB;
+  background-color: var(--white);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .stats-container {
@@ -145,24 +149,24 @@
 
 .stats-overall-card {
   background: var(--color-bg);
-  border: 1.5px solid #EAE5DB;
-  border-radius: 24px;
+  border: 1.5px solid var(--color-border-light);
+  border-radius: var(--radius-2xl);
   padding: 3.5rem 2rem;
   text-align: center;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.01);
+  box-shadow: var(--shadow-card);
 }
 
 .stats-overall-card h2 {
   font-size: 76px;
   font-weight: 800;
-  color: var(--color-leaf);
+  color: var(--color-primary);
   line-height: 1;
   letter-spacing: -2px;
 }
 
 .stars-rating-row {
-  color: var(--color-mustard);
-  font-size: 24px;
+  color: var(--color-accent);
+  font-size: var(--text-2xl);
   margin: 0.8rem 0;
   letter-spacing: 2px;
 }
@@ -195,16 +199,16 @@
 .bar-track {
   flex: 1;
   height: 8px;
-  background-color: #FAF9F6;
-  border: 1px solid #EAE5DB;
-  border-radius: 10px;
+  background-color: var(--color-bg-warm);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 
 .bar-fill {
   height: 100%;
-  background-color: var(--color-mustard);
-  border-radius: 10px;
+  background-color: var(--color-accent);
+  border-radius: var(--radius-md);
 }
 
 .bar-percentage {
@@ -233,12 +237,12 @@
 }
 
 .video-review-card {
-  background: white;
-  border: 1px solid #EAE5DB;
-  border-radius: 20px;
+  background: var(--white);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-full);
   padding: 1.5rem;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.01);
-  transition: transform 0.3s;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--motion-base);
 }
 
 .video-review-card:hover {
@@ -247,11 +251,11 @@
 
 .video-thumbnail-box {
   height: 200px;
-  border-radius: 12px;
+  border-radius: var(--radius-xl);
   overflow: hidden;
   position: relative;
   margin-bottom: 1.5rem;
-  border: 1px solid #FAF6ED;
+  border: 1px solid var(--color-bg-warm);
 }
 
 .video-thumbnail-box img {
@@ -267,11 +271,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
-  font-size: 36px;
-  transition: all 0.3s ease;
+  color: var(--white);
+  font-size: var(--text-4xl);
+  transition: all var(--motion-base) var(--motion-ease);
   cursor: pointer;
-  text-shadow: 0 4px 10px rgba(0,0,0,0.3);
+  text-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
 }
 
 .video-review-card:hover .video-play-btn {
@@ -295,9 +299,9 @@
 /* 5. UGC Media Gallery */
 .reviews-ugc-section {
   padding: 7rem 0;
-  background-color: white;
-  border-top: 1px solid #EAE5DB;
-  border-bottom: 1px solid #EAE5DB;
+  background-color: var(--white);
+  border-top: 1px solid var(--color-border-light);
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .ugc-container {
@@ -314,24 +318,24 @@
 
 .ugc-item {
   aspect-ratio: 1;
-  border-radius: 16px;
+  border-radius: var(--radius-2xl);
   overflow: hidden;
-  border: 2px solid #EAE5DB;
+  border: 2px solid var(--color-border-light);
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all var(--motion-base) cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .ugc-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s ease;
+  transition: transform var(--motion-slow) var(--motion-ease);
 }
 
 .ugc-item:hover {
   transform: scale(1.03);
-  border-color: var(--color-mustard);
-  box-shadow: 0 10px 25px rgba(199, 154, 59, 0.1);
+  border-color: var(--color-accent);
+  box-shadow: 0 10px 25px rgba(232, 168, 58, 0.1);
 }
 
 .ugc-item:hover img {
@@ -351,14 +355,14 @@
 }
 
 .instagram-box {
-  background: white;
-  border: 2px solid #EAE5DB;
-  border-radius: 24px;
+  background: var(--white);
+  border: 2px solid var(--color-border-light);
+  border-radius: var(--radius-2xl);
   padding: 4rem 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.01);
+  box-shadow: var(--shadow-card);
 }
 
 .ig-icon {
@@ -383,28 +387,28 @@
 
 .ig-follow-btn {
   height: 48px;
-  padding: 0 32px;
-  border-radius: 30px;
-  background-color: var(--color-leaf);
-  color: white;
+  padding: 0 var(--space-8);
+  border-radius: var(--radius-full);
+  background-color: var(--color-primary);
+  color: var(--white);
   font-weight: 700;
-  font-size: 14px;
+  font-size: var(--text-sm);
   display: inline-flex;
   align-items: center;
-  transition: all 0.3s ease;
+  transition: all var(--motion-base) var(--motion-ease);
 }
 
 .ig-follow-btn:hover {
-  background-color: #244b2f;
+  background-color: var(--color-primary-dark);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(47, 94, 59, 0.2);
+  box-shadow: var(--shadow-md);
 }
 
 /* 7. Testimonials Feed & Form */
 .reviews-feed-form-section {
   padding: 8rem 0;
-  background-color: #FAF8F5;
-  border-top: 1px solid #EAE5DB;
+  background-color: var(--color-bg-warm);
+  border-top: 1px solid var(--color-border-light);
 }
 
 .reviews-feed-container {
@@ -433,11 +437,11 @@
 }
 
 .feed-title {
-  font-size: 22px;
+  font-size: var(--text-2xl);
   font-weight: 800;
   color: var(--color-ink);
   margin-bottom: 2rem;
-  border-bottom: 2px solid #EAE5DB;
+  border-bottom: 2px solid var(--color-border-light);
   padding-bottom: 0.8rem;
 }
 
@@ -448,11 +452,11 @@
 }
 
 .testimonial-card {
-  background: white;
-  border: 1px solid #EAE5DB;
-  border-radius: 20px;
+  background: var(--white);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-full);
   padding: 2rem;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.01);
+  box-shadow: var(--shadow-sm);
 }
 
 .tc-header {
@@ -475,7 +479,7 @@
 }
 
 .tc-stars {
-  color: var(--color-mustard);
+  color: var(--color-accent);
   font-size: 13px;
   margin-bottom: 0.8rem;
   letter-spacing: 2px;
@@ -491,15 +495,15 @@
 
 /* Submit Form */
 .submit-form-card {
-  background: white;
-  border: 1px solid #EAE5DB;
-  border-radius: 24px;
+  background: var(--white);
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-2xl);
   padding: 3rem 2.5rem;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.02);
+  box-shadow: var(--shadow-card);
 }
 
 .submit-form-card h3 {
-  font-size: 22px;
+  font-size: var(--text-2xl);
   font-weight: 800;
   color: var(--color-ink);
   margin-bottom: 2rem;
@@ -530,22 +534,22 @@
 .form-field-select,
 .form-field-area {
   width: 100%;
-  padding: 14px;
-  border: 2px solid #EAE5DB;
-  border-radius: 10px;
+  padding: var(--space-4);
+  border: 2px solid var(--color-border-light);
+  border-radius: var(--radius-md);
   font-family: var(--font-body);
   font-size: 15px;
   color: var(--color-ink);
-  background-color: #FAF9F6;
-  transition: all 0.3s ease;
+  background-color: var(--color-bg-warm);
+  transition: all var(--motion-base) var(--motion-ease);
 }
 
 .form-field:focus,
 .form-field-select:focus,
 .form-field-area:focus {
   outline: none;
-  border-color: var(--color-leaf);
-  background-color: white;
+  border-color: var(--color-primary);
+  background-color: var(--white);
 }
 
 .form-field-area {
@@ -556,22 +560,22 @@
 .submit-review-form-btn {
   height: 52px;
   border: none;
-  background-color: var(--color-leaf);
-  color: white;
-  border-radius: 10px;
+  background-color: var(--color-primary);
+  color: var(--white);
+  border-radius: var(--radius-md);
   font-weight: 700;
   font-size: 15px;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all var(--motion-base) cubic-bezier(0.16, 1, 0.3, 1);
   text-transform: uppercase;
   letter-spacing: 1px;
   margin-top: 1rem;
 }
 
 .submit-review-form-btn:hover {
-  background-color: #244b2f;
+  background-color: var(--color-primary-dark);
   transform: translateY(-2px);
-  box-shadow: 0 8px 20px rgba(47, 94, 59, 0.25);
+  box-shadow: var(--shadow-md);
 }
 
 .review-submit-success-state {
@@ -582,9 +586,9 @@
 .checkmark-icon {
   width: 60px;
   height: 60px;
-  border-radius: 50%;
-  background-color: rgba(47, 94, 59, 0.08);
-  color: var(--color-leaf);
+  border-radius: var(--radius-full);
+  background-color: rgba(10, 90, 50, 0.08);
+  color: var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;

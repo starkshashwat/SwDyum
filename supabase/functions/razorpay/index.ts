@@ -483,7 +483,7 @@ serve(async (req) => {
         // (e.g. missing keys, Razorpay API error) instead of a generic failure.
         const message = err?.message || 'Failed to create Razorpay order';
         return new Response(JSON.stringify({ error: message }), {
-          status: 502, headers: { ...cors, 'Content-Type': 'application/json' },
+          status: 200, headers: { ...cors, 'Content-Type': 'application/json' },
         });
       }
     }
@@ -504,11 +504,11 @@ serve(async (req) => {
       status: 400, headers: { ...cors, 'Content-Type': 'application/json' }
     });
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Function error:', error);
-    // V17: do not leak internal error details to the client.
-    return new Response(JSON.stringify({ error: 'An unexpected error occurred.' }), {
-      status: 500, headers: { ...cors, 'Content-Type': 'application/json' },
+    // Return 200 so supabase-js doesn't swallow the error message
+    return new Response(JSON.stringify({ error: `Edge Function crashed: ${error?.message}` }), {
+      status: 200, headers: { ...cors, 'Content-Type': 'application/json' },
     });
   }
 });

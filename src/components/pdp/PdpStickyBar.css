@@ -7,7 +7,7 @@
   backdrop-filter: blur(12px);
   box-shadow: 0 -6px 24px rgba(17, 32, 24, 0.12);
   z-index: 1000;
-  padding: 10px var(--space-4);
+  padding: var(--space-2) var(--space-4);
   border-top: 1px solid var(--color-border);
 }
 
@@ -23,7 +23,7 @@
 .pdp-sticky-product {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   min-width: 0;
 }
 
@@ -51,7 +51,7 @@
 .pdp-sticky-price-row {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   margin-top: 2px;
 }
 
@@ -64,9 +64,9 @@
 .pdp-sticky-save {
   font-size: 0.68rem;
   font-weight: 800;
-  color: #fff;
-  background: var(--color-chili);
-  padding: 2px 8px;
+  color: var(--white);
+  background: var(--color-primary);
+  padding: 2px var(--space-2);
   border-radius: var(--radius-full);
 }
 
@@ -79,7 +79,7 @@
 .pdp-sticky-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   flex-shrink: 0;
 }
 
@@ -89,19 +89,19 @@
   border: 2px solid var(--color-border);
   border-radius: var(--radius-md);
   overflow: hidden;
-  background: var(--color-card);
+  background: var(--color-surface);
 }
 
 .pdp-sticky-qty button {
   width: 34px;
   height: 40px;
   font-size: 1.1rem;
-  color: var(--color-chili);
-  transition: background var(--duration-fast);
+  color: var(--color-primary);
+  transition: background var(--motion-fast);
 }
 
 .pdp-sticky-qty button:hover {
-  background: var(--color-cream);
+  background: var(--color-bg-warm);
 }
 
 .pdp-sticky-qty button:active {
@@ -116,18 +116,18 @@
 }
 
 .pdp-sticky-add {
-  background: var(--color-card);
-  color: var(--color-chili);
-  border: 2px solid var(--color-chili);
-  padding: 10px 18px;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  border: 2px solid var(--color-primary);
+  padding: var(--space-2) var(--space-4);
   border-radius: var(--radius-md);
   font-weight: 800;
-  transition: all var(--duration-fast) var(--ease-out);
+  transition: all var(--motion-fast) var(--motion-ease);
 }
 
 .pdp-sticky-add:hover:not(:disabled) {
-  background: var(--color-chili);
-  color: #fff;
+  background: var(--color-primary);
+  color: var(--white);
   transform: translateY(-2px);
 }
 
@@ -136,14 +136,14 @@
 }
 
 .pdp-sticky-buy {
-  background: linear-gradient(135deg, var(--color-chili), var(--color-chili-light));
-  color: #fff;
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+  color: var(--white);
   border: none;
-  padding: 12px 22px;
+  padding: var(--space-3) var(--space-5);
   border-radius: var(--radius-md);
   font-weight: 800;
   box-shadow: 0 6px 16px rgba(10, 90, 50, 0.25);
-  transition: all var(--duration-fast) var(--ease-out);
+  transition: all var(--motion-fast) var(--motion-ease);
 }
 
 .pdp-sticky-buy:hover:not(:disabled) {
@@ -186,11 +186,11 @@
   }
 
   .pdp-sticky-add {
-    padding: 10px 14px;
+    padding: var(--space-2) var(--space-3);
   }
 
   .pdp-sticky-buy {
-    padding: 10px 16px;
+    padding: var(--space-2) var(--space-4);
   }
 }
 

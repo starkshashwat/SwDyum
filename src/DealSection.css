@@ -1,6 +1,6 @@
 .deal-section {
   width: 100vw;
-  background-color: #fcfcfc;
+  background-color: var(--color-bg);
   padding: 6rem 0;
   overflow: hidden;
   position: relative;
@@ -26,16 +26,16 @@
 }
 
 .deal-subtitle {
-  color: var(--color-leaf);
-  font-size: 24px;
-  font-family: 'Brush Script MT', cursive, sans-serif;
+  color: var(--color-primary);
+  font-size: var(--text-2xl);
+  font-family: var(--font-body);
   font-style: italic;
   display: block;
   margin-bottom: 1rem;
 }
 
 .deal-headline {
-  font-size: 48px;
+  font-size: var(--text-5xl);
   font-weight: 800;
   color: var(--color-ink);
   line-height: 1.2;
@@ -58,21 +58,21 @@
 }
 
 .time-value {
-  background-color: var(--color-leaf);
-  color: #fff;
-  font-size: 36px;
+  background-color: var(--color-primary);
+  color: var(--white);
+  font-size: var(--text-4xl);
   font-weight: 800;
   width: 70px;
   height: 70px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 8px;
-  box-shadow: 0 10px 20px rgba(47, 94, 59, 0.2);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
 }
 
 .time-label {
-  font-size: 14px;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-muted);
   text-transform: uppercase;
@@ -80,15 +80,15 @@
 }
 
 .time-separator {
-  font-size: 36px;
+  font-size: var(--text-4xl);
   font-weight: 800;
   color: var(--color-ink);
-  margin-top: 10px;
+  margin-top: var(--space-3);
 }
 
 .deal-btn {
   margin-top: 1rem;
-  border-radius: 30px;
+  border-radius: var(--radius-full);
 }
 
 /* Right Side: Image */
@@ -111,7 +111,7 @@
   width: 100%;
   height: auto;
   object-fit: contain;
-  filter: drop-shadow(0 20px 30px rgba(0,0,0,0.1));
+  filter: drop-shadow(0 20px 30px rgba(0, 0, 0, 0.1));
 }
 
 /* Floating Badges */
@@ -119,9 +119,9 @@
   position: absolute;
   width: 90px;
   height: 90px;
-  border-radius: 50%;
-  background-color: #fff;
-  border: 1px solid var(--color-leaf);
+  border-radius: var(--radius-full);
+  background-color: var(--white);
+  border: 1px solid var(--color-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -170,6 +170,7 @@
     text-align: center;
     gap: 4rem;
   }
+
   .countdown-timer {
     justify-content: center;
   }
@@ -179,12 +180,15 @@
   .deal-headline {
     font-size: 36px;
   }
+
   .time-value {
     width: 60px;
     height: 60px;
     font-size: 28px;
   }
+
   .floating-badge {
-    display: none; /* Hide badges on small screens for clarity */
+    display: none;
+    /* Hide badges on small screens for clarity */
   }
 }

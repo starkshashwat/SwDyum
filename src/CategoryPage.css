@@ -5,7 +5,8 @@
   background-color: var(--color-bg);
   width: 100%;
   min-height: 100vh;
-  padding-top: 100px; /* Offset for sticky header */
+  padding-top: 100px;
+  /* Offset for sticky header */
 }
 
 /* 1. Hero Banner */
@@ -19,7 +20,7 @@
   align-items: center;
   position: relative;
   text-align: center;
-  color: white;
+  color: var(--white);
 }
 
 .category-hero-container {
@@ -32,17 +33,18 @@
 }
 
 .category-hero-subtitle {
-  font-family: 'Brush Script MT', cursive, sans-serif;
-  font-size: 36px;
-  color: var(--color-mustard);
-  margin-bottom: 1rem;
+  font-family: var(--font-heading);
+  font-size: var(--text-4xl);
+  color: var(--color-accent);
+  margin-bottom: var(--space-4);
   font-style: italic;
+  font-weight: 400;
 }
 
 .category-hero-title {
-  font-size: 56px;
+  font-family: var(--font-heading);
+  font-size: var(--text-6xl);
   font-weight: 800;
-  text-transform: uppercase;
   letter-spacing: 2px;
   line-height: 1.1;
   text-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
@@ -52,20 +54,22 @@
   .category-hero-section {
     height: 380px;
   }
+
   .category-hero-title {
-    font-size: 38px;
+    font-size: var(--text-4xl);
   }
+
   .category-hero-subtitle {
-    font-size: 28px;
+    font-size: var(--text-3xl);
   }
 }
 
 .category-hero-line {
   width: 100px;
   height: 3px;
-  background-color: var(--color-mustard);
-  margin-top: 1.5rem;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+  background-color: var(--color-accent);
+  margin-top: var(--space-6);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
 /* Centered Header Helper */
@@ -77,8 +81,8 @@
 /* 2. Category Story */
 .category-story-section {
   padding: 6rem 0;
-  background-color: white;
-  border-bottom: 1px solid #EAE5DB;
+  background-color: var(--white);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .category-story-container {
@@ -94,11 +98,11 @@
 }
 
 .category-story-narrative {
-  font-size: 19px;
+  font-size: var(--text-lg);
   line-height: 1.9;
   color: var(--color-muted);
   font-weight: 500;
-  margin-top: 1rem;
+  margin-top: var(--space-4);
 }
 
 /* 3. Product Grid */
@@ -126,15 +130,15 @@
 }
 
 .cat-product-card {
-  background: white;
-  border: 1px solid #EAE5DB;
-  border-radius: 20px;
+  background: var(--white);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
   overflow: hidden;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.02);
+  transition: all var(--motion-slow) var(--motion-ease-spring);
+  box-shadow: var(--shadow-xs);
   position: relative;
 }
 
@@ -142,16 +146,16 @@
   content: '';
   position: absolute;
   inset: 0;
-  border: 2px solid var(--color-mustard);
-  border-radius: 20px;
+  border: 2px solid var(--color-accent);
+  border-radius: var(--radius-xl);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease;
+  transition: opacity var(--motion-base) var(--motion-ease);
 }
 
 .cat-product-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-lg);
 }
 
 .cat-product-card:hover::after {
@@ -160,13 +164,13 @@
 
 .cat-prod-img-box {
   height: 280px;
-  background-color: #FAF9F6;
+  background-color: var(--color-bg-warm);
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
+  padding: var(--space-8);
   overflow: hidden;
-  border-bottom: 1px solid #F3EDE2;
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .cat-prod-img {
@@ -188,9 +192,9 @@
 }
 
 .cat-prod-rating {
-  color: var(--color-mustard);
-  font-size: 13px;
-  margin-bottom: 0.8rem;
+  color: var(--color-accent);
+  font-size: var(--text-xs);
+  margin-bottom: var(--space-2);
   letter-spacing: 1.5px;
 }
 
@@ -201,18 +205,19 @@
 }
 
 .cat-prod-name {
-  font-size: 20px;
+  font-family: var(--font-heading);
+  font-size: var(--text-xl);
   font-weight: 800;
   color: var(--color-ink);
-  margin-bottom: 0.5rem;
+  margin-bottom: var(--space-1);
   line-height: 1.3;
 }
 
 .cat-prod-tagline {
-  font-size: 14px;
+  font-size: var(--text-sm);
   color: var(--color-muted);
   line-height: 1.5;
-  margin-bottom: 1.8rem;
+  margin-bottom: var(--space-5);
   flex: 1;
 }
 
@@ -220,47 +225,47 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-top: 1px solid #F3EDE2;
-  padding-top: 1.2rem;
+  border-top: 1px solid var(--color-border-light);
+  padding-top: var(--space-3);
 }
 
 .cat-prod-price {
-  font-size: 18px;
+  font-size: var(--text-lg);
   font-weight: 800;
-  color: var(--color-leaf);
+  color: var(--color-primary);
 }
 
 .cat-prod-price small {
-  font-size: 13px;
+  font-size: var(--text-xs);
   color: var(--color-muted);
   font-weight: 500;
 }
 
 .cat-prod-btn {
   height: 40px;
-  padding: 0 18px;
-  border: 1.5px solid var(--color-leaf);
-  border-radius: 8px;
+  padding: 0 var(--space-4);
+  border: 1.5px solid var(--color-primary);
+  border-radius: var(--radius-md);
   background: transparent;
-  color: var(--color-leaf);
-  font-size: 13px;
+  color: var(--color-primary);
+  font-size: var(--text-xs);
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all var(--motion-base) var(--motion-ease);
 }
 
 .cat-prod-btn:hover {
-  background-color: var(--color-leaf);
-  color: white;
-  box-shadow: 0 5px 12px rgba(47, 94, 59, 0.15);
+  background-color: var(--color-primary);
+  color: var(--white);
+  box-shadow: var(--shadow-sm);
 }
 
 /* 4. Benefits Row */
 .category-benefits-section {
   padding: 6rem 0;
-  background-color: white;
-  border-top: 1px solid #EAE5DB;
-  border-bottom: 1px solid #EAE5DB;
+  background-color: var(--white);
+  border-top: 1px solid var(--color-border);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .category-benefits-container {
@@ -283,25 +288,26 @@
 .benefit-icon {
   width: 68px;
   height: 68px;
-  border-radius: 50%;
-  background-color: rgba(199, 154, 59, 0.08);
-  border: 1px solid var(--color-mustard);
+  border-radius: var(--radius-full);
+  background-color: rgba(232, 168, 58, 0.08);
+  border: 1px solid var(--color-accent);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
-  margin: 0 auto 1.8rem auto;
+  font-size: var(--text-2xl);
+  margin: 0 auto var(--space-5) auto;
 }
 
 .benefit-card h3 {
-  font-size: 18px;
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
   font-weight: 700;
   color: var(--color-ink);
-  margin-bottom: 0.8rem;
+  margin-bottom: var(--space-2);
 }
 
 .benefit-card p {
-  font-size: 14px;
+  font-size: var(--text-sm);
   color: var(--color-muted);
   line-height: 1.6;
   max-width: 260px;
@@ -311,7 +317,7 @@
 /* 5. Recipe Pairings */
 .category-pairings-section {
   padding: 7rem 0;
-  background-color: #F8F4ED;
+  background-color: var(--color-bg-warm);
 }
 
 .category-pairings-container {
@@ -337,30 +343,32 @@
 
 .pairing-card {
   display: flex;
-  gap: 2rem;
-  background: white;
-  padding: 2.5rem;
-  border-radius: 20px;
-  border: 1px solid #EAE5DB;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.02);
+  gap: var(--space-8);
+  background: var(--white);
+  padding: var(--space-10);
+  border-radius: var(--radius-xl);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-sm);
 }
 
 .pairing-number {
-  font-size: 32px;
+  font-family: var(--font-heading);
+  font-size: var(--text-3xl);
   font-weight: 800;
-  color: var(--color-mustard);
+  color: var(--color-accent);
   line-height: 1;
 }
 
 .pairing-content h3 {
-  font-size: 18px;
+  font-family: var(--font-heading);
+  font-size: var(--text-lg);
   font-weight: 700;
   color: var(--color-ink);
-  margin-bottom: 0.6rem;
+  margin-bottom: var(--space-2);
 }
 
 .pairing-content p {
-  font-size: 14px;
+  font-size: var(--text-sm);
   color: var(--color-muted);
   line-height: 1.6;
 }
@@ -368,7 +376,7 @@
 /* 6. Related Categories */
 .category-related-section {
   padding: 6rem 0;
-  border-bottom: 1px solid #EAE5DB;
+  border-bottom: 1px solid var(--color-border);
 }
 
 .category-related-container {
@@ -387,28 +395,28 @@
 
 .rel-cat-btn {
   height: 52px;
-  padding: 0 28px;
-  border: 2px solid #EAE5DB;
-  border-radius: 30px;
-  background: white;
+  padding: 0 var(--space-7);
+  border: 2px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--white);
   color: var(--color-ink);
-  font-size: 15px;
+  font-size: var(--text-base);
   font-weight: 700;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all var(--motion-base) var(--motion-ease-spring);
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
 }
 
 .rel-cat-btn span {
-  font-size: 12px;
-  transition: transform 0.2s ease;
+  font-size: var(--text-xs);
+  transition: transform var(--motion-fast) var(--motion-ease);
 }
 
 .rel-cat-btn:hover {
-  border-color: var(--color-leaf);
-  color: var(--color-leaf);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
   transform: translateY(-2px);
 }
 
@@ -419,7 +427,7 @@
 /* 7. Reviews Section */
 .category-reviews-section {
   padding: 7rem 0;
-  background-color: white;
+  background-color: var(--white);
 }
 
 .category-reviews-container {
@@ -435,12 +443,12 @@
 }
 
 .review-feed-card {
-  background-color: #FAF9F6;
-  border: 1px solid #EAE5DB;
-  border-radius: 20px;
-  padding: 2.5rem 2rem;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.01);
-  transition: transform 0.3s ease;
+  background-color: var(--color-bg-warm);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-10) var(--space-8);
+  box-shadow: var(--shadow-xs);
+  transition: transform var(--motion-base) var(--motion-ease);
 }
 
 .review-feed-card:hover {
@@ -455,19 +463,19 @@
 }
 
 .rf-user {
-  font-size: 15px;
+  font-size: var(--text-base);
   font-weight: 700;
   color: var(--color-ink);
 }
 
 .rf-stars {
-  color: var(--color-mustard);
-  font-size: 13px;
+  color: var(--color-accent);
+  font-size: var(--text-xs);
   letter-spacing: 1px;
 }
 
 .rf-message {
-  font-size: 14px;
+  font-size: var(--text-sm);
   line-height: 1.6;
   color: var(--color-muted);
   font-style: italic;

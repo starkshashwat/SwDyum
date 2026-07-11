@@ -3,7 +3,7 @@ import './DeleteAccountPage.css';
 import { Mail, ShieldAlert, FileText, CheckCircle } from 'lucide-react';
 
 const DeleteAccountPage = ({ onNavigate }) => {
-  
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -17,7 +17,7 @@ const DeleteAccountPage = ({ onNavigate }) => {
 
       <section className="delete-account-section">
         <h2>How to Delete Your Data</h2>
-        
+
         <div className="delete-account-options">
           <div className="delete-option">
             <h3>Option 1: Self-Service Deletion (Recommended)</h3>
@@ -51,7 +51,7 @@ const DeleteAccountPage = ({ onNavigate }) => {
 
       <section className="delete-account-section">
         <h2>What happens when you delete your account?</h2>
-        
+
         <div className="delete-info-grid">
           <div className="info-card warning">
             <h3><ShieldAlert size={22} /> What is Deleted / Anonymized</h3>
@@ -74,10 +74,10 @@ const DeleteAccountPage = ({ onNavigate }) => {
           </div>
         </div>
       </section>
-      
+
       <section className="delete-account-section" style={{ textAlign: 'center' }}>
-        <h2><CheckCircle size={28} style={{ color: '#27ae60', verticalAlign: 'bottom', marginRight: '10px' }} /> Meta & WhatsApp Compliance</h2>
-        <p style={{ maxWidth: '600px', margin: '0 auto', color: 'var(--color-text)' }}>
+        <h2><CheckCircle size={28} style={{ color: 'var(--color-success)', verticalAlign: 'bottom', marginRight: '10px' }} /> Meta & WhatsApp Compliance</h2>
+        <p style={{ maxWidth: '600px', margin: '0 auto', color: 'var(--color-ink)' }}>
           This data deletion portal satisfies Facebook and WhatsApp App Review policies. If you have interacted with our WhatsApp bot and wish to revoke access and delete your history, processing this deletion will successfully disconnect your account.
         </p>
       </section>

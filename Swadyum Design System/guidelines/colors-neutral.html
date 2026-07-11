@@ -1,0 +1,23 @@
+<!-- @dsCard group="Colors" viewport="700x160" name="Neutrals & Ink" subtitle="Text, backgrounds, borders" -->
+<html>
+<head>
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin:0; font-family: var(--font-body); background:#fff; }
+  .row { display:flex; height:160px; }
+  .sw { flex:1; display:flex; flex-direction:column; align-items:flex-start; justify-content:flex-end; padding:14px; box-sizing:border-box; border-right:1px solid #eee; }
+  .sw span { font-size:12px; font-weight:700; color: var(--color-ink); }
+  .sw small { font-size:11px; color: var(--color-muted); display:block; }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="sw" style="background:var(--color-ink)"><span style="color:#fff">--color-ink</span><small style="color:#ccc">#112018</small></div>
+    <div class="sw" style="background:var(--color-muted)"><span style="color:#fff">--color-muted</span><small style="color:#eee">#66786d</small></div>
+    <div class="sw" style="background:var(--color-muted-light)"><span style="color:#fff">--color-muted-light</span><small style="color:#eee">#98a89f</small></div>
+    <div class="sw" style="background:var(--color-border)"><span>--color-border</span><small>#e1ebe4</small></div>
+    <div class="sw" style="background:var(--color-bg)"><span>--color-bg</span><small>#f4f8f5</small></div>
+    <div class="sw" style="background:var(--color-surface); border:1px solid var(--color-border)"><span>--color-surface</span><small>#ffffff</small></div>
+  </div>
+</body>
+</html>

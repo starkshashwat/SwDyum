@@ -19,12 +19,12 @@
 .pdp-assurance-badge {
   display: flex;
   align-items: center;
-  gap: 12px;
-  background: var(--color-card);
+  gap: var(--space-3);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: 14px;
-  transition: transform var(--duration-fast), box-shadow var(--duration-fast);
+  padding: var(--space-3);
+  transition: transform var(--motion-fast), box-shadow var(--motion-fast);
 }
 
 .pdp-assurance-badge:hover {
@@ -65,10 +65,10 @@
   display: flex;
   flex-direction: column;
   gap: 2px;
-  padding: 14px 16px;
-  background: var(--color-cream);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-warm);
   border-radius: var(--radius-md);
-  border-left: 3px solid var(--color-chili);
+  border-left: 3px solid var(--color-primary);
 }
 
 .pdp-quick-fact-label {
@@ -100,14 +100,14 @@
 }
 
 .pdp-tab-btn {
-  padding: 14px 16px;
+  padding: var(--space-3) var(--space-4);
   font-family: var(--font-heading);
   font-size: 0.95rem;
   font-weight: 700;
   color: var(--color-muted);
   position: relative;
   white-space: nowrap;
-  transition: color var(--duration-fast);
+  transition: color var(--motion-fast);
 }
 
 .pdp-tab-btn:hover {
@@ -115,7 +115,7 @@
 }
 
 .pdp-tab-btn.active {
-  color: var(--color-chili);
+  color: var(--color-primary);
 }
 
 .pdp-tab-indicator {
@@ -124,7 +124,7 @@
   left: 0;
   right: 0;
   height: 3px;
-  background: var(--color-chili);
+  background: var(--color-primary);
   border-radius: 3px 3px 0 0;
 }
 
@@ -149,7 +149,7 @@
   gap: var(--space-3);
   margin-top: var(--space-8);
   padding: var(--space-5);
-  background: var(--color-card);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
 }
@@ -157,7 +157,7 @@
 .pdp-return-item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .pdp-return-icon {

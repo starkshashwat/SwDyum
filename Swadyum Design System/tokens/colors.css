@@ -1,0 +1,59 @@
+/* ─── Swadyum — Color Tokens ─────────────────────────────────────────────
+   Source: Swadyum website/src/index.css (:root tokens), Header/Footer/PDP CSS.
+   Note: base token names in the source code still say "chili"/"mango"/"clay"
+   (a legacy red/terracotta naming), but their *values* were repointed to the
+   brand's green identity when the logo changed. We keep the semantic aliases
+   below so consumers reach for meaning, not the old literal names. */
+
+:root {
+  /* Base palette — greens (primary), lime (secondary), warm accent, ink & neutrals */
+  --green-900: #064022;
+  --green-800: #0a5a32;
+  --green-700: #15834b;
+  --lime-300: #c8dca0;
+  --lime-200: #dcedbe;
+  --amber-500: #e8a83a;
+
+  --ink-900: #112018;
+  --neutral-600: #66786d;
+  --neutral-400: #98a89f;
+  --neutral-100: #e1ebe4;
+  --neutral-50: #eff5f1;
+
+  --white: #ffffff;
+  --bg-tint: #f4f8f5;
+  --cream: #ebf2ed;
+  --warm-bg: #e6efe9;
+
+  /* Semantic aliases — use these in product work */
+  --color-bg: var(--bg-tint);            /* page background */
+  --color-surface: var(--white);         /* cards, panels */
+  --color-cream: var(--cream);           /* soft tinted surface (image wells, inputs) */
+  --color-warm-bg: var(--warm-bg);
+
+  --color-ink: var(--ink-900);           /* primary text, headings, top-bar bg */
+  --color-muted: var(--neutral-600);     /* secondary text */
+  --color-muted-light: var(--neutral-400); /* tertiary text, placeholders */
+
+  --color-border: var(--neutral-100);
+  --color-border-light: var(--neutral-50);
+
+  --color-primary: var(--green-800);      /* primary CTA, links, active states */
+  --color-primary-dark: var(--green-900); /* hover/active */
+  --color-primary-light: var(--green-700);/* accents, icons on light bg */
+
+  --color-secondary: var(--lime-300);     /* secondary accent, ratings */
+  --color-secondary-light: var(--lime-200);
+
+  --color-accent: var(--amber-500);       /* retained warm accent — spicy badges etc */
+
+  --color-success: var(--green-800);
+  --color-destructive: #c0392b;           /* not in source palette — used sparingly for errors only */
+
+  /* Overlay tints (hero scrims etc — see visual foundations) */
+  --overlay-cream-97: rgba(251, 245, 234, 0.97);
+  --overlay-cream-92: rgba(251, 245, 234, 0.92);
+  --overlay-cream-65: rgba(251, 245, 234, 0.65);
+  --overlay-cream-0: rgba(251, 245, 234, 0);
+  --overlay-ink-40: rgba(36, 26, 20, 0.4);
+}

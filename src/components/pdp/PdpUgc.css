@@ -6,7 +6,7 @@
 .ugc-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
+  gap: var(--space-4);
   max-width: 1400px;
   margin: var(--space-8) auto 0;
 }
@@ -26,7 +26,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-cream);
+  background: var(--color-bg-warm);
   color: var(--color-muted);
   font-weight: 600;
 }
@@ -34,7 +34,7 @@
 .ugc-hover-overlay {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -47,15 +47,15 @@
 }
 
 .ugc-play-btn {
-  background: white;
+  background: var(--white);
   color: var(--color-ink);
   border: none;
-  padding: 12px 24px;
+  padding: var(--space-3) var(--space-6);
   border-radius: var(--radius-full);
   font-weight: 700;
   font-size: 0.9rem;
   transform: translateY(10px);
-  transition: transform 0.3s;
+  transition: transform var(--motion-base);
 }
 
 .ugc-item:hover .ugc-play-btn {

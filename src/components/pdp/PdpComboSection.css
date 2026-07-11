@@ -1,7 +1,7 @@
 .pdp-combo-section {
   padding: var(--space-14, 3.5rem) var(--space-4);
-  background: linear-gradient(135deg, var(--color-ink), #0a3a20);
-  color: #fff;
+  background: linear-gradient(135deg, var(--color-ink), var(--color-primary-dark));
+  color: var(--white);
   position: relative;
   overflow: hidden;
 }
@@ -34,7 +34,7 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 2px;
-  color: var(--color-mango);
+  color: var(--color-accent);
   margin-bottom: var(--space-3);
 }
 
@@ -42,7 +42,7 @@
   font-family: var(--font-heading);
   font-size: clamp(1.8rem, 5vw, 3rem);
   line-height: 1.1;
-  color: #fff;
+  color: var(--white);
   margin-bottom: var(--space-4);
   letter-spacing: -0.5px;
 }
@@ -65,26 +65,26 @@
 .pdp-combo-perk {
   font-size: 0.82rem;
   font-weight: 700;
-  color: var(--color-mustard);
+  color: var(--color-secondary);
   background: rgba(200, 220, 160, 0.12);
-  padding: 6px 12px;
+  padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
 }
 
 .pdp-combo-btn {
-  background: var(--color-mango);
+  background: var(--color-accent);
   color: var(--color-ink);
   border: none;
-  padding: 15px 30px;
+  padding: var(--space-4) var(--space-8);
   border-radius: var(--radius-full);
   font-weight: 800;
   font-size: 1rem;
-  transition: all var(--duration-normal) var(--ease-out);
+  transition: all var(--motion-base) var(--motion-ease);
   box-shadow: 0 8px 20px rgba(232, 168, 58, 0.3);
 }
 
 .pdp-combo-btn:hover {
-  background: #fff;
+  background: var(--white);
   transform: translateY(-3px);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.3);
 }
@@ -122,11 +122,11 @@
   position: absolute;
   top: 6%;
   right: 6%;
-  background: var(--color-mango);
+  background: var(--color-accent);
   color: var(--color-ink);
   font-weight: 900;
   font-size: 0.85rem;
-  padding: 10px 14px;
+  padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-full);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
   animation: combo-badge-pulse 2.4s infinite;

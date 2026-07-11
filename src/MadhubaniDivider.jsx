@@ -7,7 +7,7 @@ import './madhubani-dividers.css';
  * Used sparingly between sections to add cultural authenticity.
  */
 function MadhubaniDivider({ variant = 'floral', color }) {
-  const strokeColor = color || 'var(--color-chili)';
+  const strokeColor = color || 'var(--color-primary)';
 
   const motifs = {
     /* Simple lotus-inspired symmetrical border */

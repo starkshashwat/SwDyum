@@ -290,7 +290,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
           email: formData.email,
           contact: formData.phone
         },
-        theme: { color: '#C1402B' },
+        theme: { color: '#0a5a32' },
         handler: async function (response) {
           setProcessingStep('Verifying payment...');
           setIsProcessing(true);

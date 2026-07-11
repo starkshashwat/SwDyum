@@ -9,7 +9,7 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-10);
-  background-color: var(--color-card);
+  background-color: var(--color-surface);
   padding: var(--space-8);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-sm);
@@ -32,7 +32,7 @@
 }
 
 .star-label {
-  color: var(--color-mustard);
+  color: var(--color-accent);
   font-size: 1rem;
   letter-spacing: 2px;
   width: 80px;
@@ -48,8 +48,8 @@
 
 .progress-fill {
   height: 100%;
-  background: var(--color-chili);
-  border-radius: 4px;
+  background: var(--color-primary);
+  border-radius: var(--radius-sm);
 }
 
 .pct-label {
@@ -75,12 +75,12 @@
 }
 
 .stars-wrap .star {
-  color: var(--color-muted-light);
+  color: var(--color-muted);
   font-size: 1.5rem;
 }
 
 .stars-wrap .star.filled {
-  color: var(--color-mustard);
+  color: var(--color-accent);
 }
 
 .review-count {
@@ -89,23 +89,23 @@
 }
 
 .write-review-btn {
-  padding: 12px 24px;
-  background-color: var(--color-chili);
-  color: white;
+  padding: var(--space-3) var(--space-6);
+  background-color: var(--color-primary);
+  color: var(--white);
   border-radius: var(--radius-full);
   font-weight: 600;
   border: none;
   cursor: pointer;
-  transition: all var(--duration-fast);
+  transition: all var(--motion-fast);
 }
 
 .write-review-btn:hover {
-  background-color: var(--color-chili-dark);
+  background-color: var(--color-primary-dark);
 }
 
 /* Form Styles */
 .review-form {
-  background-color: var(--color-card);
+  background-color: var(--color-surface);
   padding: var(--space-8);
   border-radius: var(--radius-lg);
   margin-bottom: var(--space-10);
@@ -119,8 +119,8 @@
 }
 
 .form-error {
-  background-color: #ffeaea;
-  color: #d32f2f;
+  background-color: var(--color-error-bg);
+  color: var(--color-error);
   padding: var(--space-3);
   border-radius: var(--radius-md);
   margin-bottom: var(--space-4);
@@ -147,14 +147,14 @@
 
 .star-select {
   font-size: 2rem;
-  color: var(--color-muted-light);
+  color: var(--color-muted);
   cursor: pointer;
-  transition: color var(--duration-fast);
+  transition: color var(--motion-fast);
 }
 
 .star-select.active,
 .star-select:hover {
-  color: var(--color-mustard);
+  color: var(--color-accent);
 }
 
 .review-form input[type="text"],
@@ -175,14 +175,14 @@
 
 .file-count {
   font-size: var(--text-sm);
-  color: var(--color-leaf);
+  color: var(--color-primary);
   font-weight: 600;
 }
 
 .submit-review-btn {
-  padding: 14px 24px;
+  padding: var(--space-4) var(--space-6);
   background-color: var(--color-ink);
-  color: white;
+  color: var(--white);
   border-radius: var(--radius-full);
   font-weight: 600;
   border: none;
@@ -213,10 +213,10 @@
 
 .review-card {
   padding: var(--space-5);
-  background: var(--color-card);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
-  transition: transform var(--duration-normal) var(--ease-out), box-shadow var(--duration-normal) var(--ease-out);
+  transition: transform var(--motion-base) var(--motion-ease), box-shadow var(--motion-base) var(--motion-ease);
 }
 
 .review-card:hover {
@@ -230,7 +230,7 @@
   font-family: var(--font-heading);
   font-size: 2.5rem;
   line-height: 0.6;
-  color: var(--color-mustard);
+  color: var(--color-accent);
   margin-bottom: var(--space-2);
 }
 
@@ -253,8 +253,8 @@
   content: '';
   width: 32px;
   height: 32px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-chili), var(--color-chili-light));
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
   flex-shrink: 0;
   display: inline-block;
 }
@@ -262,11 +262,11 @@
 .reviewer-name::after {
   content: '✓';
   font-size: 0.65rem;
-  color: #fff;
-  background: var(--color-chili);
+  color: var(--white);
+  background: var(--color-primary);
   width: 16px;
   height: 16px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -283,11 +283,11 @@
 }
 
 .review-stars .star {
-  color: var(--color-muted-light);
+  color: var(--color-muted);
 }
 
 .review-stars .star.filled {
-  color: var(--color-mustard);
+  color: var(--color-accent);
 }
 
 .review-comment {

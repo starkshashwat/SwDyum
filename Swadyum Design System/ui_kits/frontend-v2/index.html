@@ -1,0 +1,83 @@
+<!-- @dsCard group="Storefront" viewport="1440x900" name="Swadyum Frontend v2" subtitle="Full site: Home, Shop, PDP, Combo Builder, Checkout, Account, Recipes, Contact, About" -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Swadyum — Taste of Bihar</title>
+<link rel="stylesheet" href="../../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../../_ds_bundle.js"></script>
+<style>
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; font-family: var(--font-body); background: var(--color-bg); color: var(--color-ink); }
+  img { max-width: 100%; display: block; }
+  a { cursor: pointer; color: var(--color-primary); text-decoration: none; }
+  a:hover { color: var(--color-primary-dark); }
+  button { font-family: var(--font-body); }
+
+  .container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+  .section { padding: 88px 24px; }
+  .section-dark { background: var(--color-primary-dark); color: #fff; }
+  .section-cream { background: var(--color-cream); }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+  .grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 20px; }
+  .split { display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; }
+
+  .eyebrow { display: block; font-size: 12px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--color-primary); margin-bottom: 12px; }
+  .section-dark .eyebrow { color: var(--color-secondary); }
+  .headline { font-family: var(--font-heading); font-weight: 800; line-height: 1.1; letter-spacing: -0.5px; margin: 0; }
+  .headline em { font-style: italic; font-weight: 400; color: var(--color-primary); }
+  .section-dark .headline em { color: var(--color-secondary); }
+
+  .h1 { font-size: clamp(2.4rem, 5.5vw, 4.25rem); }
+  .h2 { font-size: clamp(1.8rem, 3.5vw, 2.75rem); }
+  .h3 { font-size: clamp(1.25rem, 2vw, 1.5rem); }
+
+  .desktop-only { display: flex; }
+  .mobile-only { display: none; }
+
+  @media (max-width: 900px) {
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+    .grid-3 { grid-template-columns: repeat(2, 1fr); }
+    .grid-5 { grid-template-columns: repeat(2, 1fr); }
+    .split { grid-template-columns: 1fr; gap: 28px; }
+    .section { padding: 56px 20px; }
+    .desktop-only { display: none !important; }
+    .mobile-only { display: flex; }
+  }
+  @media (max-width: 560px) {
+    .grid-4, .grid-3, .grid-2 { grid-template-columns: 1fr; }
+    .grid-5 { grid-template-columns: 1fr; }
+    .section { padding: 44px 16px; }
+    .container { padding: 0 16px; }
+  }
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 8px; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" src="Icons.jsx"></script>
+<script type="text/babel" src="data.jsx"></script>
+<script type="text/babel" src="Header.jsx"></script>
+<script type="text/babel" src="Footer.jsx"></script>
+<script type="text/babel" src="HomeScreen.jsx"></script>
+<script type="text/babel" src="ShopScreen.jsx"></script>
+<script type="text/babel" src="PdpScreen.jsx"></script>
+<script type="text/babel" src="ComboBuilder.jsx"></script>
+<script type="text/babel" src="CheckoutScreen.jsx"></script>
+<script type="text/babel" src="AccountScreen.jsx"></script>
+<script type="text/babel" src="RecipesScreen.jsx"></script>
+<script type="text/babel" src="ContactScreen.jsx"></script>
+<script type="text/babel" src="AboutScreen.jsx"></script>
+<script type="text/babel" src="CartDrawer.jsx"></script>
+<script type="text/babel" src="app.jsx"></script>
+</body>
+</html>

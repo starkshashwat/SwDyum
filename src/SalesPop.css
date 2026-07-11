@@ -1,15 +1,15 @@
 .sales-pop-container {
   position: fixed;
-  bottom: 20px;
-  left: 20px;
-  background-color: var(--color-card);
+  bottom: var(--space-5);
+  left: var(--space-5);
+  background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
-  padding: 12px;
-  gap: 12px;
+  padding: var(--space-3);
+  gap: var(--space-3);
   z-index: 10001;
   animation: slideUpFade 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   max-width: 300px;
@@ -20,6 +20,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -32,7 +33,7 @@
   flex-shrink: 0;
   border-radius: var(--radius-sm);
   overflow: hidden;
-  background-color: var(--color-background);
+  background-color: var(--color-bg);
 }
 
 .sales-pop-img img {
@@ -56,39 +57,40 @@
 }
 
 .sales-pop-buyer strong {
-  color: var(--color-foreground);
+  color: var(--color-ink);
 }
 
 .sales-pop-action strong {
-  color: var(--color-chili);
+  color: var(--color-primary);
   font-weight: 600;
 }
 
 .sales-pop-time {
   font-size: 0.75rem;
-  color: var(--color-muted-light);
+  color: var(--color-muted);
 }
 
 .sales-pop-close {
   position: absolute;
-  top: 4px;
-  right: 6px;
+  top: var(--space-1);
+  right: var(--space-2);
   background: none;
   border: none;
   font-size: 1.2rem;
-  color: var(--color-muted-light);
+  color: var(--color-muted);
   cursor: pointer;
   padding: 0;
   line-height: 1;
 }
 
 .sales-pop-close:hover {
-  color: var(--color-foreground);
+  color: var(--color-ink);
 }
 
 @media (max-width: 768px) {
   .sales-pop-container {
-    bottom: 80px; /* above mobile sticky elements if any */
+    bottom: 80px;
+    /* above mobile sticky elements if any */
     left: 50%;
     transform: translateX(-50%);
     width: 90%;
@@ -101,6 +103,7 @@
       opacity: 0;
       transform: translate(-50%, 20px);
     }
+
     to {
       opacity: 1;
       transform: translate(-50%, 0);

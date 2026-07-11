@@ -1,9 +1,7 @@
 /* ─── Process Section V2 — Kasutam-style Journey Timeline ────────────────── */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap');
-
 .process-v2 {
   position: relative;
-  background: #fdf8ef;
+  background: var(--color-bg-warm);
   padding: var(--space-20) var(--space-6);
   overflow: hidden;
 }
@@ -67,7 +65,7 @@
   font-family: var(--font-heading);
   font-style: italic;
   font-weight: 400;
-  color: var(--color-chili);
+  color: var(--color-primary);
 }
 
 /* ─── Cow Illustration ───────────────────────────────────────────────────── */
@@ -97,25 +95,23 @@
 .process-timeline-line {
   position: absolute;
   left: 18px;
-  top: 24px;
-  bottom: 24px;
+  top: var(--space-6);
+  bottom: var(--space-6);
   width: 2px;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    #c9b896 0px,
-    #c9b896 6px,
-    transparent 6px,
-    transparent 14px
-  );
+  background-image: repeating-linear-gradient(to bottom,
+      var(--color-border-strong) 0px,
+      var(--color-border-strong) 6px,
+      transparent 6px,
+      transparent 14px);
   z-index: 0;
 }
 
 .process-timeline-fill {
   position: absolute;
   inset: 0;
-  background: var(--color-chili);
+  background: var(--color-primary);
   transform-origin: top;
-  border-radius: 2px;
+  border-radius: var(--radius-xs);
   opacity: 0.4;
 }
 
@@ -140,16 +136,16 @@
   flex-shrink: 0;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   background: var(--color-ink);
-  color: #fffdf8;
+  color: var(--white);
   font-family: var(--font-body);
   font-size: var(--text-base);
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.12);
+  box-shadow: var(--shadow-sm);
   position: relative;
   z-index: 2;
 }
@@ -160,18 +156,18 @@
   display: flex;
   align-items: center;
   gap: var(--space-5);
-  background: #fffdf8;
-  border: 1px solid #e8dcc8;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   padding: var(--space-5) var(--space-6);
-  transition: all var(--duration-normal) var(--ease-out);
+  transition: all var(--motion-base) var(--motion-ease);
   cursor: default;
 }
 
 .process-step-card:hover {
   transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-  border-color: #d4c3a5;
+  box-shadow: var(--shadow-md);
+  border-color: var(--color-border-strong);
 }
 
 /* ─── Step Image (circular) ──────────────────────────────────────────────── */
@@ -179,10 +175,10 @@
   flex-shrink: 0;
   width: 72px;
   height: 72px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   overflow: hidden;
-  border: 3px solid #e8dcc8;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border: 3px solid var(--color-border);
+  box-shadow: var(--shadow-xs);
 }
 
 .process-step-img {
@@ -199,7 +195,7 @@
 
 .process-step-title {
   font-family: var(--font-body);
-  font-size: 0.95rem;
+  font-size: var(--text-base);
   font-weight: 700;
   color: var(--color-ink);
   margin: 0 0 var(--space-1);
@@ -208,7 +204,7 @@
 
 .process-step-desc {
   font-family: var(--font-body);
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   color: var(--color-muted);
   line-height: 1.55;
   margin: 0;
@@ -230,7 +226,7 @@
   }
 
   .process-v2-heading {
-    font-size: 1.5rem;
+    font-size: var(--text-xl);
   }
 
   .process-decor-cow {
@@ -261,7 +257,8 @@
   }
 
   .process-decor-branch {
-    display: none; /* Hide branch on mobile for cleaner look */
+    display: none;
+    /* Hide branch on mobile for cleaner look */
   }
 
   .process-decor-cow {
@@ -277,7 +274,7 @@
   }
 
   .process-v2-heading {
-    font-size: 1.4rem;
+    font-size: var(--text-lg);
   }
 
   .process-v2-heading br {
@@ -311,11 +308,11 @@
   }
 
   .process-step-title {
-    font-size: 0.85rem;
+    font-size: var(--text-sm);
   }
 
   .process-step-desc {
-    font-size: 0.76rem;
+    font-size: var(--text-xs);
     line-height: 1.5;
   }
 
@@ -336,7 +333,7 @@
   }
 
   .process-v2-heading {
-    font-size: 1.2rem;
+    font-size: var(--text-base);
   }
 
   .process-v2-right {
@@ -350,7 +347,7 @@
   .process-step-number {
     width: 30px;
     height: 30px;
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
   }
 
   .process-step-card {
@@ -366,11 +363,11 @@
   }
 
   .process-step-title {
-    font-size: 0.8rem;
+    font-size: var(--text-sm);
   }
 
   .process-step-desc {
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
   }
 
   .process-steps-list {

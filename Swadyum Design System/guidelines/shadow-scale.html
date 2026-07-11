@@ -1,0 +1,20 @@
+<!-- @dsCard group="Spacing" viewport="700x160" name="Shadow Scale" subtitle="Warm-tinted, sparing use" -->
+<html>
+<head>
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin:0; font-family: var(--font-body); background: var(--color-bg); }
+  .row { display:flex; gap:28px; padding:28px 32px; }
+  .box { width:90px; height:70px; background: var(--color-surface); border-radius: var(--radius-md); display:flex; align-items:center; justify-content:center; font-size:10px; font-family:monospace; color:var(--color-muted); }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="box" style="box-shadow:var(--shadow-sm)">sm</div>
+    <div class="box" style="box-shadow:var(--shadow-md)">md</div>
+    <div class="box" style="box-shadow:var(--shadow-lg)">lg</div>
+    <div class="box" style="box-shadow:var(--shadow-xl)">xl</div>
+    <div class="box" style="box-shadow:var(--shadow-card-hover)">card-hover</div>
+  </div>
+</body>
+</html>

@@ -1,7 +1,6 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    Shop Page — Unified with Home Page (Kasutam-inspired)
    ═══════════════════════════════════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap');
 
 .sp-wrapper {
   background: var(--color-bg);
@@ -19,7 +18,7 @@
   position: relative;
   max-width: 1400px;
   margin: 0 auto;
-  border-radius: 24px;
+  border-radius: var(--radius-2xl);
   overflow: hidden;
   height: 320px;
 }
@@ -35,13 +34,11 @@
 .sp-hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    100deg,
-    rgba(30, 22, 12, 0.82) 0%,
-    rgba(30, 22, 12, 0.55) 50%,
-    rgba(30, 22, 12, 0.2) 80%,
-    rgba(30, 22, 12, 0) 100%
-  );
+  background: linear-gradient(100deg,
+      rgba(17, 32, 24, 0.82) 0%,
+      rgba(17, 32, 24, 0.55) 50%,
+      rgba(17, 32, 24, 0.2) 80%,
+      rgba(17, 32, 24, 0) 100%);
 }
 
 .sp-hero-content {
@@ -60,22 +57,22 @@
   font-family: var(--font-heading);
   font-size: clamp(2rem, 4vw, 3rem);
   font-weight: 700;
-  color: #fffdf8;
+  color: var(--white);
   line-height: 1.15;
   margin: 0;
 }
 
 .sp-hero-title em {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: var(--font-heading);
   font-style: italic;
   font-weight: 400;
-  color: #f5d88e;
+  color: var(--color-accent);
 }
 
 .sp-hero-subtitle {
   font-family: var(--font-body);
   font-size: clamp(0.875rem, 1.2vw, 1rem);
-  color: rgba(255, 253, 248, 0.8);
+  color: rgba(255, 255, 255, 0.8);
   line-height: 1.65;
   margin: 0;
 }
@@ -106,40 +103,40 @@
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
-  padding: 9px 20px;
+  padding: var(--space-2) var(--space-5);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-full);
   font-family: var(--font-body);
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-ink);
-  background: var(--color-card);
+  background: var(--color-surface);
   cursor: pointer;
-  transition: all var(--duration-normal) var(--ease-out);
+  transition: all var(--motion-base) var(--motion-ease);
   white-space: nowrap;
 }
 
 .sp-tab:hover {
-  border-color: var(--color-chili);
-  color: var(--color-chili);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .sp-tab.active {
-  background: var(--color-chili);
-  color: #ffffff;
-  border-color: var(--color-chili);
-  box-shadow: 0 4px 12px rgba(10, 90, 50, 0.2);
+  background: var(--color-primary);
+  color: var(--white);
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-sm);
 }
 
 .sp-tab.active .sp-tab-icon {
-  color: #ffffff;
+  color: var(--white);
 }
 
 .sp-tab-icon {
   display: flex;
   align-items: center;
-  color: var(--color-chili);
-  transition: color var(--duration-fast);
+  color: var(--color-primary);
+  transition: color var(--motion-fast);
 }
 
 /* ─── Search + Sort (right side) ─────────────────────────────────────────── */
@@ -157,50 +154,50 @@
 
 .sp-search-icon {
   position: absolute;
-  left: 12px;
+  left: var(--space-3);
   color: var(--color-muted);
   pointer-events: none;
 }
 
 .sp-search-input {
-  padding: 9px 14px 9px 36px;
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-9);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-full);
   font-family: var(--font-body);
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   color: var(--color-ink);
-  background: var(--color-card);
+  background: var(--color-surface);
   outline: none;
   width: 200px;
-  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+  transition: border-color var(--motion-fast), box-shadow var(--motion-fast);
 }
 
 .sp-search-input:focus {
-  border-color: var(--color-chili);
+  border-color: var(--color-primary);
   box-shadow: 0 0 0 3px rgba(10, 90, 50, 0.08);
 }
 
 .sp-search-input::placeholder {
-  color: var(--color-muted-light);
+  color: var(--color-muted);
 }
 
 .sp-sort-select {
-  padding: 9px 14px;
+  padding: var(--space-2) var(--space-3);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-full);
   font-family: var(--font-body);
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   font-weight: 600;
   color: var(--color-ink);
-  background: var(--color-card);
+  background: var(--color-surface);
   cursor: pointer;
   outline: none;
-  transition: border-color var(--duration-fast);
+  transition: border-color var(--motion-fast);
   appearance: auto;
 }
 
 .sp-sort-select:focus {
-  border-color: var(--color-chili);
+  border-color: var(--color-primary);
 }
 
 /* ─── Product Grid Section ───────────────────────────────────────────────── */
@@ -214,7 +211,7 @@
 }
 
 .sp-result-count {
-  font-size: 0.82rem;
+  font-size: var(--text-sm);
   color: var(--color-muted);
   margin-bottom: var(--space-5);
   font-weight: 500;
@@ -234,12 +231,12 @@
 /* ─── Product Card (unified with FeaturedProducts) ───────────────────────── */
 .sp-card {
   position: relative;
-  background: var(--color-card);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
   cursor: pointer;
-  transition: all var(--duration-normal) var(--ease-out);
+  transition: all var(--motion-base) var(--motion-ease);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -247,21 +244,21 @@
 
 .sp-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+  box-shadow: var(--shadow-card-hover);
   border-color: transparent;
 }
 
 /* ─── Badges ─────────────────────────────────────────────────────────────── */
 .sp-sale-badge {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: var(--space-3);
+  right: var(--space-3);
   z-index: 3;
-  padding: 4px 12px;
+  padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-sm);
-  background: var(--color-chili);
-  color: #ffffff;
-  font-size: 0.7rem;
+  background: var(--color-primary);
+  color: var(--white);
+  font-size: var(--text-xs);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -269,13 +266,13 @@
 
 .sp-best-badge {
   position: absolute;
-  top: 12px;
-  left: 12px;
+  top: var(--space-3);
+  left: var(--space-3);
   z-index: 3;
-  padding: 4px 10px;
+  padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
-  background: #f5d88e;
-  color: #5c3d10;
+  background: var(--color-accent);
+  color: var(--color-accent-dark);
   font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
@@ -287,7 +284,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  background: #f0ebe2;
+  background: var(--color-bg-warm);
   overflow: hidden;
 }
 
@@ -295,7 +292,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform var(--duration-slow) var(--ease-out);
+  transition: transform var(--motion-slow) var(--motion-ease);
 }
 
 .sp-card:hover .sp-card-img {
@@ -304,13 +301,13 @@
 
 .sp-weight-tag {
   position: absolute;
-  bottom: 10px;
-  right: 10px;
-  background: rgba(30, 22, 12, 0.75);
-  color: #fffdf8;
-  padding: 4px 10px;
+  bottom: var(--space-2);
+  right: var(--space-2);
+  background: rgba(17, 32, 24, 0.75);
+  color: var(--white);
+  padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);
-  font-size: 0.7rem;
+  font-size: var(--text-xs);
   font-weight: 700;
   backdrop-filter: blur(4px);
 }
@@ -338,7 +335,7 @@
 }
 
 .sp-review-count {
-  font-size: 0.72rem;
+  font-size: var(--text-xs);
   color: var(--color-muted);
   font-weight: 500;
 }
@@ -346,11 +343,10 @@
 /* ─── Product Name ───────────────────────────────────────────────────────── */
 .sp-product-name {
   font-family: var(--font-body);
-  font-size: 0.8rem;
+  font-size: var(--text-sm);
   font-weight: 700;
   color: var(--color-ink);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.2px;
   line-height: 1.35;
   margin: 0;
   display: -webkit-box;
@@ -361,7 +357,7 @@
 
 /* ─── Product Description ────────────────────────────────────────────────── */
 .sp-product-desc {
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   color: var(--color-muted);
   line-height: 1.5;
   margin: 0;
@@ -379,7 +375,7 @@
 }
 
 .sp-weight-btn {
-  padding: 4px 10px;
+  padding: var(--space-1) var(--space-2);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
   font-size: 0.68rem;
@@ -387,7 +383,7 @@
   color: var(--color-muted);
   background: transparent;
   cursor: pointer;
-  transition: all var(--duration-fast);
+  transition: all var(--motion-fast);
   font-family: var(--font-body);
 }
 
@@ -398,7 +394,7 @@
 
 .sp-weight-btn.active {
   background: var(--color-ink);
-  color: #ffffff;
+  color: var(--white);
   border-color: var(--color-ink);
 }
 
@@ -413,7 +409,7 @@
 
 .sp-mrp {
   font-size: var(--text-sm);
-  color: var(--color-muted-light);
+  color: var(--color-muted);
   text-decoration: line-through;
   font-weight: 500;
 }
@@ -428,10 +424,10 @@
 .sp-discount {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
+  padding: 2px var(--space-2);
   border-radius: var(--radius-sm);
-  background: #fef3e2;
-  color: #c67b1a;
+  background: var(--color-accent-light);
+  color: var(--color-accent-dark);
   font-size: 0.65rem;
   font-weight: 700;
 }
@@ -439,25 +435,25 @@
 /* ─── Add to Cart ────────────────────────────────────────────────────────── */
 .sp-add-btn {
   width: 100%;
-  padding: 12px 16px;
+  padding: var(--space-3) var(--space-4);
   margin-top: var(--space-2);
   border: none;
   border-radius: var(--radius-md);
-  background: var(--color-chili);
-  color: #ffffff;
+  background: var(--color-primary);
+  color: var(--white);
   font-family: var(--font-body);
-  font-size: 0.78rem;
+  font-size: var(--text-sm);
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 1px;
   cursor: pointer;
-  transition: all var(--duration-normal) var(--ease-out);
+  transition: all var(--motion-base) var(--motion-ease);
 }
 
 .sp-add-btn:hover {
-  background: var(--color-chili-dark);
+  background: var(--color-primary-dark);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(10, 90, 50, 0.25);
+  box-shadow: var(--shadow-sm);
 }
 
 /* ─── Empty State ────────────────────────────────────────────────────────── */
@@ -470,31 +466,33 @@
 
 .sp-reset-btn {
   margin-top: var(--space-4);
-  padding: 12px 28px;
-  background: var(--color-chili);
-  color: #ffffff;
+  padding: var(--space-3) var(--space-7);
+  background: var(--color-primary);
+  color: var(--white);
   border-radius: var(--radius-full);
   font-weight: 700;
   font-size: var(--text-sm);
   border: none;
   cursor: pointer;
   font-family: var(--font-body);
-  transition: all var(--duration-fast);
+  transition: all var(--motion-fast);
 }
 
 .sp-reset-btn:hover {
-  background: var(--color-chili-dark);
+  background: var(--color-primary-dark);
 }
 
 /* ─── Skeleton ───────────────────────────────────────────────────────────── */
-.sp-card-skeleton { pointer-events: none; }
+.sp-card-skeleton {
+  pointer-events: none;
+}
 
 .sp-skel-img {
   width: 100%;
   aspect-ratio: 1 / 1;
-  background: linear-gradient(110deg, #eee8e0 30%, #f5f0e8 50%, #eee8e0 70%);
+  background: linear-gradient(110deg, var(--color-border) 30%, var(--color-surface) 50%, var(--color-border) 70%);
   background-size: 200% 100%;
-  animation: sp-shimmer 1.5s ease-in-out infinite;
+  animation: sp-shimmer var(--motion-slow) ease-in-out infinite;
 }
 
 .sp-skel-info {
@@ -505,20 +503,33 @@
 }
 
 .sp-skel-line {
-  height: 12px;
-  border-radius: 6px;
-  background: linear-gradient(110deg, #eee8e0 30%, #f5f0e8 50%, #eee8e0 70%);
+  height: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: linear-gradient(110deg, var(--color-border) 30%, var(--color-surface) 50%, var(--color-border) 70%);
   background-size: 200% 100%;
-  animation: sp-shimmer 1.5s ease-in-out infinite;
+  animation: sp-shimmer var(--motion-slow) ease-in-out infinite;
 }
 
-.w60 { width: 60%; }
-.w80 { width: 80%; }
-.w40 { width: 40%; }
+.w60 {
+  width: 60%;
+}
+
+.w80 {
+  width: 80%;
+}
+
+.w40 {
+  width: 40%;
+}
 
 @keyframes sp-shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* ─── Bottom CTA Banner ──────────────────────────────────────────────────── */
@@ -533,8 +544,8 @@
 
 .sp-bottom-cta-card {
   display: flex;
-  background: var(--color-chili);
-  border-radius: 20px;
+  background: var(--color-primary);
+  border-radius: var(--radius-xl);
   overflow: hidden;
 }
 
@@ -566,7 +577,7 @@
 
 .sp-bottom-cta-eyebrow {
   font-family: var(--font-body);
-  font-size: 0.75rem;
+  font-size: var(--text-xs);
   font-weight: 700;
   color: rgba(255, 255, 255, 0.6);
   text-transform: uppercase;
@@ -577,13 +588,13 @@
   font-family: var(--font-heading);
   font-size: clamp(1.4rem, 2.5vw, 2rem);
   font-weight: 700;
-  color: #ffffff;
+  color: var(--white);
   margin: 0;
   line-height: 1.2;
 }
 
 .sp-bottom-cta-desc {
-  font-size: 0.9rem;
+  font-size: var(--text-sm);
   color: rgba(255, 255, 255, 0.7);
   line-height: 1.65;
   margin: 0;
@@ -592,23 +603,23 @@
 
 .sp-bottom-cta-btn {
   align-self: flex-start;
-  padding: 12px 30px;
+  padding: var(--space-3) var(--space-8);
   border-radius: var(--radius-full);
-  background: #fffdf8;
-  color: var(--color-chili);
+  background: var(--white);
+  color: var(--color-primary);
   font-family: var(--font-body);
-  font-size: 0.85rem;
+  font-size: var(--text-sm);
   font-weight: 700;
   border: none;
   cursor: pointer;
-  transition: all var(--duration-normal) var(--ease-out);
+  transition: all var(--motion-base) var(--motion-ease);
   margin-top: var(--space-2);
 }
 
 .sp-bottom-cta-btn:hover {
-  background: #f5d88e;
+  background: var(--color-accent);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-md);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -632,7 +643,7 @@
   }
 
   .sp-hero-banner {
-    border-radius: 18px;
+    border-radius: var(--radius-xl);
     height: 240px;
   }
 
@@ -653,11 +664,13 @@
     padding-bottom: var(--space-1);
   }
 
-  .sp-tabs::-webkit-scrollbar { display: none; }
+  .sp-tabs::-webkit-scrollbar {
+    display: none;
+  }
 
   .sp-tab {
-    padding: 8px 14px;
-    font-size: 0.78rem;
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-xs);
   }
 
   .sp-toolbar-right {
@@ -687,11 +700,12 @@
   }
 
   .sp-product-name {
-    font-size: 0.72rem;
+    font-size: var(--text-xs);
   }
 
   .sp-product-desc {
-    display: none; /* Hide description on mobile for cleaner cards */
+    display: none;
+    /* Hide description on mobile for cleaner cards */
   }
 
   .sp-price {
@@ -699,8 +713,8 @@
   }
 
   .sp-add-btn {
-    padding: 10px 12px;
-    font-size: 0.7rem;
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-xs);
   }
 
   /* CTA Banner stacks */
@@ -721,11 +735,11 @@
 @media (max-width: 480px) {
   .sp-hero-banner {
     height: 200px;
-    border-radius: 14px;
+    border-radius: var(--radius-lg);
   }
 
   .sp-hero-title {
-    font-size: 1.6rem;
+    font-size: var(--text-xl);
   }
 
   .sp-grid {
@@ -739,7 +753,7 @@
   }
 
   .sp-product-name {
-    font-size: 0.68rem;
+    font-size: var(--text-xs);
   }
 
   .sp-price {
@@ -747,7 +761,7 @@
   }
 
   .sp-mrp {
-    font-size: 0.75rem;
+    font-size: var(--text-xs);
   }
 
   .sp-discount {
@@ -787,10 +801,10 @@
   }
 
   .sp-bottom-cta-heading {
-    font-size: 1.25rem;
+    font-size: var(--text-lg);
   }
 
   .sp-bottom-cta-desc {
-    font-size: 0.82rem;
+    font-size: var(--text-xs);
   }
 }

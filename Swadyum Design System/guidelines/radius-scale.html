@@ -1,0 +1,20 @@
+<!-- @dsCard group="Spacing" viewport="700x160" name="Radius Scale" subtitle="sm/md/lg/xl/full" -->
+<html>
+<head>
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin:0; font-family: var(--font-body); background: var(--color-surface); }
+  .row { display:flex; gap:20px; padding:24px 32px; align-items:flex-end; }
+  .box { width:80px; height:80px; background: var(--color-cream); border:1.5px solid var(--color-primary); display:flex; align-items:flex-end; justify-content:center; padding-bottom:6px; font-size:10px; font-family:monospace; color:var(--color-muted); }
+</style>
+</head>
+<body>
+  <div class="row">
+    <div class="box" style="border-radius:var(--radius-sm)">sm 6</div>
+    <div class="box" style="border-radius:var(--radius-md)">md 10</div>
+    <div class="box" style="border-radius:var(--radius-lg)">lg 16</div>
+    <div class="box" style="border-radius:var(--radius-xl)">xl 24</div>
+    <div class="box" style="border-radius:var(--radius-full)">full</div>
+  </div>
+</body>
+</html>

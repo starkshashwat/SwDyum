@@ -94,7 +94,7 @@ function SocialProofSection() {
   return (
     <section className="social-proof-section section-padding">
       <div className="section-container">
-        
+
         <div className="sp-header text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -131,8 +131,8 @@ function SocialProofSection() {
         <div className="sp-carousel-wrapper" ref={scrollRef}>
           <div className="sp-carousel-fade-left"></div>
           <div className="sp-carousel-fade-right"></div>
-          
-          <motion.div 
+
+          <motion.div
             className="sp-carousel-track"
             animate={controls}
             onHoverStart={() => controls.stop()}
@@ -142,8 +142,8 @@ function SocialProofSection() {
               <div className="sp-testimonial-card" key={`${t.id}-${idx}`}>
                 <div className="sp-stars">
                   {[...Array(5)].map((_, i) => (
-                    <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill={i < t.rating ? 'var(--color-accent)' : 'none'} stroke={i < t.rating ? 'var(--color-accent)' : 'var(--color-muted-light)'} strokeWidth="2">
-                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+                    <svg key={i} width="16" height="16" viewBox="0 0 24 24" fill={i < t.rating ? 'var(--color-accent)' : 'none'} stroke={i < t.rating ? 'var(--color-accent)' : 'var(--color-muted)'} strokeWidth="2">
+                      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                     </svg>
                   ))}
                 </div>

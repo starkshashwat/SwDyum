@@ -1,6 +1,6 @@
 .pdp-ingredients-section {
   padding: var(--space-14, 3.5rem) var(--space-4);
-  background: var(--color-warm-bg);
+  background: var(--color-bg-warm);
 }
 
 .pdp-ingredients-container {
@@ -19,15 +19,15 @@
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 2px;
-  color: var(--color-chili);
-  margin-bottom: 8px;
+  color: var(--color-primary);
+  margin-bottom: var(--space-2);
 }
 
 .pdp-heading {
   font-family: var(--font-heading);
   font-size: clamp(1.6rem, 4vw, 2.6rem);
   color: var(--color-ink);
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
   line-height: 1.1;
 }
 
@@ -45,11 +45,11 @@
 }
 
 .pdp-ingredient-card {
-  background: var(--color-card);
+  background: var(--color-surface);
   border-radius: var(--radius-lg);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
-  transition: box-shadow var(--duration-normal) var(--ease-out);
+  transition: box-shadow var(--motion-base) var(--motion-ease);
   cursor: default;
   border: 1px solid var(--color-border);
 }
@@ -68,7 +68,7 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.4s var(--ease-out);
+  transition: transform 0.4s var(--motion-ease);
 }
 
 .pdp-ingredient-card:hover .ing-img-wrap img {
@@ -76,8 +76,8 @@
 }
 
 .ing-info {
-  padding: 14px;
-  background: var(--color-card);
+  padding: var(--space-3);
+  background: var(--color-surface);
 }
 
 .ing-info h4 {

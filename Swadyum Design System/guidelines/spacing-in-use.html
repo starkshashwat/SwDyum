@@ -1,0 +1,18 @@
+<!-- @dsCard group="Spacing" viewport="700x180" name="Spacing In Use" subtitle="Section padding vs card padding" -->
+<html>
+<head>
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin:0; font-family: var(--font-body); background: var(--color-bg); }
+  .section { padding: var(--space-8) var(--space-6); }
+  .card { background: var(--color-surface); border:1px solid var(--color-border); border-radius: var(--radius-xl); padding: var(--space-6); max-width:340px; }
+  .card h4 { margin:0 0 4px; font-family:var(--font-heading); color:var(--color-ink); }
+  .card p { margin:0; font-size:13px; color:var(--color-muted); }
+</style>
+</head>
+<body>
+  <div class="section">
+    <div class="card"><h4>Card padding: --space-6</h4><p>Section padding uses --space-24 vertical on desktop (shown scaled here).</p></div>
+  </div>
+</body>
+</html>

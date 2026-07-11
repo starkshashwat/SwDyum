@@ -10,7 +10,7 @@
   height: 80vh;
   font-family: var(--font-heading);
   font-size: 1.5rem;
-  color: var(--color-chili);
+  color: var(--color-primary);
   font-weight: 600;
 }
 
@@ -33,7 +33,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 3px;
-  color: var(--color-chili);
+  color: var(--color-primary);
   margin-bottom: var(--space-3);
 }
 

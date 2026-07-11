@@ -7,22 +7,22 @@ import './FeaturedProducts.css';
 const tabIcons = {
   bestseller: (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="12" cy="8" r="7"/><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"/>
+      <circle cx="12" cy="8" r="7" /><polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88" />
     </svg>
   ),
   pickles: (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M8 2h8l2 6H6l2-6z"/><rect x="6" y="8" width="12" height="12" rx="2"/><line x1="12" y1="8" x2="12" y2="20"/>
+      <path d="M8 2h8l2 6H6l2-6z" /><rect x="6" y="8" width="12" height="12" rx="2" /><line x1="12" y1="8" x2="12" y2="20" />
     </svg>
   ),
   spices: (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 1c1 2 2 4.5 2 8 0 5.5-4.8 11-10 11z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+      <path d="M11 20A7 7 0 0 1 9.8 6.9C15.5 4.9 17 3.5 19 1c1 2 2 4.5 2 8 0 5.5-4.8 11-10 11z" /><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
     </svg>
   ),
   all: (
     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+      <rect x="3" y="3" width="7" height="7" /><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" />
     </svg>
   ),
 };
@@ -54,15 +54,15 @@ function Stars({ rating, count }) {
             width="14"
             height="14"
             viewBox="0 0 24 24"
-            fill={idx < full ? '#d4a843' : (idx === full && hasHalf ? 'url(#half-star)' : 'none')}
-            stroke="#d4a843"
+            fill={idx < full ? 'var(--color-accent)' : (idx === full && hasHalf ? 'url(#half-star)' : 'none')}
+            stroke="var(--color-accent)"
             strokeWidth="1.5"
             aria-hidden="true"
           >
             {idx === full && hasHalf && (
               <defs>
                 <linearGradient id="half-star">
-                  <stop offset="50%" stopColor="#d4a843" />
+                  <stop offset="50%" stopColor="var(--color-accent)" />
                   <stop offset="50%" stopColor="transparent" />
                 </linearGradient>
               </defs>
@@ -87,11 +87,11 @@ function FeaturedProducts({ onNavigate, addToCart }) {
     const loadData = async () => {
       const data = await fetchProducts();
       setProducts(data);
-      
+
       const uniqueCats = Array.from(new Set(data.map(p => p.category))).filter(c => c && c !== 'Uncategorized');
-      
+
       const newTabs = [...baseTabs];
-      
+
       uniqueCats.forEach(cat => {
         let icon = tabIcons.pickles;
         const lowerCat = cat.toLowerCase();
@@ -100,11 +100,11 @@ function FeaturedProducts({ onNavigate, addToCart }) {
         } else if (lowerCat.includes('box') || lowerCat.includes('combo')) {
           icon = tabIcons.spices; // fallback icon
         } else if (lowerCat.includes('murabba') || lowerCat.includes('sweet')) {
-           icon = <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v9"/></svg>;
+          icon = <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 3v9" /></svg>;
         }
         newTabs.push({ key: cat, label: cat, icon: icon });
       });
-      
+
       newTabs.push({ key: 'all', label: 'All Products', icon: tabIcons.all });
       setDynamicCategories(newTabs);
       setLoading(false);

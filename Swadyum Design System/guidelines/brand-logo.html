@@ -1,0 +1,22 @@
+<!-- @dsCard group="Brand" viewport="700x260" name="Logo" subtitle="Primary lockup on light & dark" -->
+<html>
+<head>
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin:0; font-family: var(--font-body); }
+  .wrap { display:flex; height:260px; }
+  .panel { flex:1; display:flex; align-items:center; justify-content:center; gap:24px; }
+  .light { background: var(--color-bg); }
+  .dark { background: var(--color-primary-dark); }
+  img { height:120px; width:120px; }
+  .word { font-family: var(--font-heading); font-weight:800; font-size:28px; color: var(--color-ink); }
+  .dark .word { color: #fff; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="panel light"><img src="../assets/logo/logo-mark.png"><span class="word">Swadyum</span></div>
+    <div class="panel dark"><img src="../assets/logo/logo-mark.png"><span class="word">Swadyum</span></div>
+  </div>
+</body>
+</html>

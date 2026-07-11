@@ -2,15 +2,15 @@
 .final-cta-section {
   position: relative;
   padding: var(--space-24) var(--space-6);
-  background: linear-gradient(135deg, var(--color-clay) 0%, #5E3520 100%);
+  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-primary) 100%);
   overflow: hidden;
 }
 
 .final-cta-bg-pattern {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 20% 80%, rgba(193, 64, 43, 0.15) 0%, transparent 50%),
-              radial-gradient(circle at 80% 20%, rgba(217, 154, 27, 0.1) 0%, transparent 50%);
+  background: radial-gradient(circle at 20% 80%, rgba(10, 90, 50, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(232, 168, 58, 0.1) 0%, transparent 50%);
   pointer-events: none;
 }
 
@@ -30,7 +30,7 @@
   font-family: var(--font-heading);
   font-size: var(--text-5xl);
   font-weight: 800;
-  color: #FFFFFF;
+  color: var(--white);
   line-height: 1.1;
   letter-spacing: -1px;
 }
@@ -38,7 +38,7 @@
 .final-cta-headline em {
   font-style: italic;
   font-weight: 400;
-  color: var(--color-mustard-light);
+  color: var(--color-secondary-light);
 }
 
 .final-cta-subtext {
@@ -55,26 +55,26 @@
 }
 
 .final-cta-primary {
-  background-color: var(--color-chili);
-  color: #FFFFFF;
-  padding: 18px 44px;
+  background-color: var(--color-primary);
+  color: var(--white);
+  padding: var(--space-4) var(--space-11);
   border-radius: var(--radius-full);
   font-size: var(--text-lg);
   font-weight: 700;
   font-family: var(--font-body);
   border: none;
   cursor: pointer;
-  transition: all var(--duration-normal) var(--ease-out);
-  box-shadow: 0 4px 20px rgba(193, 64, 43, 0.35);
+  transition: all var(--motion-base) var(--motion-ease);
+  box-shadow: 0 4px 20px rgba(10, 90, 50, 0.35);
   display: inline-flex;
   align-items: center;
   gap: var(--space-3);
 }
 
 .final-cta-primary:hover {
-  background-color: var(--color-chili-light);
+  background-color: var(--color-primary-light);
   transform: translateY(-3px);
-  box-shadow: 0 8px 30px rgba(193, 64, 43, 0.4);
+  box-shadow: 0 8px 30px rgba(10, 90, 50, 0.4);
 }
 
 .final-cta-primary:active {

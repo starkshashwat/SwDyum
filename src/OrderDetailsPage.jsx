@@ -24,11 +24,11 @@ function OrderDetailsPage({ onNavigate, orderId, currentUser }) {
           .single();
 
         if (orderError) throw orderError;
-        
+
         // Security check - ensure this order belongs to the current user (if logged in)
         // If not logged in, we still show it (guest checkout viewing from ThankYou page)
         if (currentUser && orderData.customer_id && orderData.customer_id !== currentUser.id) {
-           throw new Error("Unauthorized");
+          throw new Error("Unauthorized");
         }
 
         setOrder(orderData);
@@ -38,7 +38,7 @@ function OrderDetailsPage({ onNavigate, orderId, currentUser }) {
           .from('order_items')
           .select('*')
           .eq('order_id', cleanOrderId);
-        
+
         setOrderItems(items || []);
 
         // Fetch timeline
@@ -47,7 +47,7 @@ function OrderDetailsPage({ onNavigate, orderId, currentUser }) {
           .select('*')
           .eq('order_id', cleanOrderId)
           .order('created_at', { ascending: false });
-          
+
         setTimeline(timelineData || []);
 
         // Fetch invoice
@@ -56,7 +56,7 @@ function OrderDetailsPage({ onNavigate, orderId, currentUser }) {
           .select('*')
           .eq('order_id', cleanOrderId)
           .single();
-          
+
         setInvoice(invoiceData);
 
       } catch (e) {
@@ -65,7 +65,7 @@ function OrderDetailsPage({ onNavigate, orderId, currentUser }) {
         setIsLoading(false);
       }
     };
-    
+
     fetchOrderDetails();
   }, [cleanOrderId, currentUser]);
 
@@ -73,8 +73,8 @@ function OrderDetailsPage({ onNavigate, orderId, currentUser }) {
     return (
       <div className="order-details-page-wrapper">
         <div style={{ textAlign: 'center', padding: '4rem' }}>
-          <div className="spinner" style={{ margin: '0 auto 1.5rem auto', borderTopColor: 'var(--primary-green)' }}></div>
-          <p style={{ color: 'var(--muted-text)', fontWeight: '600' }}>Loading Order Details...</p>
+          <div className="spinner" style={{ margin: '0 auto 1.5rem auto', borderTopColor: 'var(--color-primary)' }}></div>
+          <p style={{ color: 'var(--color-muted)', fontWeight: '600' }}>Loading Order Details...</p>
         </div>
       </div>
     );
@@ -94,7 +94,7 @@ function OrderDetailsPage({ onNavigate, orderId, currentUser }) {
 
   // Timeline status logic
   const currentStatus = (order.order_status || order.status).toLowerCase();
-  
+
   const formatDate = (isoString) => {
     if (!isoString) return '—';
     const d = new Date(isoString);
@@ -131,31 +131,31 @@ function OrderDetailsPage({ onNavigate, orderId, currentUser }) {
 
         {/* Status Highlights */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Order Status</p>
-              <p className="font-bold text-lg">{order.order_status || order.status}</p>
-           </div>
-           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Payment Status</p>
-              <p className={`font-bold text-lg ${order.payment_status === 'Paid' ? 'text-green-600' : 'text-orange-500'}`}>{order.payment_status}</p>
-           </div>
-           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Total Amount</p>
-              <p className="font-bold text-lg">₹{order.total}</p>
-           </div>
-           <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-              <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Est. Delivery</p>
-              <p className="font-bold text-lg">{order.estimated_delivery ? new Date(order.estimated_delivery).toLocaleDateString() : 'TBD'}</p>
-           </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Order Status</p>
+            <p className="font-bold text-lg">{order.order_status || order.status}</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Payment Status</p>
+            <p className={`font-bold text-lg ${order.payment_status === 'Paid' ? 'text-green-600' : 'text-orange-500'}`}>{order.payment_status}</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Total Amount</p>
+            <p className="font-bold text-lg">₹{order.total}</p>
+          </div>
+          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Est. Delivery</p>
+            <p className="font-bold text-lg">{order.estimated_delivery ? new Date(order.estimated_delivery).toLocaleDateString() : 'TBD'}</p>
+          </div>
         </div>
 
         {/* Order Tracking Timeline */}
         <section className="details-card timeline-card">
           <h3 className="card-sec-title">Tracking History</h3>
           {timeline.length === 0 ? (
-             <p className="text-gray-500 italic p-4">No tracking updates available yet.</p>
+            <p className="text-gray-500 italic p-4">No tracking updates available yet.</p>
           ) : (
-             <div className="vertical-timeline-list px-4 py-2">
+            <div className="vertical-timeline-list px-4 py-2">
               {timeline.map((item, idx) => (
                 <div key={idx} className={`vt-row ${idx === 0 ? 'vt-latest' : ''}`}>
                   <div className="vt-connector">
@@ -175,14 +175,14 @@ function OrderDetailsPage({ onNavigate, orderId, currentUser }) {
 
         {/* Shipping details */}
         <section className="details-card">
-           <h3 className="card-sec-title">Shipping Address</h3>
-           <div className="p-4 bg-gray-50 rounded-lg">
-              <p className="font-bold text-gray-900">{shipping.name || order.customer_name}</p>
-              <p className="text-gray-700">{shipping.address || [shipping.house_number, shipping.street].filter(Boolean).join(', ')}</p>
-              <p className="text-gray-700">{[shipping.city, shipping.state, shipping.zip || shipping.pin_code].filter(Boolean).join(', ')}</p>
-              <p className="text-gray-700 mt-2">📞 {shipping.phone || order.customer_phone}</p>
-              <p className="text-gray-700">✉️ {shipping.email || order.customer_email}</p>
-           </div>
+          <h3 className="card-sec-title">Shipping Address</h3>
+          <div className="p-4 bg-gray-50 rounded-lg">
+            <p className="font-bold text-gray-900">{shipping.name || order.customer_name}</p>
+            <p className="text-gray-700">{shipping.address || [shipping.house_number, shipping.street].filter(Boolean).join(', ')}</p>
+            <p className="text-gray-700">{[shipping.city, shipping.state, shipping.zip || shipping.pin_code].filter(Boolean).join(', ')}</p>
+            <p className="text-gray-700 mt-2">📞 {shipping.phone || order.customer_phone}</p>
+            <p className="text-gray-700">✉️ {shipping.email || order.customer_email}</p>
+          </div>
         </section>
 
       </div>

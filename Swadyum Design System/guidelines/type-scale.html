@@ -1,0 +1,23 @@
+<!-- @dsCard group="Type" viewport="700x300" name="Type Scale" subtitle="text-xs through text-6xl" -->
+<html>
+<head>
+<link rel="stylesheet" href="../styles.css">
+<style>
+  body { margin:0; font-family: var(--font-body); background: var(--color-surface); }
+  .wrap { padding: 20px 32px; display:flex; flex-direction:column; gap:6px; }
+  .row { display:flex; align-items:baseline; gap:14px; }
+  .row span.label { width:110px; font-size:11px; color: var(--color-muted); font-family: monospace; flex-shrink:0; }
+  .row span.sample { font-family: var(--font-heading); font-weight:700; color: var(--color-ink); }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="row"><span class="label">--text-6xl / 60</span><span class="sample" style="font-size:var(--text-6xl)">Aa</span></div>
+    <div class="row"><span class="label">--text-4xl / 36</span><span class="sample" style="font-size:var(--text-4xl)">Aa</span></div>
+    <div class="row"><span class="label">--text-2xl / 24</span><span class="sample" style="font-size:var(--text-2xl)">Aa</span></div>
+    <div class="row"><span class="label">--text-lg / 18</span><span class="sample" style="font-size:var(--text-lg)">Aa</span></div>
+    <div class="row"><span class="label">--text-base / 16</span><span class="sample" style="font-size:var(--text-base); font-weight:500">Aa</span></div>
+    <div class="row"><span class="label">--text-xs / 12</span><span class="sample" style="font-size:var(--text-xs); font-weight:700; letter-spacing:2px; text-transform:uppercase">Aa</span></div>
+  </div>
+</body>
+</html>

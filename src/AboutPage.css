@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════════════════════════════════════════
    About Page — Kasutam-inspired Design (Ara, Bhojpur)
    ═══════════════════════════════════════════════════════════════════════════ */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,600;0,700;1,400&display=swap');
 
 .about-page-v2 {
   background: var(--color-bg);
@@ -15,7 +15,7 @@
   font-family: var(--font-body);
   font-size: 0.85rem;
   font-weight: 700;
-  color: var(--color-chili);
+  color: var(--color-primary);
   text-transform: uppercase;
   letter-spacing: 2px;
   display: block;
@@ -56,13 +56,11 @@
 .about-hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    100deg,
-    rgba(30, 22, 12, 0.85) 0%,
-    rgba(30, 22, 12, 0.6) 50%,
-    rgba(30, 22, 12, 0.2) 80%,
-    rgba(30, 22, 12, 0) 100%
-  );
+  background: linear-gradient(100deg,
+      rgba(30, 22, 12, 0.85) 0%,
+      rgba(30, 22, 12, 0.6) 50%,
+      rgba(30, 22, 12, 0.2) 80%,
+      rgba(30, 22, 12, 0) 100%);
 }
 
 .about-hero-content {
@@ -81,16 +79,16 @@
   font-family: var(--font-heading);
   font-size: clamp(2.5rem, 5vw, 3.5rem);
   font-weight: 700;
-  color: #fffdf8;
+  color: var(--white);
   line-height: 1.1;
   margin: 0;
 }
 
 .about-hero-title em {
-  font-family: 'Playfair Display', Georgia, serif;
+  font-family: var(--font-body);
   font-style: italic;
   font-weight: 400;
-  color: #f5d88e;
+  color: var(--color-accent);
 }
 
 .about-hero-subtitle {
@@ -104,7 +102,7 @@
 /* ─── Story Section (Split Layout) ───────────────────────────────────────── */
 .about-story {
   padding: var(--space-16) var(--space-6);
-  background: #fdf8ef;
+  background: var(--color-bg-warm);
 }
 
 .about-story-container {
@@ -141,7 +139,7 @@
 .about-signature {
   margin-top: var(--space-8);
   padding-top: var(--space-4);
-  border-top: 1px solid #e8dcc8;
+  border-top: 1px solid var(--color-border-light);
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -155,7 +153,7 @@
 
 .about-signature span {
   font-size: 0.85rem;
-  color: var(--color-chili);
+  color: var(--color-primary);
   text-transform: uppercase;
   letter-spacing: 1px;
   font-weight: 700;
@@ -187,17 +185,17 @@
 }
 
 .about-value-card {
-  background: var(--color-card);
+  background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-xl);
   padding: var(--space-8) var(--space-6);
   text-align: left;
-  transition: all var(--duration-normal) var(--ease-out);
+  transition: all var(--motion-base) var(--motion-ease);
 }
 
 .about-value-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--shadow-card-hover);
   border-color: transparent;
 }
 
@@ -208,8 +206,8 @@
   width: 56px;
   height: 56px;
   border-radius: var(--radius-lg);
-  background: linear-gradient(135deg, rgba(193, 64, 43, 0.08), rgba(232, 118, 44, 0.08));
-  color: var(--color-chili);
+  background: linear-gradient(135deg, rgba(10, 90, 50, 0.08), rgba(232, 168, 58, 0.08));
+  color: var(--color-primary);
   margin-bottom: var(--space-5);
 }
 
@@ -241,8 +239,8 @@
 
 .about-cta-card {
   display: flex;
-  background: var(--color-chili);
-  border-radius: 20px;
+  background: var(--color-primary);
+  border-radius: var(--radius-full);
   overflow: hidden;
 }
 
@@ -285,7 +283,7 @@
   font-family: var(--font-heading);
   font-size: clamp(1.4rem, 2.5vw, 2.2rem);
   font-weight: 700;
-  color: #ffffff;
+  color: var(--white);
   margin: 0;
   line-height: 1.2;
 }
@@ -300,23 +298,23 @@
 
 .about-cta-btn {
   align-self: flex-start;
-  padding: 14px 36px;
+  padding: var(--space-4) var(--space-9);
   border-radius: var(--radius-full);
-  background: #fffdf8;
-  color: var(--color-chili);
+  background: var(--white);
+  color: var(--color-primary);
   font-family: var(--font-body);
   font-size: 0.9rem;
   font-weight: 700;
   border: none;
   cursor: pointer;
-  transition: all var(--duration-normal) var(--ease-out);
+  transition: all var(--motion-base) var(--motion-ease);
   margin-top: var(--space-2);
 }
 
 .about-cta-btn:hover {
-  background: #f5d88e;
+  background: var(--color-accent);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-md);
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════

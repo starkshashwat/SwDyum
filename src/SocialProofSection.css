@@ -1,6 +1,6 @@
 /* ─── Social Proof Section ───────────────────────────────────────────────── */
 .social-proof-section {
-  background: var(--color-warm-bg);
+  background: var(--color-bg-warm);
 }
 
 .sp-header {
@@ -18,10 +18,10 @@
 .sp-metric-box {
   text-align: center;
   padding: var(--space-8) var(--space-4);
-  background: var(--color-card);
+  background: var(--color-surface);
   border-radius: var(--radius-lg);
   border: 1px solid var(--color-border);
-  transition: transform var(--duration-normal) var(--ease-out), box-shadow var(--duration-normal);
+  transition: transform var(--motion-base) var(--motion-ease), box-shadow var(--motion-base);
 }
 
 .sp-metric-box:hover {
@@ -33,7 +33,7 @@
   font-family: var(--font-heading);
   font-size: var(--text-4xl);
   font-weight: 800;
-  color: var(--color-chili);
+  color: var(--color-primary);
   margin-bottom: var(--space-2);
   line-height: 1;
 }
@@ -66,12 +66,12 @@
 
 .sp-carousel-fade-left {
   left: 0;
-  background: linear-gradient(90deg, var(--color-warm-bg), transparent);
+  background: linear-gradient(90deg, var(--color-bg-warm), transparent);
 }
 
 .sp-carousel-fade-right {
   right: 0;
-  background: linear-gradient(-90deg, var(--color-warm-bg), transparent);
+  background: linear-gradient(-90deg, var(--color-bg-warm), transparent);
 }
 
 .sp-carousel-track {
@@ -83,14 +83,14 @@
 .sp-testimonial-card {
   min-width: 320px;
   max-width: 360px;
-  background: var(--color-card);
+  background: var(--color-surface);
   border-radius: var(--radius-lg);
   padding: var(--space-8);
   border: 1px solid var(--color-border);
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
-  transition: box-shadow var(--duration-normal);
+  transition: box-shadow var(--motion-base);
   flex-shrink: 0;
 }
 
@@ -122,9 +122,9 @@
 .sp-avatar {
   width: 40px;
   height: 40px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--color-chili), var(--color-mango));
-  color: #FFFFFF;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-accent));
+  color: var(--white);
   display: flex;
   align-items: center;
   justify-content: center;

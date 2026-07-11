@@ -1,4 +1,4 @@
-/* ─── Global Footer — Clay Brown ─────────────────────────────────────────── */
+/* ─── Global Footer ──────────────────────────────────────────────────────── */
 .site-footer {
   background-color: var(--color-bg);
   color: var(--color-ink);
@@ -24,7 +24,8 @@
 }
 
 .footer-logo-img {
-  height: 60px; /* Made slightly larger */
+  height: 60px;
+  /* Made slightly larger */
   width: auto;
   opacity: 1;
 }
@@ -46,21 +47,21 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
-  background: var(--color-cream);
-  color: var(--color-chili);
+  border-radius: var(--radius-full);
+  background: var(--color-bg);
+  color: var(--color-primary);
   border: 1px solid var(--color-border);
-  transition: all var(--duration-normal) var(--ease-out);
+  transition: all var(--motion-base) var(--motion-ease);
 }
 
 .footer-social a:hover {
-  background: var(--color-chili);
-  color: #FFFFFF;
+  background: var(--color-primary);
+  color: var(--white);
   transform: translateY(-3px);
 }
 
 .footer-social a:focus-visible {
-  outline: 2px solid var(--color-mustard);
+  outline: 2px solid var(--color-secondary);
   outline-offset: 2px;
 }
 
@@ -84,11 +85,11 @@
   color: var(--color-muted);
   text-decoration: none;
   font-size: var(--text-sm);
-  transition: color var(--duration-fast);
+  transition: color var(--motion-fast);
 }
 
 .footer-list a:hover {
-  color: var(--color-chili);
+  color: var(--color-primary);
 }
 
 /* Newsletter Column */
@@ -105,22 +106,22 @@
 
 .footer-input-group {
   display: flex;
-  background: var(--color-cream);
+  background: var(--color-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-full);
-  padding: 4px;
-  transition: border-color var(--duration-fast);
+  padding: var(--space-1);
+  transition: border-color var(--motion-fast);
 }
 
 .footer-input-group:focus-within {
-  border-color: var(--color-chili);
+  border-color: var(--color-primary);
 }
 
 .footer-input {
   flex: 1;
   background: transparent;
   border: none;
-  padding: 10px 16px;
+  padding: var(--space-2) var(--space-4);
   color: var(--color-ink);
   font-family: var(--font-body);
   font-size: var(--text-sm);
@@ -135,33 +136,33 @@
 }
 
 .footer-submit {
-  background: var(--color-chili);
-  color: #FFFFFF;
+  background: var(--color-primary);
+  color: var(--white);
   border: none;
   width: 40px;
   height: 40px;
-  border-radius: 50%;
+  border-radius: var(--radius-full);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: background var(--duration-fast);
+  transition: background var(--motion-fast);
   flex-shrink: 0;
 }
 
 .footer-submit:hover {
-  background: var(--color-chili-dark);
+  background: var(--color-primary-dark);
 }
 
 .footer-success {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  color: var(--color-chili);
+  color: var(--color-primary);
   font-size: var(--text-sm);
   font-weight: 600;
-  background: rgba(210, 85, 45, 0.1);
-  padding: 12px;
+  background: rgba(10, 90, 50, 0.1);
+  padding: var(--space-3);
   border-radius: var(--radius-md);
 }
 
@@ -192,7 +193,7 @@
 .footer-legal a {
   font-size: var(--text-xs);
   color: var(--color-muted);
-  transition: color var(--duration-fast);
+  transition: color var(--motion-fast);
 }
 
 .footer-legal a:hover {
