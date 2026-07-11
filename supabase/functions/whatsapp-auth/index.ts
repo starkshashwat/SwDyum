@@ -25,7 +25,10 @@ const ALLOWED_ORIGINS = [
 ];
 
 function corsHeaders(origin: string | null) {
-  const allow = origin && ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  let allow = ALLOWED_ORIGINS[0];
+  if (origin && (ALLOWED_ORIGINS.includes(origin) || origin.endsWith(".vercel.app"))) {
+    allow = origin;
+  }
   return {
     "Access-Control-Allow-Origin": allow,
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
@@ -172,6 +175,7 @@ export default {
         // Send via WhatsApp Meta API (or mock in dev).
         const accessToken = Deno.env.get("WHATSAPP_ACCESS_TOKEN");
         const phoneNumberId = Deno.env.get("WHATSAPP_PHONE_NUMBER_ID");
+        const isLocal = !(Deno.env.get("SUPABASE_URL") || "").includes(".supabase.co");
 
         if (accessToken && phoneNumberId) {
           const metaUrl = `https://graph.facebook.com/v18.0/${phoneNumberId}/messages`;
@@ -220,8 +224,15 @@ export default {
               { status: 502, headers: { ...cors, "Content-Type": "application/json" } }
             );
           }
+        } else if (isLocal) {
+          console.log(`[dev] Mocking OTP send to ${phone}. OTP is: ${generatedOtp}`);
         } else {
-          console.log(`[dev] Mocking OTP send to ${phone}`);
+          console.error("Missing WHATSAPP_ACCESS_TOKEN or WHATSAPP_PHONE_NUMBER_ID in environment.");
+          await supabase.from("whatsapp_otps").delete().eq("phone", phone);
+          return new Response(
+            JSON.stringify({ error: "Server misconfiguration: WhatsApp credentials missing." }),
+            { status: 500, headers: { ...cors, "Content-Type": "application/json" } }
+          );
         }
 
         return new Response(JSON.stringify({ status: "success", message: "OTP sent successfully" }), {
