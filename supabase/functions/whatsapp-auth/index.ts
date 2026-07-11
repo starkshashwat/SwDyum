@@ -76,7 +76,7 @@ function generateSecureOtp(): string {
 // JWT secret of the Supabase project (SUPABASE_JWT_SECRET), which only the
 // edge function can read from env.
 async function issueSessionToken(profileId: string): Promise<string> {
-  const secret = Deno.env.get("SUPABASE_JWT_SECRET") || Deno.env.get("SESSION_SECRET") || "";
+  const secret = Deno.env.get("SUPABASE_JWT_SECRET") || Deno.env.get("SESSION_SECRET") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
   if (!secret) {
     throw new Error("Session signing secret is not configured");
   }
