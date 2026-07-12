@@ -418,6 +418,10 @@ section,
   :root {
     --header-height: 60px;
   }
+  
+  body {
+    padding-bottom: 70px;
+  }
 
   .section-title {
     font-size: var(--text-3xl);

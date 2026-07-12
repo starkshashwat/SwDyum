@@ -25,16 +25,13 @@ const Icon = {
   refresh: (
     <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9" /><path d="M3 4v5h5" /></svg>
   ),
-  drop: (
-    <svg viewBox="0 0 24 24"><path d="M12 3s6 5.686 6 11a6 6 0 0 1-12 0c0-5.314 6-11 6-11z" /><path d="M5 4l14 15" /></svg>
-  ),
 };
 
 const Benefits = [
-  { icon: Icon.leaf, title: '100% Natural', sub: 'No artificial colours' },
-  { icon: Icon.hand, title: 'Grandma Recipe', sub: 'Small-batch craft' },
+  { icon: Icon.leaf, title: '100% Natural', sub: 'No preservatives' },
+  { icon: Icon.shield, title: 'Moisture-Locked', sub: 'Humidity-controlled, dry-sealed' },
   { icon: Icon.sun, title: 'Sun-Cured', sub: 'Authentic taste' },
-  { icon: Icon.drop, title: 'Moisture-Locked', sub: 'Humidity-controlled seal' },
+  { icon: Icon.truck, title: 'Fast Dispatch', sub: 'Ships in 24 hrs' },
 ];
 
 function PdpHero({
@@ -118,7 +115,7 @@ function PdpHero({
       <div className="pdp-offer-strip" role="status">
         <span className="pdp-offer-pulse" aria-hidden="true" />
         <span className="pdp-offer-text">
-          {discountPct > 0 ? `Flat ${discountPct}% OFF · ` : ''}Free shipping above ₹799 · COD available
+          {discountPct > 0 ? `Flat ${discountPct}% OFF · ` : ''}Free shipping above ₹799
         </span>
       </div>
 
@@ -179,7 +176,7 @@ function PdpHero({
             <h1 className="pdp-title">{product.name}</h1>
           </div>
 
-          {hasRating ? (
+          {hasRating && (
             <div className="pdp-rating-row">
               <div className="pdp-stars" aria-hidden="true">★★★★★</div>
               <span className="pdp-rating-score">{product.rating}</span>
@@ -187,12 +184,10 @@ function PdpHero({
                 {product.reviewsCount.toLocaleString('en-IN')} verified review{product.reviewsCount !== 1 ? 's' : ''}
               </button>
             </div>
-          ) : (
-            <div className="pdp-social-line">Loved by 100+ families across Bihar, Delhi &amp; beyond</div>
           )}
 
           <p className="pdp-story">
-            {product.short_description ||
+            {product.pdp_config?.short_description || product.short_description ||
               'Prepared using sun-ripened ingredients, cold-pressed mustard oil, and traditional Bihari spices. Every jar is handcrafted in small batches to preserve authentic taste.'}
           </p>
 
@@ -343,12 +338,8 @@ function PdpHero({
               <span>Free Shipping ₹799+</span>
             </div>
             <div className="trust-icon-item">
-              <span className="pdp-icon" aria-hidden="true">{Icon.rupee}</span>
-              <span>COD Available</span>
-            </div>
-            <div className="trust-icon-item">
               <span className="pdp-icon" aria-hidden="true">{Icon.refresh}</span>
-              <span>7-Day Returns</span>
+              <span>No Returns</span>
             </div>
           </div>
         </div>

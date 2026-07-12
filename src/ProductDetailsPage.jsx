@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './ProductDetailsPage.css';
 import { getProductBySlug, getRelatedProducts } from './data/products';
+import { pdpContentMap } from './data/pdpContentMap';
 
 import PdpHero from './components/pdp/PdpHero';
 import PdpStickyBar from './components/pdp/PdpStickyBar';
@@ -26,6 +27,14 @@ function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow }) {
       setLoading(true);
       const data = await getProductBySlug(slug);
       if (data) {
+        // Inject custom PDP content if it exists in the map
+        if (pdpContentMap[slug]) {
+          data.pdp_config = {
+            ...data.pdp_config,
+            ...pdpContentMap[slug]
+          };
+        }
+
         setP({ ...data, related: [] }); // Set product immediately
         setSelectedSize(Object.keys(data.prices)[0] || '250g');
         setQuantity(1);
@@ -74,7 +83,7 @@ function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow }) {
       />
 
       {/* 3. INGREDIENTS SHOWCASE — "what's inside" */}
-      <PdpIngredients ingredients={p.pure_ingredients} />
+      <PdpIngredients ingredients={p.pdp_config?.pure_ingredients || p.pure_ingredients} />
 
       {/* 4. TASTE PROFILE — "will I like it?" (moved up before process) */}
       <PdpTasteProfile tasteProfile={p.pdp_config?.taste_profile} />
@@ -94,7 +103,7 @@ function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow }) {
       <PdpUgc />
 
       {/* 9. FAQ — objection handling before upsell */}
-      <PdpFaq faqs={p.pdp_config?.faq} />
+      <PdpFaq faqData={p.pdp_config?.faq} />
 
       {/* 10. COMBO SECTION — upsell once convinced */}
       <PdpComboSection onNavigate={onNavigate} />

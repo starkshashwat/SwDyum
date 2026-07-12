@@ -3,9 +3,21 @@ import { motion, AnimatePresence } from 'framer-motion';
 import './PdpTabs.css';
 
 const I = {
+  fssai: (
+    <img 
+      src="https://static.freepnglogo.com/images/all_img/fssai-logo-df4c.png" 
+      alt="FSSAI" 
+      style={{ width: '28px', height: '28px', objectFit: 'contain' }} 
+    />
+  ),
+  razorpay: (
+    <img 
+      src="https://razorpay.com/newsroom-content/uploads/2020/12/output-onlinepngtools-1-1.png" 
+      alt="Razorpay" 
+      style={{ width: '22px', height: '22px', objectFit: 'contain' }} 
+    />
+  ),
   shield: (<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></svg>),
-  flask: (<svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 8a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-8V3" /><path d="M7 15h10" /></svg>),
-  drop: (<svg viewBox="0 0 24 24"><path d="M12 3s6 5.686 6 11a6 6 0 0 1-12 0c0-5.314 6-11 6-11z" /><path d="M5 4l14 15" /></svg>),
   recycle: (<svg viewBox="0 0 24 24"><path d="M7 19H4l2.5-4.3M17 19h3l-2-3.4M12 4 9.5 8.3M12 4l2.6 4.3M4.6 14.7 7 10.5M19.5 15.3 17 10.5" /></svg>),
   leaf: (<svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 4 13c0-6 7-9 15-9 0 8-3 15-9 15z" /><path d="M4 21c1.5-5 5-8 9-9" /></svg>),
   noChem: (<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M6 6l12 12" /></svg>),
@@ -14,12 +26,10 @@ const I = {
 };
 
 const AssuranceBadges = [
-  { icon: I.shield, title: 'FSSAI Licensed', sub: 'Food-safe' },
-  { icon: I.flask, title: 'Lab-Tested', sub: 'Every batch' },
-  { icon: I.drop, title: 'Moisture-Free', sub: 'Humidity-controlled' },
-  { icon: I.recycle, title: 'Glass Jar', sub: 'Eco packaging' },
-  { icon: I.leaf, title: 'Vegan', sub: 'Plant-based' },
-  { icon: I.noChem, title: 'No Added Colour', sub: 'No synthetic flavours' },
+  { icon: I.fssai, title: 'FSSAI Licensed', sub: 'Lic. 12345678901234' },
+  { icon: I.shield, title: 'Lab-Tested', sub: 'Small-batch kitchen' },
+  { icon: I.lock, title: 'Moisture-Free Packed', sub: 'No damp, no fungus' },
+  { icon: I.leaf, title: '100+ Families Served', sub: 'Bihar, Delhi & beyond' },
 ];
 
 function PdpTabs({ product, tabsData }) {
@@ -28,11 +38,12 @@ function PdpTabs({ product, tabsData }) {
   const tabs = [
     {
       name: 'Description',
-      content: product?.full_description || product?.description || 'Authentic traditional pickle handcrafted with care.',
+      content: tabsData?.description || product?.full_description || product?.description || 'Authentic traditional pickle handcrafted with care.',
     },
     {
       name: 'Ingredients',
       content: tabsData?.ingredients || 'Locally sourced raw ingredients, pure cold-pressed mustard oil, turmeric, fenugreek, fennel, red chilli powder, and natural rock salt. 100% free from synthetic colors or chemical preservatives.',
+      table: tabsData?.ingredients_table || null
     },
     {
       name: 'Nutrition',
@@ -40,11 +51,11 @@ function PdpTabs({ product, tabsData }) {
     },
     {
       name: 'Storage',
-      content: tabsData?.storage || 'Keep in a cool dry place.\n\nUse dry spoon only.\n\nBest consumed within 12 to 18 months of opening.',
+      content: tabsData?.storage || 'Humidity is the enemy — isliye hum humidity-controlled kitchen mein dry seal karte hain; aap bhi hamesha sookha chammach use karein.',
     },
     {
       name: 'Shipping',
-      content: tabsData?.shipping || 'We ship PAN-India in heavy-duty, leak-proof glass jars to ensure chemical-free transit. Deliveries typically arrive within 5-7 business days.',
+      content: tabsData?.shipping || 'We ship PAN-India in heavy-duty, leak-proof jars to ensure chemical-free transit. Deliveries typically arrive within 5-7 business days.',
     },
   ];
 
@@ -113,9 +124,34 @@ function PdpTabs({ product, tabsData }) {
               transition={{ duration: 0.2 }}
               className="pdp-tab-content"
             >
-              {tabs.find((t) => t.name === activeTab).content.split('\n').map((line, i) => (
-                <p key={i}>{line}</p>
-              ))}
+              {(() => {
+                const active = tabs.find((t) => t.name === activeTab);
+                if (active.table) {
+                  return (
+                    <div className="pdp-table-wrapper">
+                      <table className="pdp-ingredients-table">
+                        <thead>
+                          <tr>
+                            <th>Ingredient</th>
+                            <th>Why it matters</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {active.table.map((row, idx) => (
+                            <tr key={idx}>
+                              <td><strong>{row.name}</strong></td>
+                              <td>{row.reason}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  );
+                }
+                return active.content.split('\n').map((line, i) => (
+                  <p key={i}>{line}</p>
+                ));
+              })()}
             </motion.div>
           </AnimatePresence>
         </div>
@@ -131,15 +167,15 @@ function PdpTabs({ product, tabsData }) {
           <div className="pdp-return-item">
             <span className="pdp-return-icon pdp-icon-chip" aria-hidden="true">{I.return}</span>
             <div>
-              <strong>7-Day Easy Returns</strong>
-              <small>Unopened jars, hassle-free refund</small>
+              <strong>No Return Policy</strong>
+              <small>Food product, non-returnable</small>
             </div>
           </div>
           <div className="pdp-return-item">
-            <span className="pdp-return-icon pdp-icon-chip" aria-hidden="true">{I.lock}</span>
+            <span className="pdp-return-icon pdp-icon-chip" aria-hidden="true">{I.razorpay}</span>
             <div>
               <strong>Secure Payments</strong>
-              <small>Razorpay · UPI · Cards · COD</small>
+              <small>Razorpay · UPI · Cards</small>
             </div>
           </div>
         </motion.div>
