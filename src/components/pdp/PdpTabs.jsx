@@ -4,6 +4,8 @@ import './PdpTabs.css';
 
 const I = {
   shield: (<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" /><path d="M9 12l2 2 4-4" /></svg>),
+  flask: (<svg viewBox="0 0 24 24"><path d="M9 3h6M10 3v6l-5 8a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-8V3" /><path d="M7 15h10" /></svg>),
+  drop: (<svg viewBox="0 0 24 24"><path d="M12 3s6 5.686 6 11a6 6 0 0 1-12 0c0-5.314 6-11 6-11z" /><path d="M5 4l14 15" /></svg>),
   recycle: (<svg viewBox="0 0 24 24"><path d="M7 19H4l2.5-4.3M17 19h3l-2-3.4M12 4 9.5 8.3M12 4l2.6 4.3M4.6 14.7 7 10.5M19.5 15.3 17 10.5" /></svg>),
   leaf: (<svg viewBox="0 0 24 24"><path d="M11 20A7 7 0 0 1 4 13c0-6 7-9 15-9 0 8-3 15-9 15z" /><path d="M4 21c1.5-5 5-8 9-9" /></svg>),
   noChem: (<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" /><path d="M6 6l12 12" /></svg>),
@@ -12,10 +14,12 @@ const I = {
 };
 
 const AssuranceBadges = [
-  { icon: I.shield, title: 'FSSAI Certified', sub: 'Safe & tested' },
+  { icon: I.shield, title: 'FSSAI Licensed', sub: 'Food-safe' },
+  { icon: I.flask, title: 'Lab-Tested', sub: 'Every batch' },
+  { icon: I.drop, title: 'Moisture-Free', sub: 'Humidity-controlled' },
   { icon: I.recycle, title: 'Glass Jar', sub: 'Eco packaging' },
   { icon: I.leaf, title: 'Vegan', sub: 'Plant-based' },
-  { icon: I.noChem, title: 'No Preservatives', sub: 'Natural only' },
+  { icon: I.noChem, title: 'No Added Colour', sub: 'No synthetic flavours' },
 ];
 
 function PdpTabs({ product, tabsData }) {

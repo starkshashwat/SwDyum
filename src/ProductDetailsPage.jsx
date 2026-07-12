@@ -94,7 +94,7 @@ function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow }) {
       <PdpUgc />
 
       {/* 9. FAQ — objection handling before upsell */}
-      <PdpFaq />
+      <PdpFaq faqs={p.pdp_config?.faq} />
 
       {/* 10. COMBO SECTION — upsell once convinced */}
       <PdpComboSection onNavigate={onNavigate} />

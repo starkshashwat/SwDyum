@@ -18,7 +18,7 @@ function PdpIngredients({ ingredients = [] }) {
         <div className="pdp-section-header center">
           <span className="pdp-eyebrow">The Secret</span>
           <h2 className="pdp-heading">Pure Ingredients</h2>
-          <p className="pdp-subtext">No preservatives, no synthetic colors. Just the wholesome goodness of nature.</p>
+          <p className="pdp-subtext">No artificial colours, no synthetic flavours — just the wholesome goodness of nature.</p>
         </div>
 
         <div className="pdp-ingredients-grid">

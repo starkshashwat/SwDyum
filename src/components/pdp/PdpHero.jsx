@@ -25,13 +25,16 @@ const Icon = {
   refresh: (
     <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9" /><path d="M3 4v5h5" /></svg>
   ),
+  drop: (
+    <svg viewBox="0 0 24 24"><path d="M12 3s6 5.686 6 11a6 6 0 0 1-12 0c0-5.314 6-11 6-11z" /><path d="M5 4l14 15" /></svg>
+  ),
 };
 
 const Benefits = [
-  { icon: Icon.leaf, title: '100% Natural', sub: 'No preservatives' },
+  { icon: Icon.leaf, title: '100% Natural', sub: 'No artificial colours' },
   { icon: Icon.hand, title: 'Grandma Recipe', sub: 'Small-batch craft' },
   { icon: Icon.sun, title: 'Sun-Cured', sub: 'Authentic taste' },
-  { icon: Icon.truck, title: 'Fast Dispatch', sub: 'Ships in 24 hrs' },
+  { icon: Icon.drop, title: 'Moisture-Locked', sub: 'Humidity-controlled seal' },
 ];
 
 function PdpHero({
@@ -176,7 +179,7 @@ function PdpHero({
             <h1 className="pdp-title">{product.name}</h1>
           </div>
 
-          {hasRating && (
+          {hasRating ? (
             <div className="pdp-rating-row">
               <div className="pdp-stars" aria-hidden="true">★★★★★</div>
               <span className="pdp-rating-score">{product.rating}</span>
@@ -184,6 +187,8 @@ function PdpHero({
                 {product.reviewsCount.toLocaleString('en-IN')} verified review{product.reviewsCount !== 1 ? 's' : ''}
               </button>
             </div>
+          ) : (
+            <div className="pdp-social-line">Loved by 100+ families across Bihar, Delhi &amp; beyond</div>
           )}
 
           <p className="pdp-story">

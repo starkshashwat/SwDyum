@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './PdpFaq.css';
 
-const faqs = [
+const defaultFaqs = [
   { q: 'How long does it last?', a: 'Our pickles have a shelf life of 12-18 months. Please check the label on your jar for the exact best before date.' },
   { q: 'Does it contain preservatives?', a: 'No, we do not use any chemical preservatives. We rely on traditional sun-curing, mustard oil, and salt for natural preservation.' },
   { q: 'Is it vegan?', a: 'Yes, all our pickles are 100% vegan and plant-based.' },
@@ -11,7 +11,8 @@ const faqs = [
   { q: 'What is your return policy?', a: 'We offer 7-day easy returns on unopened jars. If your jar arrives damaged, contact us within 48 hours for a free replacement or full refund.' },
 ];
 
-function PdpFaq() {
+function PdpFaq({ faqs }) {
+  const list = faqs && faqs.length > 0 ? faqs : defaultFaqs;
   const [openIdx, setOpenIdx] = useState(0);
 
   const toggle = (idx) => setOpenIdx(openIdx === idx ? null : idx);
@@ -25,7 +26,7 @@ function PdpFaq() {
         </div>
 
         <div className="faq-list">
-          {faqs.map((faq, idx) => (
+          {list.map((faq, idx) => (
             <motion.div
               className={`faq-item ${openIdx === idx ? 'open' : ''}`}
               key={idx}

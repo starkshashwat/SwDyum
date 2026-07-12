@@ -184,11 +184,18 @@
 
 .pdp-title {
   font-family: var(--font-heading);
-  font-size: clamp(2rem, 5vw, 3rem);
-  line-height: 1.08;
+  font-size: clamp(1.6rem, 3.5vw, 2.25rem);
+  line-height: 1.12;
   color: var(--color-ink);
   letter-spacing: -0.02em;
   font-weight: 700;
+}
+
+.pdp-social-line {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  margin-bottom: var(--space-4);
 }
 
 .pdp-rating-row {
@@ -220,10 +227,10 @@
 .pdp-review-link:hover { color: var(--color-primary); }
 
 .pdp-story {
-  font-size: 1rem;
-  line-height: 1.7;
+  font-size: 0.94rem;
+  line-height: 1.65;
   color: var(--color-muted);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-5);
   max-width: 52ch;
 }
 
@@ -232,17 +239,17 @@
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--space-2);
-  margin-bottom: var(--space-6);
+  margin-bottom: var(--space-5);
 }
 
 .pdp-benefit {
   display: flex;
   align-items: center;
-  gap: var(--space-3);
+  gap: var(--space-2);
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
-  padding: var(--space-3);
+  padding: var(--space-2) var(--space-3);
   transition: transform var(--motion-fast), box-shadow var(--motion-fast), border-color var(--motion-fast);
 }
 
@@ -253,8 +260,8 @@
 }
 
 .pdp-benefit-icon {
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-full);
   background: var(--color-secondary-light);
   color: var(--color-primary);
@@ -262,8 +269,8 @@
 }
 
 .pdp-benefit-icon svg {
-  width: 19px;
-  height: 19px;
+  width: 17px;
+  height: 17px;
 }
 
 .pdp-benefit-text {
@@ -273,13 +280,13 @@
 }
 
 .pdp-benefit-text strong {
-  font-size: 0.84rem;
+  font-size: 0.8rem;
   color: var(--color-ink);
   font-weight: 700;
 }
 
 .pdp-benefit-text small {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   color: var(--color-muted);
 }
 
@@ -294,7 +301,7 @@
 
 .pdp-price-main {
   font-family: var(--font-heading);
-  font-size: clamp(2.1rem, 5vw, 2.6rem);
+  font-size: clamp(1.7rem, 3.5vw, 2rem);
   font-weight: 800;
   color: var(--color-ink);
   line-height: 1;
@@ -461,9 +468,9 @@
 }
 
 .pdp-qty-selector button {
-  font-size: 1.3rem;
-  width: 38px;
-  height: 52px;
+  font-size: 1.2rem;
+  width: 36px;
+  height: 46px;
   color: var(--color-primary);
   transition: background var(--motion-fast);
   border-radius: var(--radius-sm);
@@ -483,7 +490,7 @@
   color: var(--color-primary);
   border-radius: var(--radius-md);
   font-weight: 800;
-  font-size: 1rem;
+  font-size: 0.92rem;
   transition: all var(--motion-base) var(--motion-ease);
   position: relative;
   overflow: hidden;
@@ -514,11 +521,11 @@
   background: linear-gradient(135deg, var(--color-primary-dark), var(--color-primary));
   color: var(--white);
   border: none;
-  padding: var(--space-4);
+  padding: var(--space-3) var(--space-4);
   border-radius: var(--radius-md);
   font-weight: 800;
-  font-size: 1.05rem;
-  margin-bottom: var(--space-6);
+  font-size: 0.95rem;
+  margin-bottom: var(--space-5);
   transition: all var(--motion-base) var(--motion-ease);
   display: flex;
   align-items: center;
