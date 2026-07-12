@@ -22,9 +22,9 @@
   --color-success: #16A34A;
 
   /* Typography */
-  --font-heading: 'Playfair Display', Georgia, serif;
-  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-accent: 'Amatic SC', cursive;
+  --font-heading: 'Eloquia Display', Georgia, serif;
+  --font-body: 'Eloquia Display', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-accent: 'Eloquia Display', cursive;
 
   /* Type Scale */
   --text-xs: 0.75rem;
