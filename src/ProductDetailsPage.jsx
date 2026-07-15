@@ -8,7 +8,7 @@ import PdpStickyBar from './components/pdp/PdpStickyBar';
 import PdpIngredients from './components/pdp/PdpIngredients';
 import PdpProcessTimeline from './components/pdp/PdpProcessTimeline';
 import PdpTasteProfile from './components/pdp/PdpTasteProfile';
-import PdpTabs from './components/pdp/PdpTabs';
+
 import ReviewSection from './ReviewSection';
 import PdpUgc from './components/pdp/PdpUgc';
 import PdpComboSection from './components/pdp/PdpComboSection';
@@ -67,6 +67,7 @@ function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow }) {
         quantity={quantity}
         setQuantity={setQuantity}
         subscription={subscription}
+        setSubscription={setSubscription}
         addToCart={addToCart}
         onNavigate={onNavigate}
         handleBuyNow={handleBuyNow}
@@ -91,8 +92,7 @@ function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow }) {
       {/* 5. THE MAKING PROCESS (TIMELINE) — "how it's made" */}
       <PdpProcessTimeline />
 
-      {/* 6. TABS (INFO) — full specs */}
-      <PdpTabs product={p} tabsData={p.pdp_config?.tabs} />
+
 
       {/* 7. REVIEWS — social proof */}
       <div id="pdp-reviews">
