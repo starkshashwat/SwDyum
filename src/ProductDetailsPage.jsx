@@ -7,11 +7,9 @@ import PdpHero from './components/pdp/PdpHero';
 import PdpStickyBar from './components/pdp/PdpStickyBar';
 import PdpIngredients from './components/pdp/PdpIngredients';
 import PdpProcessTimeline from './components/pdp/PdpProcessTimeline';
-import PdpTasteProfile from './components/pdp/PdpTasteProfile';
-
+// import PdpTabs from './components/pdp/PdpTabs';
 import ReviewSection from './ReviewSection';
 import PdpUgc from './components/pdp/PdpUgc';
-import PdpComboSection from './components/pdp/PdpComboSection';
 import PdpRelated from './components/pdp/PdpRelated';
 import PdpFaq from './components/pdp/PdpFaq';
 
@@ -84,15 +82,30 @@ function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow }) {
       />
 
       {/* 3. INGREDIENTS SHOWCASE — "what's inside" */}
-      <PdpIngredients ingredients={p.pdp_config?.pure_ingredients || p.pure_ingredients} />
+      <PdpIngredients product={p} />
 
-      {/* 4. TASTE PROFILE — "will I like it?" (moved up before process) */}
-      <PdpTasteProfile tasteProfile={p.pdp_config?.taste_profile} />
-
-      {/* 5. THE MAKING PROCESS (TIMELINE) — "how it's made" */}
+      {/* 4. THE MAKING PROCESS (TIMELINE) — "how it's made" */}
       <PdpProcessTimeline />
 
+      {/* Mid-page CTA — for users convinced after reading ingredients/process */}
+      <div className="pdp-midpage-cta">
+        <div className="pdp-midpage-cta-inner">
+          <div className="pdp-midpage-cta-content">
+            <span className="pdp-midpage-cta-badge">Small Batch</span>
+            <h4 className="pdp-midpage-cta-text">Traditional Langda Aam ka Achaar, ready to ship.</h4>
+            <p className="pdp-midpage-cta-subtext">Sun-cured in mustard oil, made the old Bihari way.</p>
+          </div>
+          <button
+            className="pdp-midpage-cta-btn"
+            onClick={() => handleBuyNow(p, selectedSize, quantity, subscription)}
+          >
+            Buy Now · ₹{(p.prices?.[selectedSize] || p.base_price) * quantity}
+          </button>
+        </div>
+      </div>
 
+      {/* 6. TABS (INFO) — full specs */}
+      {/* <PdpTabs product={p} tabsData={p.pdp_config?.tabs} /> */}
 
       {/* 7. REVIEWS — social proof */}
       <div id="pdp-reviews">
@@ -104,9 +117,6 @@ function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow }) {
 
       {/* 9. FAQ — objection handling before upsell */}
       <PdpFaq faqData={p.pdp_config?.faq} />
-
-      {/* 10. COMBO SECTION — upsell once convinced */}
-      <PdpComboSection onNavigate={onNavigate} />
 
       {/* 11. RELATED PRODUCTS — broader cross-sell */}
       <PdpRelated products={p.related} onNavigate={onNavigate} />

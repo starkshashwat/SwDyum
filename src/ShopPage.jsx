@@ -319,34 +319,6 @@ function ShopPage({ onNavigate, addToCart }) {
         </div>
       </section>
 
-      {/* ════════════════════════════════════════════
-          BOTTOM CTA BANNER
-      ════════════════════════════════════════════ */}
-      <section className="sp-bottom-cta">
-        <div className="sp-bottom-cta-inner">
-          <div className="sp-bottom-cta-card">
-            <div className="sp-bottom-cta-img-side">
-              <img src="/deal_scatter.webp" alt="Swadyum pickles" className="sp-bottom-cta-img" />
-            </div>
-            <div className="sp-bottom-cta-content">
-              <span className="sp-bottom-cta-eyebrow">Featured Collection</span>
-              <h2 className="sp-bottom-cta-heading">Experience Bihar In One Box</h2>
-              <p className="sp-bottom-cta-desc">
-                Elevate your meals with Swadyum's premium hand-packed combo gift chests — a perfect assortment of our finest pickles.
-              </p>
-              <button className="sp-bottom-cta-btn" onClick={() => {
-                const boxCat = dynamicCategories.find(c => c.label.toLowerCase().includes('box') || c.label.toLowerCase().includes('combo'));
-                if (boxCat) setFilter(boxCat.key);
-                else setFilter('All');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}>
-                Explore Gift Packs
-              </button>
-            </div>
-          </div>
-        </div>
-      </section>
-
     </div>
   );
 }

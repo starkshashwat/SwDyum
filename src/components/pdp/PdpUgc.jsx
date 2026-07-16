@@ -13,34 +13,29 @@ function PdpUgc() {
   return (
     <section className="pdp-ugc-section">
       <motion.div
-        className="ugc-invite"
-        initial={{ opacity: 0, y: 24 }}
+        className="ugc-strip"
+        initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: '-60px' }}
-        transition={{ duration: 0.5 }}
+        viewport={{ once: true, margin: '-40px' }}
+        transition={{ duration: 0.4 }}
       >
-        <span className="ugc-invite-icon pdp-icon" aria-hidden="true">{InstaIcon}</span>
-        <span className="pdp-eyebrow">Community</span>
-        <h2 className="pdp-heading">Share Your Swadyum Moment</h2>
-        <p className="pdp-subtext">
-          Loving your jar? Tag <strong>@swadyum</strong> and use <strong>#TasteOfBihar</strong> —
-          we feature our favourite plates from the community right here.
-        </p>
+        <span className="ugc-strip-icon pdp-icon" aria-hidden="true">{InstaIcon}</span>
+        <div className="ugc-strip-text">
+          <p className="ugc-strip-heading">
+            Tag <strong>@swadyum</strong> with <strong>#TasteOfBihar</strong>
+          </p>
+          <p className="ugc-strip-sub">
+            We feature our favourite plates from the community
+          </p>
+        </div>
         <a
-          className="ugc-invite-btn"
+          className="ugc-strip-btn"
           href="https://instagram.com/swadyum"
           target="_blank"
           rel="noopener noreferrer"
         >
-          <span className="pdp-icon" aria-hidden="true">{InstaIcon}</span>
-          Follow @swadyum
+          Follow @swadyum →
         </a>
-        <div className="ugc-tags">
-          <span>#TasteOfBihar</span>
-          <span>#Swadyum</span>
-          <span>#HandmadePickle</span>
-          <span>#GharKaAchaar</span>
-        </div>
       </motion.div>
     </section>
   );

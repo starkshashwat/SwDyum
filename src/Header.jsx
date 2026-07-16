@@ -28,7 +28,6 @@ function Header({ currentPage = 'home', onNavigate, cartCount = 0, onOpenCart, c
     { page: 'home', label: 'Home', path: '/' },
     { page: 'shop', label: 'Shop', path: '/shop' },
     { page: 'about', label: 'About', path: '/about' },
-    { page: 'recipes', label: 'Recipes', path: '/recipes' },
   ];
 
   return (
@@ -47,12 +46,7 @@ function Header({ currentPage = 'home', onNavigate, cartCount = 0, onOpenCart, c
           </div>
           
           <div className="top-bar-announcement">
-            <div className="marquee-container">
-              <div className="marquee-content">
-                <span>🎉 Flat 20% off on all Pickles! Use code SWADYUM20 🎉 Free Shipping on orders above ₹799! 🎉</span>
-                <span>🎉 Flat 20% off on all Pickles! Use code SWADYUM20 🎉 Free Shipping on orders above ₹799! 🎉</span>
-              </div>
-            </div>
+            <span className="announcement-text">Free shipping on orders above ₹799</span>
           </div>
 
           <div className="top-bar-socials">

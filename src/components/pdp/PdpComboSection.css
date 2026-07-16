@@ -1,7 +1,7 @@
 .pdp-combo-section {
   padding: var(--pdp-section-y, 6rem) var(--space-4);
-  background: linear-gradient(135deg, var(--color-ink), var(--color-primary-dark));
-  color: var(--white);
+  background: linear-gradient(135deg, #f5f0e5, #eef3e6);
+  color: var(--color-ink);
   position: relative;
   overflow: hidden;
 }
@@ -10,7 +10,7 @@
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 80% 20%, rgba(200, 220, 160, 0.12), transparent 50%);
+  background: radial-gradient(circle at 80% 20%, rgba(45, 90, 39, 0.06), transparent 50%);
   pointer-events: none;
 }
 
@@ -42,7 +42,7 @@
   font-family: var(--font-heading);
   font-size: clamp(1.8rem, 5vw, 3rem);
   line-height: 1.1;
-  color: var(--white);
+  color: var(--color-ink);
   margin-bottom: var(--space-4);
   letter-spacing: -0.5px;
 }
@@ -50,7 +50,7 @@
 .pdp-combo-desc {
   font-size: 1rem;
   line-height: 1.7;
-  color: rgba(255, 255, 255, 0.82);
+  color: var(--color-muted);
   margin-bottom: var(--space-5);
   max-width: 480px;
 }
@@ -65,8 +65,8 @@
 .pdp-combo-perk {
   font-size: 0.82rem;
   font-weight: 700;
-  color: var(--color-secondary);
-  background: rgba(200, 220, 160, 0.12);
+  color: var(--color-primary-dark);
+  background: rgba(45, 90, 39, 0.08);
   padding: var(--space-1) var(--space-3);
   border-radius: var(--radius-full);
 }

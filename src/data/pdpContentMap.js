@@ -1,6 +1,6 @@
 export const pdpContentMap = {
   'mango-pickle': {
-    short_description: 'आम का अचार, ghar jaisa. Raw Langda mangoes plucked green straight from the tree, sun-cured and rested in cold-pressed Kachi Ghani mustard oil — small-batch, seedha Ara, Bihar se.',
+    short_description: 'Sharp, tangy raw Langda mango pickle, sun-cured in cold-pressed mustard oil, made in small batches in Ara, Bihar.',
     
     tabs: {
       description: 'Har Bihari ghar mein ek martaban hota hai jiski khushboo poore aangan mein bas jaati hai — that jar is what we bottled. Made the way our family has always made it in Ara, Bhojpur: raw Langda aam, ped se seedha plucked green, hand-cut and dhoop mein pakaya (sun-cured), then rested in cold-pressed Kachi Ghani mustard oil with a slow-ground masala of saunf, methi, mangraila aur hing. No artificial colours, no synthetic flavours — bas dhoop, tel aur purani reet. Tangy, bold, and just-oily-enough, it turns a plain dal-bhaat into a proper meal. Chhote batches mein banaya, taaki har jar mein wahi ghar wala swaad rahe.',

@@ -49,9 +49,9 @@ function ShippingPolicyPage({ onNavigate }) {
           <h2>4. Shipping Costs</h2>
           <p>Shipping charges are calculated as follows:</p>
           <ul>
-            <li><strong>Standard Shipping:</strong> ₹50</li>
-            <li><strong>Express Shipping (if applicable):</strong> ₹100</li>
-            <li><strong>Free Shipping</strong> on orders above ₹999</li>
+            <li><strong>Standard Shipping:</strong> ₹60</li>
+            <li><strong>Express Shipping (if applicable):</strong> ₹120</li>
+            <li><strong>Free Shipping</strong> on orders above ₹799</li>
           </ul>
           <p>The final shipping cost will be displayed at checkout before payment confirmation.</p>
         </div>
@@ -103,7 +103,17 @@ function ShippingPolicyPage({ onNavigate }) {
         </div>
 
         <div className="legal-section">
-          <h2>9. Damaged Packages</h2>
+          <h2>9. Non-Returnable Food Products</h2>
+          <p>All food products sold on Swadyum are non-returnable once delivered due to hygiene and food-safety reasons.</p>
+          <ul>
+            <li>We do not accept change-of-mind returns.</li>
+            <li>We do not accept returns of opened or used jars.</li>
+            <li>If your order arrives damaged, leaking, or incorrect, contact us within 24 hours with photos and order details.</li>
+          </ul>
+        </div>
+
+        <div className="legal-section">
+          <h2>10. Damaged Packages</h2>
           <p>If your order arrives visibly damaged:</p>
           <ul>
             <li>Please refuse delivery if possible, or</li>

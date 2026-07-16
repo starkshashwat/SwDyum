@@ -18,27 +18,6 @@ const categoriesData = {
     subtitle: "~ Mithila Sun-Dried Summer Heritage ~",
     story: "Made with firm, green raw mangoes hand-sliced and sun-cured over weeks. Infused with coarse mustard seeds, kalonji, fennel, and cold-pressed mustard oil, this tangy delicacy represents the heart of Bihar's summers.",
     heroImage: "/cat_mango.webp"
-  },
-  "garlic-pickle": {
-    tag: "Garlic",
-    title: "Mountain Garlic Pickles",
-    subtitle: "~ Rich Winter Indulgence ~",
-    story: "Carefully hand-peeled plump cloves of regional garlic cured in stone-ground spices and pure mustard oil. Its rich, warm flavor balances parathas, khichdi, and heavy winter meals.",
-    heroImage: "/cat_garlic.webp"
-  },
-  "lemon-pickle": {
-    tag: "Lemon",
-    title: "Oil-Free Zesty Lemon Pickles",
-    subtitle: "~ Aged Solar Softened Citrus ~",
-    story: "Prepared entirely without oil, matured in glass jars under direct sunlight for forty days. Natural juices combine with carom seeds and rock salt to form a sweet, sour glaze that aids digestion.",
-    heroImage: "/prod_lemon.webp"
-  },
-  "green-chilli-pickle": {
-    tag: "Chilli",
-    title: "Stuffed Green Chilli Pickles",
-    subtitle: "~ Bold Spicy Heat ~",
-    story: "Bold local green chillies, slit and stuffed with roasted spices, dry mango powder, and pure oil. Handcrafted in small batches for the ultimate spicy comfort.",
-    heroImage: "/prod_chili.webp"
   }
 };
 
@@ -48,21 +27,9 @@ const pairingsData = {
     { title: "Sattu Paratha & Dahi", desc: "The tangy raw mango slices break down the roasted gram flour warmth perfectly." },
     { title: "Arhar Dal & Steamed Rice", desc: "A classic Bihari lunch complete with a dollop of pure ghee and mango achar." }
   ],
-  "Garlic": [
-    { title: "Garhwal Khichdi", desc: "The bold garlic notes bring savory complexity to simple lentil and rice porridge." },
-    { title: "Litti Chokha", desc: "Dip your wood-fired sattu Littis in ghee, paired with spicy garlic cloves." }
-  ],
-  "Lemon": [
-    { title: "Puri & Aloo Dum", desc: "Sweet-and-sour oil-free lemon glaze cuts through the heavy spiced potato curry." },
-    { title: "Curd Rice", desc: "A cooling comfort meal topped with a piece of citrus peel." }
-  ],
-  "Chilli": [
-    { title: "Masala Poori", desc: "Deep fried pooris paired with fiery stuffed chillies for a spicy morning kick." },
-    { title: "Plain Paratha", desc: "Roll a paratha with mustard oil masala stuffing for an instant high-flavor travel snack." }
-  ],
   "default": [
-    { title: "Sattu Paratha", desc: "The authentic Bihari flatbread paired with any of our house pickles." },
-    { title: "Dal Chawal", desc: "Elevate your basic comfort food with a spoonful of artisanal achar." }
+    { title: "Sattu Paratha & Dahi", desc: "The tangy raw mango slices break down the roasted gram flour warmth perfectly." },
+    { title: "Arhar Dal & Steamed Rice", desc: "A classic Bihari lunch complete with a dollop of pure ghee and mango achar." }
   ]
 };
 

@@ -1,0 +1,37 @@
+.confidence-card {
+    padding: var(--space-5) var(--space-6);
+    background: var(--color-bg-warm);
+    border-radius: var(--radius-lg);
+    margin: 0 var(--space-6) var(--space-4);
+}
+
+.confidence-title {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-ink);
+    margin-bottom: var(--space-3);
+    font-family: var(--font-body);
+}
+
+.confidence-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.confidence-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    font-family: var(--font-body);
+}
+
+.confidence-item svg {
+    flex-shrink: 0;
+    opacity: 0.7;
+}

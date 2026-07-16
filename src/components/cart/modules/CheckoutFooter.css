@@ -1,0 +1,127 @@
+.checkout-footer {
+    position: sticky;
+    bottom: 0;
+    background: var(--white);
+    padding: var(--space-5) var(--space-6);
+    box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.08);
+    z-index: 2;
+    border-top: 1px solid var(--color-border-light);
+}
+
+/* Price summary */
+.footer-summary {
+    margin-bottom: var(--space-4);
+}
+
+.footer-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    margin-bottom: var(--space-1);
+}
+
+.footer-free {
+    color: var(--color-primary);
+    font-weight: 600;
+}
+
+.footer-discount-row {
+    color: var(--color-primary);
+}
+
+.footer-divider {
+    height: 1px;
+    background: var(--color-border-light);
+    margin: var(--space-2) 0;
+}
+
+.footer-total-row {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    color: var(--color-ink);
+    margin-bottom: 0;
+}
+
+/* Trust badges */
+.footer-trust {
+    display: flex;
+    justify-content: center;
+    gap: var(--space-4);
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    margin-bottom: var(--space-4);
+}
+
+/* Checkout button */
+.footer-checkout-btn {
+    width: 100%;
+    height: 56px;
+    background: var(--color-primary);
+    color: var(--white);
+    border: none;
+    border-radius: var(--radius-xl);
+    font-weight: 700;
+    font-size: var(--text-base);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--space-6);
+    font-family: var(--font-body);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--motion-fast) var(--motion-ease);
+    position: relative;
+    overflow: hidden;
+}
+
+.footer-checkout-btn:hover:not(:disabled) {
+    box-shadow: 0 8px 25px rgba(10, 90, 50, 0.25);
+}
+
+.footer-checkout-btn:disabled {
+    opacity: 0.8;
+    cursor: not-allowed;
+}
+
+.footer-btn-text {
+    font-weight: 700;
+}
+
+.footer-btn-total {
+    font-weight: 700;
+    font-size: var(--text-lg);
+}
+
+/* Loading state */
+.footer-btn-loading {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    justify-content: center;
+    width: 100%;
+}
+
+.footer-spinner {
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: var(--white);
+    border-radius: var(--radius-full);
+    animation: footer-spin 0.8s linear infinite;
+}
+
+@keyframes footer-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Security text */
+.footer-security-text {
+    text-align: center;
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    margin-top: var(--space-3);
+    margin-bottom: 0;
+}

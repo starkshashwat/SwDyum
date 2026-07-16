@@ -1,15 +1,21 @@
-/* ─── Google Fonts ─────────────────────────────────────────────────────────── */
 @import url('https://api.fontshare.com/v2/css?f[]=satoshi@900,700,500,300,400&display=swap');
+@import "tailwindcss";
+@source "./components/pdp";
+
 
 /* ─── Design System Tokens — Swadyum Brand Palette ─────────────────────────── */
 :root {
+  --brand-primary: #1A4E28;
+  --brand-secondary: #E8F3EC;
+  --brand-tertiary: #FFFFFF;
+
   /* ── Raw Color Scale ── */
-  --green-900: #064022;
-  --green-800: #0a5a32;
-  --green-700: #0d6e3e;
-  --green-600: #15834b;
-  --green-500: #1a9d5a;
-  --green-100: #d4ecd9;
+  --green-900: #12391d;
+  --green-800: var(--brand-primary);
+  --green-700: #225f33;
+  --green-600: #357446;
+  --green-500: #4d8a5e;
+  --green-100: var(--brand-secondary);
 
   --lime-400: #b5d490;
   --lime-300: #c8dca0;
@@ -22,9 +28,9 @@
   --amber-300: #f0c46a;
   --amber-100: #fce8b8;
 
-  --cream-100: #f4f8f5;
-  --cream-200: #e6efe9;
-  --cream-300: #ebf2ed;
+  --cream-100: var(--brand-tertiary);
+  --cream-200: var(--brand-secondary);
+  --cream-300: var(--brand-secondary);
 
   --ink: #112018;
   --ink-700: #2a3a30;
@@ -39,26 +45,26 @@
   --neutral-50: #eff5f1;
 
   --white: #ffffff;
-  --warm-bg: #faf7f2;
+  --warm-bg: var(--brand-tertiary);
 
   /* ── Semantic Color Tokens (Design System Canonical) ── */
   --color-primary: var(--green-800);
   --color-primary-dark: var(--green-900);
   --color-primary-light: var(--green-600);
-  --color-secondary: var(--lime-300);
-  --color-secondary-light: var(--lime-200);
+  --color-secondary: var(--brand-secondary);
+  --color-secondary-light: var(--brand-secondary);
   --color-accent: var(--amber-500);
   --color-accent-light: var(--amber-300);
   --color-accent-dark: var(--amber-600);
 
-  --color-bg: var(--cream-100);
-  --color-bg-warm: var(--warm-bg);
+  --color-bg: var(--brand-tertiary);
+  --color-bg-warm: var(--brand-tertiary);
   --color-surface: var(--white);
   --color-ink: var(--ink);
   --color-muted: var(--neutral-500);
   --color-muted-light: var(--neutral-400);
-  --color-border: var(--neutral-200);
-  --color-border-light: var(--neutral-50);
+  --color-border: var(--brand-secondary);
+  --color-border-light: rgba(232, 243, 236, 0.72);
   --color-success: var(--green-800);
   --color-success-bg: #def7ec;
   --color-info: #0369a1;
@@ -119,11 +125,11 @@
   --space-24: 6rem;
 
   /* Shadows — green-tinted */
-  --shadow-sm: 0 1px 2px rgba(10, 90, 50, 0.06);
-  --shadow-md: 0 4px 6px -1px rgba(10, 90, 50, 0.08), 0 2px 4px -2px rgba(10, 90, 50, 0.04);
-  --shadow-lg: 0 10px 15px -3px rgba(10, 90, 50, 0.08), 0 4px 6px -4px rgba(10, 90, 50, 0.04);
-  --shadow-xl: 0 20px 25px -5px rgba(10, 90, 50, 0.1), 0 8px 10px -6px rgba(10, 90, 50, 0.04);
-  --shadow-card-hover: 0 16px 40px -8px rgba(10, 90, 50, 0.12);
+  --shadow-sm: 0 1px 2px rgba(26, 78, 40, 0.06);
+  --shadow-md: 0 4px 6px -1px rgba(26, 78, 40, 0.08), 0 2px 4px -2px rgba(26, 78, 40, 0.04);
+  --shadow-lg: 0 10px 15px -3px rgba(26, 78, 40, 0.08), 0 4px 6px -4px rgba(26, 78, 40, 0.04);
+  --shadow-xl: 0 20px 25px -5px rgba(26, 78, 40, 0.1), 0 8px 10px -6px rgba(26, 78, 40, 0.04);
+  --shadow-card-hover: 0 16px 40px -8px rgba(26, 78, 40, 0.12);
 
   /* Border Radius */
   --radius-xs: 2px;
@@ -153,67 +159,75 @@
 }
 
 /* ─── Reset & Base ──────────────────────────────────────────────────────────── */
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-}
+/* Wrapped in @layer base so Tailwind's @layer utilities can override these.
+   Without this, unlayered CSS always beats layered CSS per the cascade spec,
+   causing * { margin: 0 } to override .mx-auto { margin-inline: auto }. */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Satoshi', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
 
-html {
-  scroll-behavior: smooth;
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
-  scroll-padding-top: var(--header-height);
-}
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-padding-top: var(--header-height);
+  }
 
-body {
-  margin: 0;
-  padding-top: 36px;
-  /* Space for the permanent top bar */
-  font-family: var(--font-body);
-  font-size: var(--text-base);
-  line-height: 1.6;
-  background-color: var(--color-bg);
-  color: var(--color-ink);
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  body {
+    margin: 0;
+    padding-top: 36px;
+    /* Space for the permanent top bar */
+    font-family: var(--font-body);
+    font-size: var(--text-base);
+    line-height: 1.6;
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
 
-a {
-  text-decoration: none;
-  color: inherit;
-}
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
 
-ul,
-ol {
-  list-style: none;
-}
+  ul,
+  ol {
+    list-style: none;
+  }
 
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
+  img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+  }
 
-button {
-  cursor: pointer;
-  font-family: var(--font-body);
-  border: none;
-  background: none;
+  button {
+    cursor: pointer;
+    font-family: var(--font-body);
+    border: none;
+    background: none;
+  }
 }
 
 /* ─── Global Typography ─────────────────────────────────────────────────────── */
-h1,
-h2,
-h3,
-h4 {
-  font-family: var(--font-heading);
-  line-height: 1.15;
-  color: var(--color-ink);
-  font-weight: 700;
+@layer base {
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading);
+    line-height: 1.15;
+    color: var(--color-ink);
+    font-weight: 700;
+  }
 }
 
 /* Section Eyebrow — uppercase sans kicker */
@@ -266,7 +280,7 @@ h4 {
   border: none;
   cursor: pointer;
   transition: all var(--motion-base) var(--motion-ease);
-  box-shadow: 0 4px 14px rgba(10, 90, 50, 0.2);
+  box-shadow: 0 4px 14px rgba(26, 78, 40, 0.2);
   position: relative;
   overflow: hidden;
   display: inline-flex;
@@ -274,6 +288,12 @@ h4 {
   justify-content: center;
   gap: var(--space-2);
   line-height: 1;
+}
+
+.btn-icon {
+  width: 18px;
+  height: 18px;
+  transition: transform var(--motion-base) var(--motion-ease);
 }
 
 .btn-primary::after,
@@ -289,8 +309,13 @@ h4 {
 .btn-primary:hover,
 .primary-cta:hover {
   background-color: var(--color-primary-dark);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(10, 90, 50, 0.3);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 10px 25px rgba(26, 78, 40, 0.35);
+}
+
+.btn-primary:hover .btn-icon,
+.primary-cta:hover .btn-icon {
+  transform: translateX(4px);
 }
 
 .btn-primary:hover::after,
@@ -415,12 +440,14 @@ section,
 
 /* ─── Responsive Base ───────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  :root {
-    --header-height: 60px;
-  }
-  
-  body {
-    padding-bottom: 70px;
+  @layer base {
+    :root {
+      --header-height: 60px;
+    }
+    
+    body {
+      padding-bottom: 70px;
+    }
   }
 
   .section-title {

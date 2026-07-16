@@ -65,7 +65,7 @@
 .combo-image-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 60%, rgba(10, 90, 50, 0.1) 100%);
+  background: linear-gradient(180deg, transparent 60%, rgba(26, 78, 40, 0.1) 100%);
   z-index: 1;
 }
 

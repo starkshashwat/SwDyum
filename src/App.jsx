@@ -14,7 +14,6 @@ import ShopPage from './ShopPage';
 import ProductDetailsPage from './ProductDetailsPage';
 import AboutPage from './AboutPage';
 import ContactPage from './ContactPage';
-import RecipePage from './RecipePage';
 import ReviewsPage from './ReviewsPage';
 import ThankYouPage from './ThankYouPage';
 import CategoryPage from './CategoryPage';
@@ -26,14 +25,14 @@ import SignupPage from './SignupPage';
 import ForgotPasswordPage from './ForgotPasswordPage';
 import AccountPage from './AccountPage';
 import OrderDetailsPage from './OrderDetailsPage';
+import ChoosePickleSection from './components/ChoosePickleSection';
 
-import CartDrawer from './components/cart/CartDrawer';
+import PurchaseDrawer from './components/cart/PurchaseDrawer';
 import BottomNav from './components/BottomNav';
 import WhatsAppLoginModal from './components/auth/WhatsAppLoginModal';
 import PrivacyPolicyPage from './PrivacyPolicyPage';
 import DeleteAccountPage from './DeleteAccountPage';
 import ShippingPolicyPage from './ShippingPolicyPage';
-import ReturnPolicyPage from './ReturnPolicyPage';
 import TermsPage from './TermsPage';
 
 function App() {
@@ -41,13 +40,12 @@ function App() {
     if (path === '/shop') return 'shop';
     if (path === '/about') return 'about';
     if (path === '/contact') return 'contact';
-    if (path === '/recipes') return 'recipes';
     if (path === '/thank-you') return 'thank-you';
     if (path === '/reviews') return 'reviews';
     if (path === '/privacy-policy') return 'privacy-policy';
     if (path === '/delete-account') return 'delete-account';
     if (path === '/shipping-policy') return 'shipping-policy';
-    if (path === '/return-policy') return 'return-policy';
+    if (path === '/return-policy') return 'terms';
     if (path === '/terms') return 'terms';
     if (path === '/cart') return 'cart';
     if (path === '/checkout') return 'checkout';
@@ -246,12 +244,24 @@ function App() {
   // Sync state on browser back/forward buttons
   useEffect(() => {
     const handlePopState = () => {
+      if (window.location.pathname === '/return-policy') {
+        window.history.replaceState({}, '', '/terms');
+        setCurrentPage('terms');
+        return;
+      }
       setCurrentPage(parsePath(window.location.pathname));
     };
     window.addEventListener('popstate', handlePopState);
     return () => {
       window.removeEventListener('popstate', handlePopState);
     };
+  }, []);
+
+  useEffect(() => {
+    if (window.location.pathname === '/return-policy') {
+      window.history.replaceState({}, '', '/terms');
+      setCurrentPage('terms');
+    }
   }, []);
 
   const handleNavigate = (page) => {
@@ -281,12 +291,10 @@ function App() {
     if (targetPage === 'shop') path = '/shop';
     else if (targetPage === 'about') path = '/about';
     else if (targetPage === 'contact') path = '/contact';
-    else if (targetPage === 'recipes') path = '/recipes';
     else if (targetPage === 'reviews') path = '/reviews';
     else if (targetPage === 'privacy-policy') path = '/privacy-policy';
     else if (targetPage === 'delete-account') path = '/delete-account';
     else if (targetPage === 'shipping-policy') path = '/shipping-policy';
-    else if (targetPage === 'return-policy') path = '/return-policy';
     else if (targetPage === 'terms') path = '/terms';
     else if (targetPage === 'cart') path = '/cart';
     else if (targetPage === 'checkout') path = '/checkout';
@@ -322,7 +330,7 @@ function App() {
         currentUser={currentUser}
       />
 
-      <CartDrawer
+      <PurchaseDrawer
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
         cart={cart}
@@ -343,8 +351,6 @@ function App() {
         <AboutPage onNavigate={handleNavigate} />
       ) : currentPage === 'contact' ? (
         <ContactPage onNavigate={handleNavigate} />
-      ) : currentPage === 'recipes' ? (
-        <RecipePage onNavigate={handleNavigate} />
       ) : currentPage === 'reviews' ? (
         <ReviewsPage onNavigate={handleNavigate} />
       ) : currentPage === 'privacy-policy' ? (
@@ -353,8 +359,6 @@ function App() {
         <DeleteAccountPage onNavigate={handleNavigate} />
       ) : currentPage === 'shipping-policy' ? (
         <ShippingPolicyPage onNavigate={handleNavigate} />
-      ) : currentPage === 'return-policy' ? (
-        <ReturnPolicyPage onNavigate={handleNavigate} />
       ) : currentPage === 'terms' ? (
         <TermsPage onNavigate={handleNavigate} />
       ) : currentPage === 'cart' ? (
@@ -382,11 +386,10 @@ function App() {
           {/* ─── Hero Section ─── */}
           <HeroSection onNavigate={handleNavigate} />
           <FeaturedProducts onNavigate={handleNavigate} addToCart={addToCart} />
+          <ChoosePickleSection onNavigate={handleNavigate} />
           <MadhubaniDivider variant="sun" />
           <ProcessSection />
           <MadhubaniDivider variant="fish" />
-          <ComboOfferSection onNavigate={handleNavigate} addToCart={addToCart} />
-          <MadhubaniDivider variant="lotus" />
           <SocialProofSection />
           <FinalCTASection onNavigate={handleNavigate} />
         </>

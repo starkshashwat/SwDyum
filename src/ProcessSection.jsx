@@ -5,65 +5,65 @@ import './ProcessSection.css';
 const steps = [
   {
     number: 1,
-    title: 'Sourcing Fresh Ingredients',
-    description:
-      'Hand-picked raw mangoes, lemons, green chillies, and garlic are sourced directly from Bihar farms — ensuring peak freshness and flavour.',
+    title: 'Fresh ingredients',
+    description: 'We source raw mangoes, chillies, lemons, and garlic for every batch.',
     image: '/process_sourcing_1783263006944.webp',
+    icon: null
   },
   {
     number: 2,
-    title: 'Traditional Spice Grinding',
-    description:
-      'Turmeric, fenugreek, mustard seeds, and red chilli are stone-ground using the age-old silbatta method for a rich, aromatic masala.',
+    title: 'Traditional spice blend',
+    description: 'Mustard, fenugreek, turmeric, and chilli are ground for a deep, aromatic masala.',
     image: '/process_grinding_1783263018468.webp',
+    icon: null
   },
   {
     number: 3,
-    title: 'Hand-Mixed in Mustard Oil',
-    description:
-      'Every ingredient is hand-mixed with raw cold-pressed mustard oil in brass vessels, infusing deep flavour into every bite.',
+    title: 'Cold-pressed mustard oil',
+    description: 'Every jar is hand-mixed in mustard oil for its unmistakable Bihari character.',
     image: '/process_mixing_1783263028798.webp',
+    icon: null
   },
   {
     number: 4,
-    title: 'Aged in Clay Martabans',
-    description:
-      'The pickle is packed into handmade earthen martabans and left to mature — just as Bihari grandmothers have done for generations.',
+    title: 'Matured for flavour',
+    description: 'The pickle rests and develops flavour before packing.',
     image: '/process_aging_1783263039730.webp',
+    icon: null
   },
   {
     number: 5,
-    title: 'Sun-Cured & Sealed Fresh',
-    description:
-      'Each batch is sun-cured for 21 days under direct Bihar sunlight, then carefully sealed and packaged to preserve its authentic taste.',
+    title: 'Packed fresh',
+    description: 'Each batch is sealed carefully to reach your kitchen full of flavour.',
     image: '/process_suncured_1783263051169.webp',
+    icon: null
   },
 ];
 
 /* ─── Animated step card ─────────────────────────────────────────────────── */
 const stepVariants = {
-  hidden: { opacity: 0, x: 40 },
+  hidden: { opacity: 0, x: 30 },
   visible: (i) => ({
     opacity: 1,
     x: 0,
     transition: {
-      delay: i * 0.12,
-      duration: 0.6,
+      delay: i * 0.1,
+      duration: 0.5,
       ease: [0.16, 1, 0.3, 1],
     },
   }),
 };
 
 const numberVariants = {
-  hidden: { opacity: 0, scale: 0.5 },
+  hidden: { opacity: 0, scale: 0.6 },
   visible: (i) => ({
     opacity: 1,
     scale: 1,
     transition: {
-      delay: i * 0.12 + 0.1,
-      duration: 0.45,
+      delay: i * 0.1 + 0.05,
+      duration: 0.4,
       type: 'spring',
-      stiffness: 300,
+      stiffness: 280,
       damping: 18,
     },
   }),
@@ -72,70 +72,72 @@ const numberVariants = {
 function ProcessSection() {
   const sectionRef = useRef(null);
 
-  /* ─── Parallax via scroll progress ─── */
+  /* ─── Scroll Progress ─── */
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start end', 'end start'],
   });
 
-  // Decorative elements move at different parallax speeds
-  const branchY = useTransform(scrollYProgress, [0, 1], ['-8%', '12%']);
-  const cowY = useTransform(scrollYProgress, [0, 1], ['15%', '-10%']);
-  const titleY = useTransform(scrollYProgress, [0, 1], ['0%', '-6%']);
-  const timelineScale = useTransform(scrollYProgress, [0, 0.3], [0, 1]);
+  const titleY = useTransform(scrollYProgress, [0, 1], ['0%', '-4%']);
+  const timelineScale = useTransform(scrollYProgress, [0, 0.35], [0, 1]);
 
   return (
     <section className="process-v2" ref={sectionRef} id="our-process">
       <div className="process-v2-inner">
         {/* ════════════════════════════════════════════
-            LEFT COLUMN — Decorative + Title
+            LEFT COLUMN — Title & Heritage Proof Card
         ════════════════════════════════════════════ */}
         <div className="process-v2-left">
-          {/* Branch + birds illustration (top-left) */}
-          <motion.div
-            className="process-decor-branch"
-            style={{ y: branchY }}
-          >
-            <img
-              src="/branch_birds.webp"
-              alt=""
-              aria-hidden="true"
-              className="decor-branch-img"
-            />
-          </motion.div>
-
-          {/* Section title */}
+          {/* Section Kicker & Heading */}
           <motion.div
             className="process-v2-title-block"
             style={{ y: titleY }}
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: 24 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: '-80px' }}
-            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            viewport={{ once: true, margin: '-60px' }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
+            <span className="process-kicker">Authentic Heritage</span>
             <h2 className="process-v2-heading">
-              The Traditional<br />
-              Journey Of Our<br />
-              <em>Pickle</em>
+              Made Slowly,<br />The Bihari Way
             </h2>
+            <p className="process-v2-subtext">
+              Five traditional steps that preserve authentic regional flavor without artificial shortcuts.
+            </p>
           </motion.div>
 
-          {/* Cow illustration (bottom-left) */}
+          {/* Real Proof & Heritage Card */}
           <motion.div
-            className="process-decor-cow"
-            style={{ y: cowY }}
+            className="process-proof-card"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: '-40px' }}
+            transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <img
-              src="/desi_cow.webp"
-              alt=""
-              aria-hidden="true"
-              className="decor-cow-img"
-            />
+            <div className="proof-card-badge">
+              <span className="proof-pulse" />
+              Real Evidence Guarantee
+            </div>
+            <h4 className="proof-card-title">Crafted in Small Batches in Ara, Bihar</h4>
+            <ul className="proof-card-list">
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A4E28" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+                <span>100% Sun-Cured</span>
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A4E28" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+                <span>Cold-Pressed Mustard Oil Only</span>
+              </li>
+              <li>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A4E28" strokeWidth="2.5"><polyline points="20 6 9 17 4 12" /></svg>
+                <span>No Artificial Preservatives</span>
+              </li>
+            </ul>
           </motion.div>
         </div>
 
         {/* ════════════════════════════════════════════
-            RIGHT COLUMN — Timeline + Steps
+            RIGHT COLUMN — Dotted Timeline + Step Cards
         ════════════════════════════════════════════ */}
         <div className="process-v2-right">
           {/* Dotted timeline line */}
@@ -180,7 +182,10 @@ function ProcessSection() {
                     />
                   </div>
                   <div className="process-step-text">
-                    <h3 className="process-step-title">{step.title}</h3>
+                    <div className="process-step-title-row">
+                      {step.icon && <div className="process-step-icon">{step.icon}</div>}
+                      <h3 className="process-step-title">{step.title}</h3>
+                    </div>
                     <p className="process-step-desc">{step.description}</p>
                   </div>
                 </motion.div>

@@ -33,8 +33,7 @@ const ensureRazorpayScript = async (retries = 2) => {
 };
 
 const UPSELL_PRODUCTS = [
-  { slug: 'mango-pickle', name: 'Aam Ka Achar', price: 199, mrp: 250, image: '/prod_mango.webp', weight: '250g' },
-  { slug: 'garlic-pickle', name: 'Spicy Garlic Pickle', price: 249, mrp: 300, image: '/cat_mango.webp', weight: '250g' }
+  { slug: 'mango-pickle', name: 'Aam Ka Achar', price: 199, mrp: 250, image: '/prod_mango.webp', weight: '250g' }
 ];
 
 const drawerTransition = { type: 'tween', ease: [0.22, 1, 0.36, 1], duration: 0.32 };

@@ -19,6 +19,7 @@ export const fetchProducts = async () => {
       product_variants (weight_label, price)
     `)
     .eq('is_active', true)
+    .eq('slug', 'mango-pickle')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -27,7 +28,7 @@ export const fetchProducts = async () => {
   }
 
   // Transform data to match the expected format of the frontend
-  return data.map(product => {
+  const transformed = await Promise.all(data.map(async (product) => {
     let primaryImage = product.product_images?.find(img => img.is_primary)?.url || product.product_images?.[0]?.url || '/prod_mango.webp';
     primaryImage = primaryImage.replace(/\.png$/, '.webp');
     
@@ -39,27 +40,48 @@ export const fetchProducts = async () => {
       });
     }
 
+    // Real review aggregate
+    let rating = 0;
+    let reviewsCount = 0;
+    const { data: reviewRows } = await supabase
+      .from('product_reviews')
+      .select('rating')
+      .eq('product_id', product.id)
+      .eq('is_approved', true);
+    if (reviewRows && reviewRows.length > 0) {
+      reviewsCount = reviewRows.length;
+      rating = Math.round((reviewRows.reduce((acc, r) => acc + (r.rating || 0), 0) / reviewsCount) * 10) / 10;
+    }
+
+    const canonicalShortDesc = 'Sharp, tangy raw Langda mango pickle, sun-cured in cold-pressed mustard oil, made in small batches in Ara, Bihar.';
+
     return {
       id: product.id,
       name: product.name,
       slug: product.slug,
-      description: product.short_description || product.description,
+      description: product.slug === 'mango-pickle' ? canonicalShortDesc : (product.short_description || product.description),
       full_description: product.description,
       image: primaryImage,
       category: product.categories?.name || 'Uncategorized',
       base_price: product.base_price,
       prices: pricesMap,
       isBestseller: product.is_bestseller,
-      rating: 4.8, // Mocked rating for now, later fetch from reviews table
-      reviewsCount: Math.floor(Math.random() * 100) + 20
+      rating: rating,
+      reviewsCount: reviewsCount
     };
-  });
+  }));
+
+  return transformed;
 };
 
 /**
  * Fetch a single product by its slug, including all its variants and images.
  */
 export const getProductBySlug = async (slug) => {
+  if (slug !== 'mango-pickle') {
+    return null;
+  }
+  
   const { data: product, error } = await supabase
     .from('products')
     .select(`
@@ -130,30 +152,5 @@ export const getProductBySlug = async (slug) => {
  * Fetch related products based on a given category or fallback to bestsellers.
  */
 export const getRelatedProducts = async (currentProductId, limit = 3) => {
-  const { data, error } = await supabase
-    .from('products')
-    .select(`
-      *,
-      product_images (url, is_primary)
-    `)
-    .eq('is_active', true)
-    .neq('id', currentProductId)
-    .limit(limit);
-
-  if (error) {
-    console.error('Error fetching related products:', error);
-    return [];
-  }
-
-  return data.map(product => {
-    let primaryImage = product.product_images?.find(img => img.is_primary)?.url || product.product_images?.[0]?.url || '/prod_mango.webp';
-    primaryImage = primaryImage.replace(/\.png$/, '.webp');
-    return {
-      id: product.id,
-      name: product.name,
-      slug: product.slug,
-      image: primaryImage,
-      base_price: product.base_price
-    };
-  });
+  return [];
 };

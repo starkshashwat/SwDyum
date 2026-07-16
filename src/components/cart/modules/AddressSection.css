@@ -1,0 +1,288 @@
+.address-section {
+    padding: 0 var(--space-6);
+}
+
+/* Toggle (collapsed summary) */
+.address-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--color-bg-warm);
+    border: none;
+    padding: var(--space-4);
+    border-radius: var(--radius-xl);
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: background var(--motion-fast) var(--motion-ease);
+}
+
+.address-toggle:hover {
+    background: var(--color-border-light);
+}
+
+.address-toggle-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+    color: var(--color-ink);
+}
+
+.address-toggle-label {
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--color-muted);
+    flex-shrink: 0;
+}
+
+.address-toggle-summary {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--color-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.addr-chevron {
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    transition: transform var(--motion-base) var(--motion-ease);
+    flex-shrink: 0;
+}
+
+.addr-chevron.open {
+    transform: rotate(180deg);
+}
+
+/* Expanded sheet */
+.address-sheet {
+    overflow: hidden;
+    margin-top: var(--space-3);
+}
+
+.address-loading {
+    font-size: var(--text-sm);
+    color: var(--color-muted);
+    padding: var(--space-4) 0;
+    text-align: center;
+}
+
+/* Saved address cards */
+.address-saved-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.address-list-label {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: var(--space-1);
+}
+
+.address-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    background: var(--white);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    cursor: pointer;
+    text-align: left;
+    font-family: var(--font-body);
+    transition: border-color var(--motion-fast) var(--motion-ease), box-shadow var(--motion-fast) var(--motion-ease);
+    perspective: 600px;
+}
+
+.address-card:hover {
+    border-color: var(--color-primary);
+}
+
+.address-card.selected {
+    border-color: var(--color-primary);
+    border-width: 2px;
+    box-shadow: 0 0 0 3px rgba(10, 90, 50, 0.08);
+}
+
+.address-card-top {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.address-card-name {
+    font-weight: 700;
+    font-size: var(--text-sm);
+    color: var(--color-ink);
+}
+
+.address-card-label {
+    font-size: 10px;
+    background: var(--color-bg-warm);
+    color: var(--color-muted);
+    padding: 1px var(--space-2);
+    border-radius: var(--radius-full);
+}
+
+.address-card-default {
+    font-size: 10px;
+    background: var(--color-primary);
+    color: var(--white);
+    padding: 1px var(--space-2);
+    border-radius: var(--radius-full);
+}
+
+.address-card-detail {
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    line-height: 1.5;
+    margin: 0;
+}
+
+.address-card-phone {
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    margin: 0;
+}
+
+.address-card-check {
+    position: absolute;
+    top: var(--space-3);
+    right: var(--space-3);
+}
+
+/* Add new button */
+.address-add-new-btn {
+    width: 100%;
+    background: none;
+    border: 1px dashed var(--color-border-strong);
+    color: var(--color-ink);
+    padding: var(--space-3);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    cursor: pointer;
+    font-family: var(--font-body);
+    margin-top: var(--space-3);
+    transition: border-color var(--motion-fast) var(--motion-ease), color var(--motion-fast) var(--motion-ease);
+}
+
+.address-add-new-btn:hover {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+/* New address form */
+.address-new-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.address-form-title {
+    font-size: var(--text-base);
+    font-weight: 600;
+    color: var(--color-ink);
+    margin: 0;
+}
+
+.address-form-error {
+    font-size: var(--text-xs);
+    color: var(--color-destructive);
+    background: var(--color-error-bg);
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    margin: 0;
+}
+
+.addr-form-row {
+    display: flex;
+    gap: var(--space-3);
+}
+
+.addr-form-row.split>* {
+    flex: 1;
+}
+
+.addr-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.addr-field label {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--color-muted);
+}
+
+.addr-field input {
+    padding: var(--space-2) var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    font-size: var(--text-sm);
+    font-family: var(--font-body);
+    outline: none;
+    background: var(--color-bg-warm);
+    transition: border-color var(--motion-fast) var(--motion-ease);
+}
+
+.addr-field input:focus {
+    border-color: var(--color-primary);
+    background: var(--white);
+}
+
+.addr-form-actions {
+    display: flex;
+    gap: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--color-border-light);
+}
+
+.addr-save-btn {
+    background: var(--color-primary);
+    color: var(--white);
+    border: none;
+    padding: var(--space-2) var(--space-5);
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    cursor: pointer;
+    font-family: var(--font-body);
+    transition: opacity var(--motion-fast) var(--motion-ease);
+}
+
+.addr-save-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.addr-cancel-btn {
+    background: none;
+    border: none;
+    color: var(--color-muted);
+    font-weight: 600;
+    font-size: var(--text-sm);
+    cursor: pointer;
+    font-family: var(--font-body);
+}
+
+.addr-cancel-btn:hover {
+    color: var(--color-ink);
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+
+    .addr-form-row.split {
+        flex-direction: column;
+    }
+}

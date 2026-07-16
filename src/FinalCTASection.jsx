@@ -8,46 +8,39 @@ function FinalCTASection({ onNavigate }) {
       <div className="final-cta-bg-pattern"></div>
       <motion.div
         className="final-cta-content"
-        initial={{ opacity: 0, y: 40 }}
+        initial={{ opacity: 0, y: 30 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+        viewport={{ once: true, margin: "-80px" }}
+        transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
       >
-        <span className="section-eyebrow" style={{ color: 'rgba(255,255,255,0.7)' }}>
-          From Our Kitchen to Yours
+        <span className="section-eyebrow" style={{ color: 'var(--brand-primary)', opacity: 0.6, letterSpacing: '1.5px', textTransform: 'uppercase' }}>
+          Heritage Taste Guarantee
         </span>
+
         <h2 className="final-cta-headline">
-          Ready to Taste the <em>Real</em> Bihar?
+          Bring Home Real Bihari Mango Pickle
         </h2>
+
         <p className="final-cta-subtext">
-          Join 200+ families across India who have rediscovered the authentic flavors of homemade pickles. Every jar is a promise of purity, tradition, and taste.
+          Tangy, spicy, sun-cured, and made with cold-pressed mustard oil. Start with one jar before you commit to more.
         </p>
+
         <div className="final-cta-buttons">
           <button
             className="final-cta-primary"
-            onClick={() => onNavigate('shop')}
-            aria-label="Browse our pickle collection"
+            onClick={() => onNavigate && onNavigate('product-mango-pickle')}
+            aria-label="Buy Mango Pickle - ₹299"
           >
-            Shop Now
+            Buy Mango Pickle - ₹299
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M5 12h14M12 5l7 7-7 7"/>
             </svg>
           </button>
         </div>
-        <div className="final-cta-trust">
-          <div className="final-cta-trust-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            Free shipping above ₹499
-          </div>
-          <div className="final-cta-trust-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            100% quality guarantee
-          </div>
-          <div className="final-cta-trust-item">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-            Delivered in 3-5 days
-          </div>
-        </div>
+
+        <p className="final-cta-proof-line">
+          Free shipping above ₹799 • Delivered in 3-5 days
+        </p>
       </motion.div>
     </section>
   );

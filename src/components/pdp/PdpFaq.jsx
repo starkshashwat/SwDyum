@@ -25,8 +25,8 @@ export default function PdpFaq({ faqData }) {
 
         <div className="mt-9 border-t border-[#d9ddd0]">
           {FAQS.map((faqItem, index) => {
-            const question = Array.isArray(faqItem) ? faqItem[0] : faqItem.question;
-            const answer = Array.isArray(faqItem) ? faqItem[1] : faqItem.answer;
+            const question = Array.isArray(faqItem) ? faqItem[0] : (faqItem.q || faqItem.question);
+            const answer = Array.isArray(faqItem) ? faqItem[1] : (faqItem.a || faqItem.answer);
             const isOpen = activeFaq === index;
 
             return (
@@ -56,7 +56,7 @@ export default function PdpFaq({ faqData }) {
         ].map(([icon, label, sublabel], index) => (
           <div key={label} className={`flex min-h-20 items-center gap-3 border-[#1c371b] px-5 py-5 ${index % 2 === 0 ? 'border-r sm:border-r lg:border-r' : ''} ${index < 2 ? 'border-b lg:border-b-0' : ''}`}>
             <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#1c371b] text-[#b7cf82]">
-              {icon === 'certificate' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4"><circle cx="12" cy="10" r="5"/><path d="m8.5 14-1 6 4.5-2 4.5 2-1-6"/><path d="m10 10 1.2 1.2L14 8.5"/></svg>}
+              {icon === 'certificate' && <img src="/fssai-logo-white.png" alt="FSSAI" className="h-6 w-auto object-contain" />}
               {icon === 'flask' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4"><path d="M9 3h6M10 3v7l-5 8a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-8V3"/><path d="M8 15h8"/></svg>}
               {icon === 'drop' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4"><path d="M12 3s6 6.2 6 11a6 6 0 0 1-12 0c0-4.8 6-11 6-11Z"/><path d="m4 4 16 16"/></svg>}
               {icon === 'users' && <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>}

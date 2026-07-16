@@ -1,0 +1,70 @@
+.freeship-bar {
+    padding: var(--space-4) var(--space-6);
+    background: var(--white);
+    border-bottom: 1px solid var(--color-border-light);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.freeship-progress p {
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-2);
+    color: var(--color-ink);
+}
+
+.freeship-progress p strong {
+    font-weight: 700;
+    color: var(--color-primary);
+}
+
+.freeship-progress-bar-bg {
+    height: var(--space-2);
+    background: var(--color-bg-warm);
+    border-radius: var(--radius-full);
+    overflow: hidden;
+}
+
+.freeship-progress-bar-fill {
+    height: 100%;
+    background: var(--color-primary);
+    border-radius: var(--radius-full);
+}
+
+/* Achieved state */
+.freeship-achieved {
+    position: relative;
+    padding: var(--space-2) 0;
+}
+
+.freeship-success-text {
+    font-size: var(--text-sm);
+    color: var(--color-primary);
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
+}
+
+.freeship-success-text strong {
+    font-weight: 700;
+}
+
+/* Confetti */
+.freeship-confetti-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 10;
+}
+
+.freeship-confetti-particle {
+    position: absolute;
+    top: 50%;
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+}

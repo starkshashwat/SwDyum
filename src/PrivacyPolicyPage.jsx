@@ -61,12 +61,14 @@ function PrivacyPolicyPage({ onNavigate }) {
             <li>Processing and fulfilling orders</li>
             <li>Providing customer support</li>
             <li>Sending order confirmations and updates</li>
+            <li>Handling delivery issues, damaged-item complaints, and cancellation requests</li>
             <li>Improving website functionality and user experience</li>
             <li>Preventing fraud and unauthorized transactions</li>
             <li>Sending promotional emails or offers (only if you opt in)</li>
             <li>Complying with legal and regulatory obligations</li>
           </ul>
           <p><strong>We do not sell or rent your personal information to third parties.</strong></p>
+          <p><strong>Because our products are food items, we do not offer customer returns after delivery.</strong> We only use support data to resolve delivery problems, transit damage, or incorrect-order issues.</p>
         </div>
 
         <div className="legal-section">

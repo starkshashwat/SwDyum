@@ -1,66 +1,120 @@
-export default function PdpTasteProfile({ tasteProfile, pairings }) {
-  const profileData = tasteProfile || [
-    ['Tangy', 'खट्टा', 95, '#d5b051'],
-    ['Spicy', 'तीखा', 70, '#be6e47'],
-    ['Oily', 'तेलयुक्त', 60, '#dab045'],
-    ['Crunch', 'कुरकुरा', 65, '#92b567'],
-  ];
+import { useMemo } from 'react';
 
-  const pairingsData = pairings || [
-    ['🍛', 'लिट्टी-चोखा', 'Litti-Chokha', 'Purvanchal classic', '#b8842e'],
-    ['🫓', 'सत्तू परांठा', 'Sattu Paratha', 'Bihari staple', '#d1aa37'],
-    ['🍚', 'दाल-भात', 'Dal-Bhaat', 'Everyday comfort', '#86aa64'],
-    ['🍲', 'खिचड़ी', 'Khichdi', 'Soul food', '#d1aa37'],
-    ['🫓', 'पूरी-सब्जी', 'Poori-Sabzi', 'Sunday special', '#b8842e'],
-  ];
+export default function PdpTasteProfile({ tasteProfile, pairings }) {
+  const profileData = useMemo(() => {
+    if (Array.isArray(tasteProfile)) return tasteProfile;
+    if (tasteProfile?.metrics && Array.isArray(tasteProfile.metrics)) {
+      const hindis = {
+        'Tangy': 'खट्टा',
+        'Spicy': 'तीखा',
+        'Oil Level': 'तेलयुक्त',
+        'Oily': 'तेलयुक्त',
+        'Crunch': 'कुरकुरा'
+      };
+      return tasteProfile.metrics.map(m => [
+        m.label,
+        hindis[m.label] || '',
+        m.level
+      ]);
+    }
+    return [
+      ['Tangy', 'खट्टा', 95],
+      ['Spicy', 'तीखा', 70],
+      ['Oily', 'तेलयुक्त', 60],
+      ['Crunch', 'कुरकुरा', 65],
+    ];
+  }, [tasteProfile]);
+
+  const pairingsData = useMemo(() => {
+    if (Array.isArray(pairings)) return pairings;
+    if (tasteProfile?.pairings && Array.isArray(tasteProfile.pairings)) {
+      const trans = {
+        'Litti-Chokha': ['🍛', 'लिट्टी-चोखा', 'Litti-Chokha', 'Purvanchal classic'],
+        'Sattu Paratha': ['🫓', 'सत्तू परांठा', 'Sattu Paratha', 'Bihari staple'],
+        'Dal-Bhaat': ['🍚', 'दाल-भात', 'Dal-Bhaat', 'Everyday comfort'],
+        'Khichdi': ['🍲', 'खिचड़ी', 'Khichdi', 'Soul food'],
+        'Poori-Sabzi': ['🫓', 'पूरी-सब्जी', 'Poori-Sabzi', 'Sunday special'],
+      };
+      return tasteProfile.pairings.map(p => {
+        const name = typeof p === 'string' ? p : p.name;
+        if (trans[name]) {
+          return trans[name];
+        }
+        return ['🍽️', name, name, 'Perfect pairing'];
+      });
+    }
+    return [
+      ['🍛', 'लिट्टी-चोखा', 'Litti-Chokha', 'Purvanchal classic'],
+      ['🫓', 'सत्तू परांठा', 'Sattu Paratha', 'Bihari staple'],
+      ['🍚', 'दाल-भात', 'Dal-Bhaat', 'Everyday comfort'],
+      ['🍲', 'खिचड़ी', 'Khichdi', 'Soul food'],
+      ['🫓', 'पूरी-सब्जी', 'Poori-Sabzi', 'Sunday special'],
+    ];
+  }, [pairings, tasteProfile]);
 
   return (
-    <section className="bg-white px-4 py-12 md:px-12 md:py-20 font-sans" style={{ fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif" }}>
-      <div className="mx-auto max-w-6xl overflow-hidden rounded-[2rem] bg-[#234622] px-6 py-10 text-white md:px-12 md:py-14">
-        <div className="flex items-start gap-4">
-          <span className="mt-3 h-px w-16 bg-[#b7cf82]" />
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#c7dca8]">Taste<br className="sm:hidden" /> Profile</p>
-            <h2 className="mt-1 text-3xl font-semibold tracking-[-0.035em] md:text-4xl">स्वाद का नक्शा</h2>
-          </div>
-        </div>
-        <p className="mt-4 text-sm text-white/65 md:text-lg">What your tongue is about to experience — on a scale of 100</p>
-
-        <div className="mt-14 grid grid-cols-2 gap-x-6 gap-y-10 md:grid-cols-4 md:gap-10">
-          {profileData.map(([name, hindi, score, color]) => (
-            <div key={name} className="text-center">
-              <div className="relative mx-auto h-20 w-40 overflow-hidden md:h-24 md:w-48">
-                <div className="absolute bottom-0 left-1/2 h-28 w-28 -translate-x-1/2 rounded-t-full border-[10px] border-b-0 md:h-32 md:w-32" style={{ borderColor: color }} />
-                <div className="absolute bottom-1 left-1/2 -translate-x-1/2 text-center">
-                  <p className="text-3xl font-bold leading-none md:text-4xl">{score}</p>
-                  <p className="mt-1 text-xs text-white/50">/100</p>
-                </div>
+    <section className="bg-white px-6 py-16 md:px-12 md:py-24 font-sans text-[#1a1a1a]" style={{ fontFamily: "'Satoshi', 'Segoe UI', sans-serif" }}>
+      <div className="mx-auto max-w-6xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24 items-center">
+          
+          {/* Left: Taste Profile */}
+          <div className="bg-[#fcfbf9] border border-gray-100 rounded-3xl p-8 md:p-12 shadow-sm">
+            <div className="flex items-start gap-4 mb-8">
+              <span className="mt-3 h-px w-12 bg-[#1A4E28]" />
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#1A4E28]">Taste Profile</p>
+                <h2 className="mt-1 text-2xl md:text-3xl font-semibold tracking-[-0.035em] text-[#1a1a1a]">स्वाद का नक्शा</h2>
+                <p className="mt-2 text-sm text-gray-500">What your tongue is about to experience</p>
               </div>
-              <p className="mt-4 text-lg font-medium text-[#dceac9]">{name}</p>
-              <p className="mt-1 text-sm text-white/45">{hindi}</p>
             </div>
-          ))}
-        </div>
 
-        <div className="my-14 h-px bg-white/10" />
-
-        <div className="flex items-start gap-4">
-          <span className="mt-3 h-px w-16 bg-[#b7cf82]" />
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#c7dca8]">Perfect</p>
-            <h3 className="text-xl font-semibold">जोड़ी</h3>
+            <div className="flex flex-col gap-6">
+              {profileData.map(([name, hindi, score]) => {
+                const label = score >= 90 ? `Very ${name}` : score >= 70 ? `Medium-High` : score >= 50 ? `Medium` : `Mild`;
+                return (
+                  <div key={name} className="flex flex-col gap-2">
+                    <div className="flex justify-between items-end">
+                      <span className="font-semibold text-gray-900">{name} <span className="text-gray-400 font-normal text-xs ml-1">({hindi})</span></span>
+                      <span className="text-xs font-bold text-gray-400">{label}</span>
+                    </div>
+                    <div className="h-2.5 w-full bg-gray-100 rounded-full overflow-hidden">
+                      <div 
+                        className="h-full bg-[#1A4E28] rounded-full transition-all duration-1000 ease-out"
+                        style={{ width: `${score}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
 
-        <div className="mt-6 flex snap-x gap-4 overflow-x-auto pb-2 [scrollbar-width:none]">
-          {pairingsData.map(([icon, hindi, english, note, color]) => (
-            <article key={english} className="min-w-[210px] snap-start rounded-2xl border border-white/10 bg-[#1c371b] p-5 shadow-sm" style={{ borderTopColor: color, borderTopWidth: 3 }}>
-              <span className="text-3xl">{icon}</span>
-              <h4 className="mt-5 text-xl font-semibold leading-tight">{hindi}</h4>
-              <p className="mt-1 text-sm text-white/55">{english}</p>
-              <span className="mt-5 inline-block rounded-full bg-white/10 px-3 py-1 text-xs font-medium" style={{ color: color }}>{note}</span>
-            </article>
-          ))}
+          {/* Right: Perfect Pairings */}
+          <div>
+            <div className="flex items-start gap-4 mb-8">
+              <span className="mt-3 h-px w-12 bg-[#c4862b]" />
+              <div>
+                <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#c4862b]">Perfect Pairings</p>
+                <h3 className="mt-1 text-2xl md:text-3xl font-semibold text-[#1a1a1a]">परफेक्ट जोड़ी</h3>
+                <p className="mt-2 text-sm text-gray-500">The best ways to enjoy our achar</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-4">
+              {pairingsData.map(([icon, hindi, english, note], idx) => (
+                <div key={english} className="flex items-center gap-5 p-4 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-md transition-shadow">
+                  <div className="w-12 h-12 rounded-full bg-[#f9faf7] flex items-center justify-center text-2xl flex-shrink-0">
+                    {icon}
+                  </div>
+                  <div className="flex-1">
+                    <h4 className="font-bold text-gray-900">{english} <span className="text-gray-400 font-normal ml-1">({hindi})</span></h4>
+                    <p className="text-sm text-gray-500 mt-0.5">{note}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
         </div>
       </div>
     </section>

@@ -1,0 +1,258 @@
+/* ─── Choose Your Pickle Section Design Tokens & Layout ─────────────────── */
+.cps-section {
+  padding: var(--space-16, 4rem) var(--space-6, 1.5rem);
+  background-color: var(--brand-tertiary, #FDFAF5);
+  border-top: 1px solid var(--brand-secondary, #E8F3EC);
+  border-bottom: 1px solid var(--brand-secondary, #E8F3EC);
+}
+
+.cps-container {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────── */
+.cps-header {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto var(--space-12, 3rem);
+}
+
+.cps-kicker {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--brand-primary, #1A4E28);
+  background-color: var(--brand-secondary, #E8F3EC);
+  padding: 4px 12px;
+  border-radius: 9999px;
+  margin-bottom: 12px;
+}
+
+.cps-title {
+  font-family: var(--font-heading, serif);
+  font-size: 2.25rem;
+  font-weight: 700;
+  color: var(--color-ink, #112018);
+  line-height: 1.2;
+  margin: 0 0 12px 0;
+  letter-spacing: -0.02em;
+}
+
+.cps-subtitle {
+  font-size: 1rem;
+  color: var(--color-muted, #66786d);
+  line-height: 1.55;
+  margin: 0;
+}
+
+/* ─── Grid ───────────────────────────────────────────────────────────────── */
+.cps-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+/* ─── Cards ──────────────────────────────────────────────────────────────── */
+.cps-card {
+  background: #ffffff;
+  border: 1.5px solid var(--brand-secondary, #E8F3EC);
+  border-radius: 18px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.cps-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--brand-primary, #1A4E28);
+  box-shadow: 0 12px 28px -6px rgba(26, 78, 40, 0.12);
+}
+
+.cps-card-highlight {
+  border-color: rgba(26, 78, 40, 0.35);
+  background: linear-gradient(180deg, #ffffff 0%, var(--brand-secondary, #E8F3EC) 100%);
+  box-shadow: 0 4px 20px rgba(26, 78, 40, 0.06);
+}
+
+/* Card Header elements */
+.cps-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.cps-badge {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--brand-primary, #1A4E28);
+  background-color: var(--brand-secondary, #E8F3EC);
+  padding: 3px 10px;
+  border-radius: 8px;
+}
+
+.cps-icon-wrapper {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: var(--brand-secondary, #E8F3EC);
+  color: var(--brand-primary, #1A4E28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.25s ease;
+}
+
+.cps-card:hover .cps-icon-wrapper {
+  background: var(--brand-primary, #1A4E28);
+  color: #ffffff;
+}
+
+/* Card Body */
+.cps-card-body {
+  margin-bottom: 24px;
+  flex-grow: 1;
+}
+
+.cps-need-label {
+  display: block;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #d97706; /* warm amber for need badge */
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.cps-product-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-ink, #112018);
+  margin: 0 0 8px 0;
+  line-height: 1.3;
+}
+
+.cps-description {
+  font-size: 0.875rem;
+  color: var(--color-muted, #66786d);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Card Footer & CTA Buttons */
+.cps-card-footer {
+  margin-top: auto;
+}
+
+.cps-cta-btn {
+  width: 100%;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-size: 0.875rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  border: none;
+}
+
+.btn-primary-green {
+  background-color: var(--brand-primary, #1A4E28);
+  color: #ffffff;
+}
+
+.btn-primary-green:hover {
+  background-color: var(--color-primary-dark, #12391d);
+  box-shadow: 0 4px 12px rgba(26, 78, 40, 0.25);
+}
+
+.btn-outline-green {
+  background-color: #ffffff;
+  color: var(--brand-primary, #1A4E28);
+  border: 1.5px solid var(--brand-primary, #1A4E28);
+}
+
+.btn-outline-green:hover {
+  background-color: var(--brand-secondary, #E8F3EC);
+  border-color: var(--color-primary-dark, #12391d);
+  color: var(--color-primary-dark, #12391d);
+}
+
+/* ─── Responsive Breakpoints ─────────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .cps-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 640px) {
+  .cps-section {
+    padding: 3rem 1.25rem;
+  }
+  .cps-title {
+    font-size: 1.75rem;
+  }
+  .cps-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+  .cps-card {
+    padding: 20px;
+  }
+}
+
+/* Focused first-product guide */
+.cps-number {
+  font-family: var(--font-heading, serif);
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: rgba(26, 78, 40, 0.24);
+  line-height: 1;
+}
+
+.cps-main-cta-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 32px;
+}
+
+.cps-main-cta {
+  min-height: 52px;
+  padding: 14px 30px;
+  border: none;
+  border-radius: var(--radius-full, 9999px);
+  background: var(--brand-primary, #1A4E28);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  box-shadow: 0 10px 24px rgba(26, 78, 40, 0.18);
+}
+
+.cps-main-cta:hover {
+  background: var(--color-primary-dark, #12391d);
+  transform: translateY(-2px);
+  box-shadow: 0 14px 30px rgba(26, 78, 40, 0.24);
+}
+
+@media (max-width: 640px) {
+  .cps-main-cta {
+    width: 100%;
+  }
+}

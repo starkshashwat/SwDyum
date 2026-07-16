@@ -1,143 +1,108 @@
-/* ── PDP Process Timeline — editorial ────────────────────────────────────── */
+/* ── PDP Process — image card grid ────────────────────────────────────── */
 .pdp-process-section {
   padding: var(--pdp-section-y, 6rem) var(--space-6);
   background: var(--color-surface);
   overflow: hidden;
 }
 
-.timeline-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  position: relative;
+/* ─── 3×2 Image Card Grid ─────────────────────────────────────────── */
+.process-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
   max-width: 1160px;
   margin: 0 auto;
-  padding: 0 var(--space-2);
 }
 
-.timeline-line {
-  position: absolute;
-  top: 38px;
-  left: 6%;
-  right: 6%;
-  width: auto;
-  height: 2px;
-  background: linear-gradient(90deg, var(--color-border), var(--color-primary-light), var(--color-border));
-  z-index: 1;
+.process-card {
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  background: var(--color-bg-warm);
+  border: 1px solid var(--color-border);
+  transition: transform var(--motion-base) var(--motion-ease),
+              box-shadow var(--motion-base) var(--motion-ease);
 }
 
-.timeline-item {
+.process-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-lg);
+}
+
+.process-card-img {
   position: relative;
-  z-index: 2;
-  text-align: center;
-  flex: 1;
-  padding: 0 10px;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
 }
 
-.timeline-icon {
-  position: relative;
-  width: 76px;
-  height: 76px;
-  margin: 0 auto var(--space-4);
-  background: var(--color-surface);
-  border: 1.5px solid var(--color-primary);
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: var(--shadow-sm);
-  transition: transform var(--motion-base), box-shadow var(--motion-base);
+.process-card-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
 }
 
-.timeline-icon .pdp-icon {
-  color: var(--color-primary);
+.process-card:hover .process-card-img img {
+  transform: scale(1.06);
 }
 
-.timeline-icon svg {
-  width: 30px;
-  height: 30px;
-}
-
-.timeline-step-num {
+.process-step-badge {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 24px;
-  height: 24px;
+  top: var(--space-3);
+  left: var(--space-3);
+  width: 32px;
+  height: 32px;
   border-radius: var(--radius-full);
   background: var(--color-primary);
   color: var(--white);
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
-  border: 2px solid var(--color-surface);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
 }
 
-.timeline-item:hover .timeline-icon {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
+.process-card-body {
+  padding: var(--space-4) var(--space-5);
 }
 
-.timeline-content h4 {
+.process-card-body h4 {
   font-size: 1rem;
   font-weight: 700;
   color: var(--color-ink);
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
 }
 
-.timeline-content p {
+.process-card-body p {
   font-size: 0.84rem;
   color: var(--color-muted);
   line-height: 1.5;
 }
 
+/* ─── Responsive ──────────────────────────────────────────────────── */
 @media (max-width: 900px) {
-  .timeline-container {
-    flex-direction: column;
-    align-items: flex-start;
-    padding-left: 40px;
-    max-width: 480px;
+  .process-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
+  }
+}
+
+@media (max-width: 520px) {
+  .process-grid {
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
   }
 
-  .timeline-line {
-    top: 0;
-    bottom: 0;
-    left: 38px;
-    right: auto;
-    width: 2px;
-    height: auto;
-    background: linear-gradient(180deg, var(--color-border), var(--color-primary-light), var(--color-border));
-  }
-
-  .timeline-item {
-    display: flex;
-    align-items: center;
-    text-align: left;
-    margin-bottom: var(--space-6);
-    padding: 0;
-  }
-
-  .timeline-item:last-child {
-    margin-bottom: 0;
-  }
-
-  .timeline-icon {
-    width: 60px;
-    height: 60px;
-    margin: 0 var(--space-5) 0 -22px;
-    flex-shrink: 0;
-  }
-
-  .timeline-icon svg {
-    width: 24px;
-    height: 24px;
+  .process-card-img {
+    aspect-ratio: 16 / 9;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .timeline-icon {
+  .process-card {
+    transition: none;
+  }
+  .process-card-img img {
     transition: none;
   }
 }

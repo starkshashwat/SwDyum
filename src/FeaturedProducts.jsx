@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { fetchProducts } from './data/products';
 import './FeaturedProducts.css';
@@ -31,6 +31,30 @@ const baseTabs = [
   { key: 'bestseller', label: 'Bestseller', icon: tabIcons.bestseller }
 ];
 
+/* ─── Static product metadata for choices ───────────────────────────────── */
+const PRODUCT_METADATA = {
+  'mango-pickle': {
+    tasteDesc: 'Sharp, tangy raw Langda mango pickle, sun-cured in cold-pressed mustard oil, made in small batches in Ara, Bihar.',
+    spice: 'Medium',
+    servings: '250g · Serves 4–6',
+  },
+  'garlic-pickle': {
+    tasteDesc: 'Earthy mountain garlic cloves in spicy mustard oil.',
+    spice: 'Hot',
+    servings: '250g · Serves 4–6',
+  },
+  'lemon-pickle': {
+    tasteDesc: 'Oil-free sun-cured citrus with carom seeds.',
+    spice: 'Mild',
+    servings: '250g · Serves 4–6',
+  },
+  'mixed-pickle': {
+    tasteDesc: 'Traditional farmhouse mix of solar matured vegetables.',
+    spice: 'Medium',
+    servings: '250g · Serves 4–6',
+  }
+};
+
 const cardVariants = {
   hidden: { opacity: 0, y: 24 },
   visible: (i) => ({
@@ -41,47 +65,16 @@ const cardVariants = {
   exit: { opacity: 0, y: -12, transition: { duration: 0.2 } },
 };
 
-/* ─── Star rating component ──────────────────────────────────────────────── */
-function Stars({ rating, count }) {
-  const full = Math.floor(rating);
-  const hasHalf = rating - full >= 0.3;
-  return (
-    <div className="fp-stars-row">
-      <div className="fp-stars">
-        {[...Array(5)].map((_, idx) => (
-          <svg
-            key={idx}
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill={idx < full ? 'var(--color-accent)' : (idx === full && hasHalf ? 'url(#half-star)' : 'none')}
-            stroke="var(--color-accent)"
-            strokeWidth="1.5"
-            aria-hidden="true"
-          >
-            {idx === full && hasHalf && (
-              <defs>
-                <linearGradient id="half-star">
-                  <stop offset="50%" stopColor="var(--color-accent)" />
-                  <stop offset="50%" stopColor="transparent" />
-                </linearGradient>
-              </defs>
-            )}
-            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-          </svg>
-        ))}
-      </div>
-      <span className="fp-review-count">{count} reviews</span>
-    </div>
-  );
-}
-
 /* ─── Main Component ─────────────────────────────────────────────────────── */
 function FeaturedProducts({ onNavigate, addToCart }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('bestseller');
   const [dynamicCategories, setDynamicCategories] = useState(baseTabs);
+  const [selectedWeights, setSelectedWeights] = useState({});
+  const [expandedDescs, setExpandedDescs] = useState({});
+  const [overflowMap, setOverflowMap] = useState({});
+  const descRefs = useRef({});
 
   useEffect(() => {
     const loadData = async () => {
@@ -91,16 +84,11 @@ function FeaturedProducts({ onNavigate, addToCart }) {
       const uniqueCats = Array.from(new Set(data.map(p => p.category))).filter(c => c && c !== 'Uncategorized');
 
       const newTabs = [...baseTabs];
-
       uniqueCats.forEach(cat => {
         let icon = tabIcons.pickles;
         const lowerCat = cat.toLowerCase();
         if (lowerCat.includes('spices') || lowerCat.includes('powder')) {
           icon = tabIcons.spices;
-        } else if (lowerCat.includes('box') || lowerCat.includes('combo')) {
-          icon = tabIcons.spices; // fallback icon
-        } else if (lowerCat.includes('murabba') || lowerCat.includes('sweet')) {
-          icon = <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 3v9" /></svg>;
         }
         newTabs.push({ key: cat, label: cat, icon: icon });
       });
@@ -113,29 +101,40 @@ function FeaturedProducts({ onNavigate, addToCart }) {
   }, []);
 
   /* Filter products by category tab */
-  const filtered = (() => {
+  const filtered = useMemo(() => {
     if (activeTab === 'bestseller') return products.filter(p => p.isBestseller);
     if (activeTab === 'all') return products;
     return products.filter(p =>
       p.category && p.category.toLowerCase().includes(activeTab.toLowerCase())
     );
-  })();
+  }, [products, activeTab]);
 
-  // Show up to 4 products
-  const displayProducts = filtered.slice(0, 4);
+  const displayProducts = filtered;
+
+  /* Detect which descriptions overflow their 2-line clamp so the
+     "Read more" toggle only appears when it's actually needed. */
+  useEffect(() => {
+    const newOverflowMap = {};
+    Object.entries(descRefs.current).forEach(([id, el]) => {
+      if (el) {
+        newOverflowMap[id] = el.scrollHeight > el.clientHeight + 1;
+      }
+    });
+    setOverflowMap(newOverflowMap);
+  }, [displayProducts]);
 
   const handleQuickAdd = (e, product) => {
     e.stopPropagation();
     if (addToCart) {
       const firstWeight = product.prices ? Object.keys(product.prices)[0] : '250g';
-      addToCart(product, firstWeight, 1);
+      const activeSize = selectedWeights[product.id] || firstWeight;
+      addToCart(product, activeSize, 1);
     }
   };
 
-  // Compute discount percentage
-  const getDiscount = (mrp, price) => {
-    if (!mrp || mrp <= price) return null;
-    return Math.round(((mrp - price) / mrp) * 100);
+  const toggleDescription = (e, productId) => {
+    e.stopPropagation();
+    setExpandedDescs(prev => ({ ...prev, [productId]: !prev[productId] }));
   };
 
   return (
@@ -143,8 +142,8 @@ function FeaturedProducts({ onNavigate, addToCart }) {
       <div className="fp-container">
         {/* ─── Header ─── */}
         <div className="fp-header">
-          <h2 className="fp-title">Featured Products</h2>
-          <p className="fp-subtitle">Shop By Categories</p>
+          <h2 className="fp-title">Start With Our Bestsellers</h2>
+          <p className="fp-subtitle">Traditional Bihari flavours, packed fresh in small batches.</p>
         </div>
 
         {/* ─── Category Tabs ─── */}
@@ -186,10 +185,18 @@ function FeaturedProducts({ onNavigate, addToCart }) {
               </motion.p>
             ) : (
               displayProducts.map((product, i) => {
-                const price = product.base_price || (product.prices ? Object.values(product.prices)[0] : 0);
-                const mrp = Math.round(price * 1.35); // Simulated MRP (35% above sale price)
-                const discount = getDiscount(mrp, price);
                 const firstWeight = product.prices ? Object.keys(product.prices)[0] : '250g';
+                const activeSize = selectedWeights[product.id] || firstWeight;
+                const price = product.prices ? product.prices[activeSize] : (product.base_price || 0);
+                const mrp = Math.round(price * 1.35); // Simulated MRP (35% above sale price)
+                const meta = PRODUCT_METADATA[product.slug] || {
+                  tasteDesc: product.description || 'Traditional Bihari style matured recipe.',
+                  spice: 'Medium',
+                  servings: '250g · Serves 4–6'
+                };
+
+                // Servings estimate matches active selected weight
+                const servingsLabel = activeSize === '500g' ? '500g · Serves 8–12' : activeSize === '1Kg' ? '1Kg · Serves 16–24' : '250g · Serves 4–6';
 
                 return (
                   <motion.div
@@ -206,40 +213,88 @@ function FeaturedProducts({ onNavigate, addToCart }) {
                     onKeyDown={(e) => { if (e.key === 'Enter') onNavigate && onNavigate(`product-${product.slug}`); }}
                     aria-label={`View ${product.name}`}
                   >
-                    {/* Sale Badge removed */}
-
-                    {/* Product Image */}
+                    {/* 1. Product Image */}
                     <div className="fp-card-img-wrap">
                       <img
-                        src={product.image}
+                        src={product.image || '/prod_mango.webp'}
                         alt={product.name}
                         className="fp-card-img"
                         loading="lazy"
                       />
-                      {/* Weight badge */}
-                      <span className="fp-weight-badge">{firstWeight}</span>
                     </div>
 
-                    {/* Product Info */}
+                    {/* Product Info container */}
                     <div className="fp-card-info">
-                      <Stars rating={product.rating || 4.8} count={product.reviewsCount || 42} />
+                      {/* 2. Bestseller badge, only for genuine bestsellers */}
+                      {product.isBestseller && (
+                        <span className="fp-bestseller-badge">⭐ Bestseller</span>
+                      )}
 
+                      {/* 3. Product Name */}
                       <h3 className="fp-product-name">{product.name}</h3>
 
+                      {/* 4. Synced short description — clamped with Read more/less toggle */}
+                      <p
+                        className={`fp-taste-desc ${expandedDescs[product.id] ? 'fp-taste-desc--expanded' : ''}`}
+                        ref={(el) => { if (el) descRefs.current[product.id] = el; }}
+                      >
+                        {product.description || meta.tasteDesc}
+                      </p>
+                      {overflowMap[product.id] && (
+                        <button
+                          type="button"
+                          className="fp-read-more-btn"
+                          onClick={(e) => toggleDescription(e, product.id)}
+                        >
+                          {expandedDescs[product.id] ? 'Read less' : 'Read more'}
+                        </button>
+                      )}
+
+                      {/* 5. Rating + review count, shown only when real approved reviews exist */}
+                      {product.rating > 0 && product.reviewsCount > 0 && (
+                        <div className="fp-rating-row">
+                          <div className="flex gap-0.5" style={{ display: 'flex', gap: '2px' }}>
+                            {[1, 2, 3, 4, 5].map(s => (
+                              <svg key={s} viewBox="0 0 20 20" fill={s <= Math.round(product.rating) ? '#f59e0b' : '#e5e7eb'} stroke={s <= Math.round(product.rating) ? '#f59e0b' : '#d1d5db'} strokeWidth="1" width="13" height="13">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                              </svg>
+                            ))}
+                          </div>
+                          <span className="rating-val">{product.rating}</span>
+                          <span className="reviews-count">({product.reviewsCount.toLocaleString('en-IN')} reviews)</span>
+                        </div>
+                      )}
+
+                      {/* Weight Selector Button Grid */}
+                      {product.prices && Object.keys(product.prices).length > 1 && (
+                        <div className="fp-card-size-selector" onClick={(e) => e.stopPropagation()}>
+                          {Object.keys(product.prices).map(size => (
+                            <button
+                              key={size}
+                              type="button"
+                              className={`fp-card-size-btn ${activeSize === size ? 'active' : ''}`}
+                              onClick={() => setSelectedWeights(prev => ({ ...prev, [product.id]: size }))}
+                            >
+                              {size}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* 8. Original price, sale price, saving */}
                       <div className="fp-price-row">
-                        <span className="fp-mrp">₹{mrp.toLocaleString('en-IN')}</span>
-                        <span className="fp-sale-price">₹{price.toLocaleString('en-IN')}/-</span>
-                        {discount && (
-                          <span className="fp-discount-badge">-{discount}% OFF</span>
-                        )}
+                        <span className="fp-mrp">₹{mrp}</span>
+                        <span className="fp-sale-price">₹{price}</span>
+                        <span className="fp-save-amount">· Save ₹{mrp - price}</span>
                       </div>
 
+                      {/* 9. Add to Cart button */}
                       <button
                         className="fp-add-to-cart-btn"
                         onClick={(e) => handleQuickAdd(e, product)}
                         aria-label={`Add ${product.name} to cart`}
                       >
-                        ADD TO CART
+                        Add to Cart
                       </button>
                     </div>
                   </motion.div>
@@ -252,10 +307,11 @@ function FeaturedProducts({ onNavigate, addToCart }) {
         {/* ─── View More ─── */}
         <div className="fp-view-more-wrap">
           <button
-            className="fp-view-more-btn"
+            className="fp-view-more-btn btn-primary"
             onClick={() => onNavigate && onNavigate('shop')}
           >
-            View More
+            View All Products
+            <svg className="btn-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M5 12h14M12 5l7 7-7 7" /></svg>
           </button>
         </div>
       </div>

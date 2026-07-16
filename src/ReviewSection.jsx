@@ -96,35 +96,50 @@ function ReviewSection({ productId }) {
         <h2 className="pdp-heading">Customer Reviews</h2>
       </div>
 
-      <div className="reviews-summary-flex">
-        <div className="rating-big">
-          <span className="avg-num">{averageRating}</span>
-          <div className="stars-wrap">{renderStars(Math.round(averageRating))}</div>
-          <span className="review-count">Based on {reviews.length} review{reviews.length !== 1 ? 's' : ''}</span>
-        </div>
+      {reviews.length > 0 ? (
+        <div className="reviews-summary-flex">
+          <div className="rating-big">
+            <span className="avg-num">{averageRating}</span>
+            <div className="stars-wrap">{renderStars(Math.round(averageRating))}</div>
+            <span className="review-count">Based on {reviews.length} review{reviews.length !== 1 ? 's' : ''}</span>
+          </div>
         
-        <div className="rating-progress-bars">
-          {[5, 4, 3, 2, 1].map(star => {
-            const count = reviews.filter(r => Math.round(r.rating) === star).length;
-            const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
-            return (
-              <div className="progress-row" key={star}>
-                <span className="star-label">{'★'.repeat(star)}{'☆'.repeat(5 - star)}</span>
-                <div className="progress-track">
-                  <div className="progress-fill" style={{ width: `${pct}%` }}></div>
+          <div className="rating-progress-bars">
+            {[5, 4, 3, 2, 1].map(star => {
+              const count = reviews.filter(r => Math.round(r.rating) === star).length;
+              const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+              return (
+                <div className="progress-row" key={star}>
+                  <span className="star-label">{'★'.repeat(star)}{'☆'.repeat(5 - star)}</span>
+                  <div className="progress-track">
+                    <div className="progress-fill" style={{ width: `${pct}%` }}></div>
+                  </div>
+                  <span className="pct-label">{Math.round(pct)}%</span>
                 </div>
-                <span className="pct-label">{Math.round(pct)}%</span>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
 
-        <div className="review-actions">
+          <div className="review-actions">
+            <button className="write-review-btn" onClick={() => setShowForm(!showForm)}>
+              {showForm ? 'Cancel' : 'Write a Review'}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="reviews-empty-state">
+          <div className="reviews-empty-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" width="40" height="40">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+            </svg>
+          </div>
+          <h3 className="reviews-empty-title">Be the first to share your experience</h3>
+          <p className="reviews-empty-desc">Tried this pickle? We'd love to hear what you think.</p>
           <button className="write-review-btn" onClick={() => setShowForm(!showForm)}>
-            {showForm ? 'Cancel' : 'Write a Review'}
+            {showForm ? 'Cancel' : '✍️ Write a Review'}
           </button>
         </div>
-      </div>
+      )}
 
       {showForm && (
         <form className="review-form" onSubmit={handleSubmit}>

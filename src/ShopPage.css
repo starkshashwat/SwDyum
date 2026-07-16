@@ -160,7 +160,7 @@
 }
 
 .sp-search-input {
-  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-9);
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-10);
   border: 1.5px solid var(--color-border);
   border-radius: var(--radius-full);
   font-family: var(--font-body);
@@ -792,7 +792,7 @@
 
   .sp-search-input {
     font-size: 0.78rem;
-    padding: 8px 12px 8px 32px;
+    padding: 8px 12px 8px 38px;
   }
 
   .sp-sort-select {

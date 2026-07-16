@@ -73,13 +73,13 @@ function TermsPage({ onNavigate }) {
         </div>
 
         <div className="legal-section">
-          <h2>6. Returns and Refunds</h2>
+          <h2>6. Food Product Policy</h2>
           <ul>
-            <li>Our return and refund policy is governed by the policy published on our website.</li>
-            <li>Return eligibility conditions will be specified in the Return Policy.</li>
-            <li>Refunds, if approved, will be processed within 2 business days.</li>
-            <li>Certain items may not be eligible for return due to hygiene or safety reasons.</li>
-            <li>We reserve the right to refuse returns that do not meet our policy conditions.</li>
+            <li>All Swadyum products sold on this website are food items and are non-returnable once delivered.</li>
+            <li>We do not accept returns, change-of-mind exchanges, or opened-product refund requests.</li>
+            <li>If you receive a damaged, leaking, defective, or incorrect order, contact us within 24 hours of delivery with clear photos and your order details.</li>
+            <li>After review, we may offer a replacement, store credit, or refund at our sole discretion where the issue is verified.</li>
+            <li>Orders may be cancelled only before dispatch.</li>
           </ul>
         </div>
 

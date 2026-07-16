@@ -1,0 +1,61 @@
+.razorpay-transition-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    border-radius: inherit;
+}
+
+.razorpay-transition-card {
+    background: var(--white);
+    border-radius: var(--radius-xl);
+    padding: var(--space-8) var(--space-10);
+    text-align: center;
+    box-shadow: var(--shadow-lg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-4);
+    max-width: 280px;
+    width: 90%;
+}
+
+.razorpay-transition-icon {
+    width: 56px;
+    height: 56px;
+    background: rgba(10, 90, 50, 0.08);
+    border-radius: var(--radius-full);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.razorpay-transition-title {
+    font-size: var(--text-base);
+    font-weight: 700;
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    margin: 0;
+}
+
+.razorpay-transition-dots {
+    display: flex;
+    gap: var(--space-2);
+}
+
+.razorpay-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--color-primary);
+    border-radius: var(--radius-full);
+}
+
+.razorpay-transition-sub {
+    font-size: var(--text-xs);
+    color: var(--color-muted);
+    margin: 0;
+}

@@ -1,73 +1,127 @@
+import { useMemo } from 'react';
+
 export default function PdpIngredients({ product }) {
-  // Use product-specific config if available, otherwise fallback to the Mango Pickle design data
-  const HERO_INGREDIENTS = product?.pdp_config?.hero_ingredients || [
-    ['Langda Aam', 'आम', 'khatta + Vitamin C'],
-    ['Kachi Ghani Sarson Tel', 'सरसों तेल', 'cold-pressed purity'],
-    ['Saunf', 'सौंफ', 'digestion ✓'],
-    ['Mangraila (Kalonji)', 'मंगरैला', 'soul of the achaar'],
-    ['Methi', 'मेथी', 'achaari depth'],
-    ['Hing', 'हींग', 'the achaar khushboo'],
+  // Hero ingredient cards with unique generated images
+  const HERO_INGREDIENTS = product?.pdp_config?.hero_ingredients_v2 || [
+    { name: 'Langda Aam', note: 'Raw green mango', img: '/ing_mango.png' },
+    { name: 'Kachi Ghani Sarson Tel', note: 'Cold-pressed mustard oil', img: '/ing_mustard_oil.png' },
+    { name: 'Saunf', note: 'Fennel seeds', img: '/ing_fennel.png' },
+    { name: 'Mangraila (Kalonji)', note: 'Nigella seeds', img: '/ing_nigella.png' },
+    { name: 'Methi', note: 'Fenugreek seeds', img: '/ing_fenugreek.png' },
+    { name: 'Hing', note: 'Asafoetida', img: '/ing_asafoetida.png' },
   ];
 
-  const INGREDIENTS = product?.pdp_config?.detailed_ingredients || product?.pdp_config?.pure_ingredients || [
-    ['आम', 'Raw Langda Mango', "Purvanchal's pride, plucked green off the tree — perfect khatta + Vitamin C"],
-    ['सरसों तेल', 'Mustard Oil', 'Cold-pressed Kachi Ghani; bold pungency + natural preservation'],
-    ['सरसों पाउडर', 'Mustard powder', 'The classic achaari sharpness'],
-    ['सौंफ', 'Fennel seeds', 'Sweet, aromatic; aids digestion'],
-    ['मेथी पाउडर', 'Fenugreek powder', 'Signature achaari depth that balances the tang'],
-    ['मंगरैला (कलौंजी)', 'Nigella seeds', 'Earthy aroma — the soul of the achaar'],
-    ['अजवाइन', 'Carom seeds', 'Warm & digestive; cuts through the oil'],
-    ['हींग', 'Asafoetida', 'That unmistakable achaar khushboo + digestion'],
-    ['धनिया पाउडर', 'Coriander powder', 'Mellow, earthy body'],
-    ['लाल मिर्ची पाउडर', 'Red chilli powder', 'Deep colour + measured heat'],
-    ['हल्दी पाउडर', 'Turmeric', 'Golden hue + everyday immunity'],
-    ['नमक', 'Salt', 'Seasoning + natural preservation'],
-    ['सिरका', 'Vinegar', 'A tangy zing that also keeps every jar fresh longer'],
-  ];
+  // Resolve and clean the ingredient list from product config (removing Hindi prefixes if any)
+  const INGREDIENTS = useMemo(() => {
+    const rawList = product?.pdp_config?.tabs?.ingredients_table || product?.pdp_config?.detailed_ingredients;
+    if (Array.isArray(rawList) && rawList.length > 0) {
+      return rawList.map(item => {
+        if (typeof item === 'object' && item !== null) {
+          const name = item.name || item.english || '';
+          const why = item.reason || item.why || '';
+          // Remove Hindi part if any (split by — or - or :)
+          const parts = name.split(/[—\-:]/);
+          const englishName = parts.length > 1 ? parts[parts.length - 1].trim() : name.trim();
+          return { english: englishName, why };
+        }
+        return { english: String(item), why: '' };
+      });
+    }
 
-  const productImg = product?.image || '/product_image.png';
+    // Default detailed fallback
+    return [
+      { english: 'Raw Langda Mango', why: 'Sourced from Purvanchal — sharp, tangy base' },
+      { english: 'Mustard Oil', why: 'Cold-pressed Kachi Ghani — bold pungency & natural preservation' },
+      { english: 'Mustard Powder', why: 'Classic achaari sharpness' },
+      { english: 'Fennel Seeds', why: 'Sweet, aromatic warmth' },
+      { english: 'Fenugreek Powder', why: 'Signature achaari depth that balances tang' },
+      { english: 'Nigella Seeds', why: 'Earthy aroma — the soul of the achaar' },
+      { english: 'Carom Seeds', why: 'Warm, peppery bite' },
+      { english: 'Asafoetida', why: 'That unmistakable achaar khushboo' },
+      { english: 'Coriander Powder', why: 'Mellow, earthy body' },
+      { english: 'Red Chilli Powder', why: 'Deep colour + measured heat' },
+      { english: 'Turmeric', why: 'Golden hue & earthiness' },
+      { english: 'Salt', why: 'Seasoning & natural preservation' },
+      { english: 'Vinegar', why: 'Tangy zing, extends freshness' },
+    ];
+  }, [product]);
+
+  const gridSpanClass = (index) => {
+    if (index === 0) return 'col-span-2 min-h-80 md:col-span-6 md:row-span-2';
+    if (index === 1) return 'md:col-span-6';
+    if (index < 4) return 'md:col-span-3';
+    return 'md:col-span-4';
+  };
+
+  const BORDER_COLORS = [
+    '#c4862b', '#8b3a1a', '#5c7a3e', '#6b4f2a', '#a0522d',
+    '#c8860a', '#5c7a3e', '#6b4f2a', '#8b3a1a', '#c4862b',
+    '#c8860a', '#7a7a6e', '#5c7a3e',
+  ];
 
   return (
-    <section className="bg-[#f7f1e6] px-6 py-16 md:px-12 md:py-24 font-sans text-[#1a1a1a]" style={{ fontFamily: "'Inter', 'Helvetica Neue', Arial, sans-serif" }}>
+    <section className="px-6 py-16 md:px-12 md:py-24 font-sans text-[#1a1a1a]" style={{ fontFamily: "'Satoshi', 'Segoe UI', sans-serif" }}>
       <div className="mx-auto max-w-6xl">
         <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#8b3a1a]">Pure Ingredients</p>
+
+        {/* Hero ingredient grid — unique images */}
         <div className="mt-5 grid grid-cols-2 gap-3 md:grid-cols-12 md:grid-rows-3">
-          {HERO_INGREDIENTS.map(([name, hindi, note], index) => (
-            <article key={name} className={`group relative min-h-48 overflow-hidden rounded-2xl bg-[#1c1208] p-4 text-white shadow-sm transition duration-200 hover:-translate-y-1.5 hover:shadow-xl ${index === 0 ? 'col-span-2 min-h-80 md:col-span-6 md:row-span-2' : index === 1 ? 'md:col-span-6' : index < 4 ? 'md:col-span-3' : 'md:col-span-4'}`}>
-              <img src={product?.images?.[index] || productImg} alt={name} className="absolute inset-0 h-full w-full object-cover opacity-60 transition duration-500 group-hover:scale-105" />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#1c1208] via-[#1c1208]/35 to-transparent" />
-              <div className="relative flex h-full min-h-40 flex-col justify-between">
-                <p className="text-[11px] font-medium tracking-[0.08em] text-white/60">{hindi}</p>
-                <div className="flex items-end justify-between gap-3">
-                  <h3 className="max-w-[11rem] text-xl font-bold leading-tight md:text-2xl">{name}</h3>
-                  <span className="max-w-[9rem] rounded-full border border-white/20 bg-white/[0.18] px-2.5 py-1.5 text-right text-[10px] font-medium leading-4 text-white backdrop-blur-md transition-all duration-200 group-hover:max-w-[12rem]">{note}</span>
+          {HERO_INGREDIENTS.map((item, index) => {
+            const name = typeof item === 'object' ? item.name : (Array.isArray(item) ? item[0] : item);
+            const note = typeof item === 'object' ? item.note : (Array.isArray(item) ? item[2] : '');
+            const img = typeof item === 'object' ? item.img : '/ing_mango.png';
+
+            return (
+              <article
+                key={`${name}-${index}`}
+                className={`group relative min-h-48 overflow-hidden rounded-2xl bg-[#faf5ed] shadow-sm transition duration-200 hover:-translate-y-1.5 hover:shadow-xl ${gridSpanClass(index)}`}
+              >
+                <img
+                  src={img}
+                  alt={name}
+                  className="absolute inset-0 h-full w-full object-cover opacity-80 transition duration-500 group-hover:scale-105"
+                />
+                <div className="relative flex h-full min-h-40 flex-col justify-between p-4">
+                  <span />
+                  <div className="flex items-end justify-between gap-3">
+                    <h3 className="max-w-[11rem] text-xl font-bold leading-tight text-white md:text-2xl drop-shadow-md">
+                      {name}
+                    </h3>
+                  </div>
                 </div>
-              </div>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
 
-        <div className="mt-14 overflow-hidden border-y border-[#d8cfc0]">
-          <div className="bg-[#f7f1e6] px-5 py-6 md:px-7">
-            <p className="text-3xl font-semibold tracking-[-0.035em] text-[#1c1208]">सामग्री</p>
-            <p className="mt-1 text-[11px] font-bold uppercase tracking-[0.16em] text-[#8b3a1a]">Ingredients</p>
-            <p className="mt-4 text-sm font-medium text-[#4d4437]">{INGREDIENTS.length} Pure Ingredients. Zero shortcuts.</p>
+        {/* Full ingredient table — clean, factual */}
+        <div className="mt-14 overflow-hidden rounded-2xl border border-[var(--color-border)]">
+          <div className="flex w-full items-center justify-between bg-[var(--color-bg-warm)] px-5 py-6 text-left md:px-7">
+            <div>
+              <p className="text-2xl font-semibold tracking-[-0.035em] text-[#1c1208]">Ingredients</p>
+              <p className="mt-2 text-sm font-medium text-[#4d4437]">{INGREDIENTS.length} Pure Ingredients. Zero shortcuts.</p>
+            </div>
           </div>
-          <div>
-            {INGREDIENTS.map((item, index) => {
-              const hindi = Array.isArray(item) ? item[0] : '';
-              const english = Array.isArray(item) ? item[1] : (item.name || item);
-              const why = Array.isArray(item) ? item[2] : (item.description || '');
+          {INGREDIENTS.map((item, index) => {
+            const english = typeof item === 'object' && !Array.isArray(item) ? item.english : (Array.isArray(item) ? item[1] || item[0] : String(item));
+            const why = typeof item === 'object' && !Array.isArray(item) ? item.why : (Array.isArray(item) ? item[2] || '' : '');
 
-              return (
-                <div key={english} className={`group grid gap-2 border-l-[3px] px-5 py-4 text-sm transition-colors hover:bg-[#ede4d4] md:grid-cols-[1fr_0.9fr_1.35fr] md:items-center md:gap-5 md:px-7 ${index % 2 === 0 ? 'bg-[#fafaf7]' : 'bg-[#f5f0e8]'}`} style={{ borderLeftColor: ['#c4862b', '#8b3a1a', '#8b3a1a', '#5c7a3e', '#6b4f2a', '#6b4f2a', '#a0522d', '#6b4f2a', '#5c7a3e', '#c8860a', '#c8860a', '#7a7a6e', '#c4862b'][index % 13] }}>
-                  <p className="flex items-center gap-2 font-medium text-[#7a5123]"><span className="flex h-4 w-4 items-center justify-center rounded-full bg-[#e8dbc5] text-[9px]">•</span>{hindi}</p>
+            return (
+              <details
+                key={`${english}-${index}`}
+                className={`group border-l-[3px] px-5 py-4 text-sm transition-colors hover:bg-[var(--cream-200)] md:px-7 ${index % 2 === 0 ? 'bg-[var(--color-surface)]' : 'bg-[var(--color-bg)]'}`}
+                style={{ borderLeftColor: BORDER_COLORS[index % BORDER_COLORS.length] }}
+              >
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-3 md:gap-5">
                   <p className="font-semibold text-[#1c1208]">{english}</p>
-                  <p className="text-sm leading-5 text-[#6e665c] transition-transform group-hover:translate-x-1">{why}</p>
-                </div>
-              );
-            })}
-          </div>
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4 flex-shrink-0 text-[#4d4437] transition-transform group-open:rotate-180">
+                    <path d="M5 7l5 5 5-5" />
+                  </svg>
+                </summary>
+                <p className="mt-2 text-sm leading-5 text-[#6e665c] transition-transform group-hover:translate-x-1">{why}</p>
+              </details>
+            );
+          })}
         </div>
       </div>
     </section>
