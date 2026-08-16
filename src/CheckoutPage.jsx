@@ -25,6 +25,23 @@ const loadRazorpayScript = () =>
 
 // Retry the script load a couple of times — flaky networks shouldn't silently
 // kill checkout. Resolves true once window.Razorpay is available.
+
+/**
+ * supabase.functions.invoke returns a generic FunctionsHttpError message
+ * ("Edge Function returned a non-2xx status code") on 4xx/5xx. The real
+ * message lives in error.context (the raw Response). Parse it so users and
+ * logs see the actual failure reason.
+ */
+const extractEdgeFunctionError = async (invokeError, fallback) => {
+    try {
+        if (invokeError?.context?.json) {
+            const body = await invokeError.context.json();
+            if (body?.error) return body.error;
+        }
+    } catch { /* context already consumed or not JSON */ }
+    return invokeError?.message || fallback;
+};
+
 const ensureRazorpayScript = async (retries = 2) => {
   for (let attempt = 0; attempt <= retries; attempt++) {
     const ok = await loadRazorpayScript();
@@ -212,7 +229,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
       // supabase.functions.invoke returns an `error` only for transport-level
       // failures. A 4xx/5xx from the function still arrives as `data` with an
       // `error` field, so check both and surface the real message.
-      if (error) throw new Error(error.message || 'Payment service is unavailable.');
+      if (error) throw new Error(await extractEdgeFunctionError(error, 'Payment service is unavailable.'));
       if (data?.error) throw new Error(data.error);
       if (!data?.order?.id || !data?.order_id) throw new Error('Payment order could not be created.');
 

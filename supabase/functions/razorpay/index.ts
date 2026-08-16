@@ -121,7 +121,13 @@ async function createRazorpayOrder(amount: number, receipt: string) {
   if (!response.ok) {
     const errorText = await response.text();
     console.error('Razorpay Error:', errorText);
-    throw new Error(`Failed to create order: ${response.statusText}`);
+    // Surface Razorpay's own reason (e.g. "Authentication failed" on bad
+    // API keys) instead of a bare status text like "Unauthorized".
+    let reason = response.statusText;
+    try {
+      reason = (await Promise.resolve(JSON.parse(errorText)))?.error?.description || reason;
+    } catch { /* non-JSON body */ }
+    throw new Error(`Razorpay order creation failed (${response.status}): ${reason}`);
   }
 
   const orderData = await response.json();

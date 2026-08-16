@@ -3,6 +3,23 @@ import { supabase } from '../../../supabaseClient';
 
 const RAZORPAY_SCRIPT_URL = 'https://checkout.razorpay.com/v1/checkout.js';
 
+/**
+ * supabase.functions.invoke returns a generic FunctionsHttpError message
+ * ("Edge Function returned a non-2xx status code") on 4xx/5xx. The real
+ * message lives in error.context (the raw Response). Parse it so users and
+ * logs see the actual failure reason.
+ */
+const extractEdgeFunctionError = async (invokeError, fallback) => {
+    try {
+        if (invokeError?.context?.json) {
+            const body = await invokeError.context.json();
+            if (body?.error) return body.error;
+        }
+    } catch { /* context already consumed or not JSON */ }
+    return invokeError?.message || fallback;
+};
+
+
 const loadRazorpayScript = () =>
     new Promise((resolve) => {
         if (window.Razorpay) { resolve(true); return; }
@@ -97,7 +114,7 @@ export default function useRazorpayCheckout({
                 },
             });
 
-            if (invokeError) throw new Error(invokeError.message || 'Payment service unavailable.');
+            if (invokeError) throw new Error(await extractEdgeFunctionError(invokeError, 'Payment service unavailable.'));
             if (data?.error) throw new Error(data.error);
             if (!data?.order?.id || !data?.order_id) throw new Error('Payment order could not be created.');
 
