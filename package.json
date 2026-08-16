@@ -32,5 +32,11 @@
     "tailwindcss": "^4.3.2",
     "vite": "^8.0.12",
     "wrangler": "^4.68.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild",
+      "workerd"
+    ]
   }
 }
