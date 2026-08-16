@@ -17,14 +17,18 @@ import { requireAdmin } from '../middleware/requireAdmin.js';
 
 const router = express.Router();
 
-// Internal/Webhook Events (could be secured further with api-keys)
-router.post('/events', trackEvent);
-
-// Public Cart Sync
-router.post('/cart/sync', syncCart);
-
-// Admin routes
+// All routes require an authenticated admin/editor. The previously public
+// /events and /cart/sync routes had no legitimate callers (the storefront
+// writes abandoned_carts directly) and allowed anyone to trigger
+// service-role WhatsApp/email sends and coupon generation.
 router.use(requireAuth, requireAdmin);
+
+// Static routes MUST be registered before /:id or Express matches
+// "config"/"data" as an automation id and 404s them.
+router.get('/config/templates', listTemplates);
+router.post('/config/templates', saveTemplate);
+router.get('/data/runs', listRuns);
+router.get('/data/logs', listCommunicationLogs);
 
 // Core Automation CRUD
 router.get('/', listAutomations);
@@ -32,13 +36,7 @@ router.post('/', createAutomation);
 router.get('/:id', getAutomation);
 router.put('/:id', updateAutomation);
 router.post('/:id/duplicate', duplicateAutomation);
-
-// Templates
-router.get('/config/templates', listTemplates);
-router.post('/config/templates', saveTemplate);
-
-// Logs & Runs
-router.get('/data/runs', listRuns);
-router.get('/data/logs', listCommunicationLogs);
+router.post('/events', trackEvent);
+router.post('/cart/sync', syncCart);
 
 export default router;

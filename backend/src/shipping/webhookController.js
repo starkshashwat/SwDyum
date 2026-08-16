@@ -4,57 +4,91 @@ import { shippingService } from './shippingService.js';
 import { logger } from '../utils/logger.js';
 import { supabaseAdmin } from '../config/supabaseClient.js';
 
-function verifyVelocitySignature(req) {
+// Velocity does not sign its webhooks (verified against their custom API
+// docs — the only HMACs are S3 presigned URLs). Two defenses are applied:
+//   1. An unguessable token in the URL path, configured in Velocity's
+//      dashboard: /api/webhooks/velocity/shipment-status/<VELOCITY_WEBHOOK_SECRET>
+//   2. If Velocity ever sends an x-velocity-signature header, it is verified
+//      as an HMAC-SHA256 of the raw body with the same secret.
+// server.js mounts express.raw() for this route before express.json() so
+// req.body arrives as a Buffer here.
+function timingSafeEqualStr(a, b) {
+    const bufA = Buffer.from(String(a), 'utf8');
+    const bufB = Buffer.from(String(b), 'utf8');
+    return bufA.length === bufB.length && crypto.timingSafeEqual(bufA, bufB);
+}
+
+function verifyVelocityRequest(req, rawBody) {
     const secret = process.env.VELOCITY_WEBHOOK_SECRET;
-    if (!secret) return true; // Accept if no secret configured
+    if (!secret) {
+        // Fail closed: a missing secret must never mean "accept everything" —
+        // an open endpoint here lets anyone move real orders to Delivered.
+        logger.error('VELOCITY_WEBHOOK_SECRET is not configured — rejecting Velocity webhook.');
+        return false;
+    }
 
-    // Velocity typically passes signature in headers (e.g. x-velocity-signature)
-    // Replace with actual header name per their docs
-    const signature = req.headers['x-velocity-signature'];
-    if (!signature) return false;
+    // Path token (primary defense for unsigned providers)
+    if (req.params?.token && timingSafeEqualStr(req.params.token, secret)) {
+        return true;
+    }
 
-    // The signature might be an HMAC of the raw body
-    // If you don't have access to the raw body buffer here (since express.json() is parsed),
-    // you might need a raw body parser middleware on this specific route.
-    // For now, assuming standard JSON payload HMAC:
+    // Optional HMAC header (used automatically if Velocity starts signing)
+    const signatureHeader = req.headers['x-velocity-signature'] || req.headers['x-velocity-signature-256'];
+    if (!signatureHeader) return false;
     try {
-        const hmac = crypto.createHmac('sha256', secret);
-        const digest = hmac.update(JSON.stringify(req.body)).digest('hex');
-        return crypto.timingSafeEqual(Buffer.from(signature), Buffer.from(digest));
+        const digest = crypto.createHmac('sha256', secret).update(rawBody, 'utf8').digest('hex');
+        return timingSafeEqualStr(String(signatureHeader).replace(/^sha256=/, ''), digest);
     } catch {
         return false;
     }
 }
 
-export const handleVelocityWebhook = asyncHandler(async (req, res) => {
-    // 1. Acknowledge Receipt Immediately (do not block on processing)
-    // We send a 200 immediately to avoid Velocity thinking the webhook failed 
-    // due to a slow DB query.
-    res.status(200).send('OK');
-
-    const rawPayload = req.body;
-    
-    // 2. Validate Signature
-    const isValid = verifyVelocitySignature(req);
-    
-    if (!isValid) {
-        logger.warn('Invalid Velocity webhook signature', { payload: rawPayload });
-        // Still insert into DB but mark as error
-        const { data: velocityProvider } = await supabaseAdmin.from('shipping_providers').select('id').eq('code', 'velocity').single();
+async function recordRejectedWebhook(rawBody, reason) {
+    try {
+        const { data: velocityProvider } = await supabaseAdmin
+            .from('shipping_providers').select('id').eq('code', 'velocity').maybeSingle();
+        let payload = {};
+        try { payload = JSON.parse(rawBody); } catch { /* keep empty */ }
         await supabaseAdmin.from('webhook_events').insert([{
             provider_id: velocityProvider?.id,
-            event_type: rawPayload.status || 'unknown',
-            awb_code: rawPayload.awb,
-            velocity_shipment_id: rawPayload.shipment_id,
-            raw_payload_json: rawPayload,
+            event_type: payload.status || 'unknown',
+            awb_code: payload.awb,
+            velocity_shipment_id: payload.shipment_id,
+            raw_payload_json: payload,
             processed: false,
-            processing_error: 'Invalid Signature'
+            processing_error: reason
         }]);
+    } catch (err) {
+        logger.error('Failed to record rejected webhook', { error: err.message });
+    }
+}
+
+export const handleVelocityWebhook = asyncHandler(async (req, res) => {
+    const rawBody = Buffer.isBuffer(req.body) ? req.body.toString('utf8') : JSON.stringify(req.body ?? {});
+    const signature = req.headers['x-velocity-signature'] || req.headers['x-velocity-signature-256'];
+
+    // 1. Verify the signature BEFORE acknowledging or parsing anything.
+    if (!verifyVelocitySignature(rawBody, signature)) {
+        logger.warn('Invalid Velocity webhook signature');
+        await recordRejectedWebhook(rawBody, 'Invalid Signature');
+        return res.status(401).json({ error: 'Invalid signature' });
+    }
+
+    // 2. Acknowledge receipt (Velocity retries on non-2xx).
+    res.status(200).send('OK');
+
+    // 3. Process asynchronously, but never let a rejection go unhandled —
+    //    an unhandled promise rejection crashes the whole Node process.
+    let payload;
+    try {
+        payload = JSON.parse(rawBody);
+    } catch (err) {
+        logger.error('Velocity webhook body is not valid JSON', { error: err.message });
+        await recordRejectedWebhook(rawBody, 'Malformed JSON');
         return;
     }
 
-    // 3. Process Webhook asynchronously
-    // Since we already sent 200, we run this without awaiting for the response.
-    // Note: error handling is inside processWebhook.
-    shippingService.processWebhook(rawPayload);
+    Promise.resolve(shippingService.processWebhook(payload)).catch((err) => {
+        logger.error('Velocity webhook processing failed', { error: err.message, stack: err.stack });
+    });
 });

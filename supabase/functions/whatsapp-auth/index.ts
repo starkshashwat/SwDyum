@@ -68,6 +68,13 @@ function generateSecureOtp(): string {
   return (100000 + (bytes[0] % 900000)).toString();
 }
 
+function timingSafeEqualStr(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
 // ─── Session token (V1) ──────────────────────────────────────────────────────
 // Issues a signed token: base64url(header).base64url(payload).hmac
 // The payload contains the profile id and an expiry. The secret must be a
@@ -290,9 +297,9 @@ export default {
           });
         }
 
-        // Constant-time-ish hash comparison (V3).
+        // Constant-time hash comparison (V3).
         const providedHash = await sha256Hex(otp);
-        if (providedHash !== record.otp_hash) {
+        if (!timingSafeEqualStr(providedHash, record.otp_hash)) {
           const newAttempts = (record.attempts || 0) + 1;
           if (newAttempts >= MAX_ATTEMPTS) {
             const lockUntil = new Date(Date.now() + LOCKOUT_MINUTES * 60 * 1000);
@@ -322,7 +329,32 @@ export default {
         const { userId } = body;
 
         if (userId) {
-           // We are linking to an existing auth profile (e.g., from Google OAuth)
+           // Phone-linking mode. A phone OTP only proves control of the PHONE —
+           // it says nothing about who owns `userId`. Before linking (and before
+           // returning the profile + session token), require a valid Supabase
+           // JWT whose subject IS the requested userId. Without this, an
+           // attacker could OTP-verify their own phone while passing a
+           // victim's profile id and take over that account.
+           const authHeader = req.headers.get("Authorization") || "";
+           const callerToken = authHeader.replace("Bearer ", "");
+           const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+           let jwtMatchesUser = false;
+           if (callerToken && callerToken !== anonKey) {
+             const userClient = createClient(
+               supabaseUrl,
+               anonKey,
+               { global: { headers: { Authorization: `Bearer ${callerToken}` } } }
+             );
+             const { data: { user } } = await userClient.auth.getUser();
+             jwtMatchesUser = !!user && user.id === userId;
+           }
+           if (!jwtMatchesUser) {
+             return new Response(JSON.stringify({ error: "Unauthorized" }), {
+                 status: 401,
+                 headers: { ...cors, "Content-Type": "application/json" }
+             });
+           }
+
            // 1. Check if phone is already used by ANOTHER profile
            const { data: existingPhoneProfile } = await supabase
              .from("profiles")

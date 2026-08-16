@@ -156,69 +156,10 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
     return Object.keys(errors).length === 0;
   };
 
-  const createPendingOrder = async (razorpayOrderId) => {
-    const customerId = currentUser ? currentUser.id : null;
-    const orderId = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-    const shippingDetails = {
-      name: formData.name, email: formData.email, phone: formData.phone,
-      address: formData.address, city: formData.city, state: formData.state, zip: formData.zip
-    };
-
-    const orderData = {
-      id: orderId,
-      customer_id: customerId,
-      customer_name: formData.name,
-      customer_email: formData.email,
-      customer_phone: formData.phone,
-      subtotal,
-      shipping_fee: shippingFee,
-      cod_fee: 0,
-      discount_amount: discountAmount,
-      total,
-      payment_method: 'Online / Razorpay',
-      payment_id: razorpayOrderId, // Temporarily store RZP Order ID here
-      razorpay_order_id: razorpayOrderId,
-      shipping_details: shippingDetails,
-      billing_details: shippingDetails, // Same as shipping for now
-      shipping: shippingFee,
-      coupon_code: appliedCoupon ? appliedCoupon.code : null,
-      items: cart,
-      status: 'Pending',
-      payment_status: 'Pending',
-      order_status: 'Pending',
-      // Checkout abandonment window: if payment is not captured within 30 min,
-      // the cleanup-pending-checkouts cron marks this order as 'failed'.
-      checkout_expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
-      created_at: new Date().toISOString()
-    };
-
-    let { error: orderError } = await supabase.from('orders').insert([orderData]);
-
-    // Fallback: If profile doesn't exist in DB (e.g. Google Auth without trigger), 
-    // the foreign key constraint will fail. Retry anonymously.
-    if (orderError && orderError.message && orderError.message.includes('orders_customer_id_fkey')) {
-      orderData.customer_id = null;
-      const retry = await supabase.from('orders').insert([orderData]);
-      orderError = retry.error;
-    }
-
-    if (orderError) throw orderError;
-
-    const orderItems = cart.map(item => ({
-      order_id: orderId,
-      product_name: item.name,
-      weight_label: item.weight,
-      sku: item.sku || '',
-      quantity: item.quantity,
-      unit_price: item.price,
-      total_price: item.price * item.quantity,
-      final_price: item.price * item.quantity
-    }));
-
-    const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
-    if (itemsError) throw itemsError;
-
-    // Save address for future orders if user is logged in
+  // The order row itself is created server-side by the `razorpay` edge
+  // function (DB prices, server-computed totals). The client only saves
+  // the address for future orders.
+  const saveAddressForFuture = async () => {
     if (currentUser && currentUser.id) {
       try {
         const { data: existingAddrs } = await supabase.from('addresses')
@@ -240,8 +181,6 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
         }
       } catch (e) { /* Address save is non-critical */ }
     }
-
-    return orderId;
   };
 
   const handlePrepaidFlow = async () => {
@@ -259,7 +198,14 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
       setProcessingStep('Creating payment order...');
       const receiptId = `rcpt_${Date.now()}`;
       const { data, error } = await supabase.functions.invoke('razorpay', {
-        body: { action: 'create_order', amount: total, receipt: receiptId }
+        body: {
+          action: 'create_order',
+          // Items only — the server recomputes all amounts from DB prices
+          items: cart.map((item) => ({ slug: item.slug, weight: item.weight, quantity: item.quantity })),
+          coupon_code: appliedCoupon ? appliedCoupon.code : null,
+          customer: formData,
+          receipt: receiptId
+        }
       });
 
       // supabase.functions.invoke returns an `error` only for transport-level
@@ -267,18 +213,27 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
       // `error` field, so check both and surface the real message.
       if (error) throw new Error(error.message || 'Payment service is unavailable.');
       if (data?.error) throw new Error(data.error);
-      if (!data?.order?.id) throw new Error('Payment order could not be created.');
+      if (!data?.order?.id || !data?.order_id) throw new Error('Payment order could not be created.');
+
+      // If the server's authoritative total differs from what this page
+      // displayed (price change, coupon state, stock), stop and let the
+      // customer review instead of silently charging a different amount.
+      const serverTotal = data.totals?.total;
+      if (typeof serverTotal === 'number' && Math.abs(serverTotal - total) > 0.5) {
+        throw new Error('The order total has changed (prices or coupon updated). Please review your cart and try again.');
+      }
 
       const rzpOrderId = data.order.id;
+      const internalOrderId = data.order_id;
       const backendKeyId = data.order.key_id || import.meta.env.VITE_RAZORPAY_KEY_ID;
       if (!backendKeyId) throw new Error('Payment key is not configured.');
 
-      setProcessingStep('Creating order...');
-      const internalOrderId = await createPendingOrder(rzpOrderId);
+      setProcessingStep('Preparing checkout...');
+      saveAddressForFuture();
 
       const options = {
         key: backendKeyId,
-        amount: Math.round(total * 100),
+        amount: Math.round((typeof serverTotal === 'number' ? serverTotal : total) * 100),
         currency: 'INR',
         name: 'Swadyum',
         description: 'Authentic Pickles',
@@ -305,15 +260,10 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
 
             if (verifyError) throw verifyError;
             if (verifyData?.error) throw new Error(verifyData.error);
-            if (!verifyData.success) throw new Error('Payment verification failed');
+            if (!verifyData.success) throw new Error(verifyData.error || 'Payment verification failed');
 
-            setProcessingStep('Finalizing order...');
-
-            // Update Order to Paid on Frontend (Webhook will also do this if frontend fails)
-            await supabase.from('orders')
-              .update({ status: 'Paid', payment_id: response.razorpay_payment_id })
-              .eq('id', internalOrderId);
-
+            // Order status is finalized server-side (payments row, invoice,
+            // inventory, notifications) before this point.
             clearCart();
             // Pass order ID via sessionStorage for ThankYouPage
             sessionStorage.setItem('lastCompletedOrder', internalOrderId);

@@ -28,7 +28,9 @@ router.get('/customer/orders/:orderId/tracking', requireAuth, shippingController
 // ==========================================
 // Webhooks (No Auth)
 // ==========================================
-router.post('/webhooks/velocity/shipment-status', handleVelocityWebhook);
+// The :token segment is VELOCITY_WEBHOOK_SECRET — Velocity's webhooks are
+// unsigned, so the unguessable URL is the authentication.
+router.post('/webhooks/velocity/shipment-status/:token', handleVelocityWebhook);
 
 // ==========================================
 // Serviceability (Public / Storefront)

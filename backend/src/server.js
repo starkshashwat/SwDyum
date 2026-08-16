@@ -85,6 +85,11 @@ app.use(
     })
 );
 
+// The Velocity webhook verifies an HMAC over the RAW request body, so its
+// route must consume the body as a Buffer BEFORE express.json() parses it.
+// body-parser marks the body as read, so express.json() skips it afterwards.
+app.use('/api/webhooks/velocity/shipment-status', express.raw({ type: '*/*', limit: '1mb' }));
+
 // Parse JSON bodies with a 1MB cap — generous enough for admin form
 // payloads (product descriptions, pdp_config JSON, etc.) while preventing
 // trivial large-body DoS attempts. File uploads bypass this entirely since

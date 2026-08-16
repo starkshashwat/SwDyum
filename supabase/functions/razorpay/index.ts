@@ -140,7 +140,7 @@ async function verifyPaymentSignature(orderId: string, paymentId: string, signat
   const signatureBuffer = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(data));
   const signatureHex = Array.from(new Uint8Array(signatureBuffer))
     .map(b => b.toString(16).padStart(2, '0')).join('');
-  return signatureHex === signature;
+  return timingSafeEqualStr(signatureHex, signature);
 }
 
 async function verifyWebhookSignature(payloadText: string, signature: string) {
@@ -154,7 +154,160 @@ async function verifyWebhookSignature(payloadText: string, signature: string) {
   const signatureBuffer = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payloadText));
   const expectedSignature = Array.from(new Uint8Array(signatureBuffer))
     .map(b => b.toString(16).padStart(2, '0')).join('');
-  return expectedSignature === signature;
+  return timingSafeEqualStr(expectedSignature, signature);
+}
+
+// Constant-time string comparison — avoids leaking signature prefixes via early exit.
+function timingSafeEqualStr(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
+
+// ====================================================================
+// Server-side pricing — the authoritative source for every amount.
+// The client sends items (slug + weight_label + quantity); prices,
+// discounts, shipping, and totals are always recomputed from the DB.
+// Column names match the live schema (coupons.min_cart_value,
+// coupons.usage_limit, product_variants.price).
+// ====================================================================
+const FREE_SHIPPING_THRESHOLD = 799;
+const FLAT_SHIPPING_FEE = 50;
+const MAX_QTY_PER_VARIANT = 20;
+const MAX_DISTINCT_ITEMS = 50;
+
+interface PricedLine {
+  product_id: string;
+  variant_id: string;
+  product_name: string;
+  weight_label: string;
+  sku: string | null;
+  quantity: number;
+  unit_price: number;
+  total_price: number;
+  final_price: number;
+}
+
+async function priceOrderServerSide(supabaseAdmin: any, items: any[], couponCode?: string | null) {
+  if (!Array.isArray(items) || items.length === 0) throw new Error('Cart is empty');
+  if (items.length > MAX_DISTINCT_ITEMS) throw new Error('Too many distinct items in cart');
+
+  const lines: PricedLine[] = [];
+  let subtotal = 0;
+
+  for (const item of items) {
+    const slug = String(item?.slug || '').trim();
+    const weight = String(item?.weight || item?.weight_label || '').trim();
+    const qty = Math.floor(Number(item?.quantity));
+    if (!slug || !weight) throw new Error('Invalid cart item');
+    if (!Number.isFinite(qty) || qty < 1 || qty > MAX_QTY_PER_VARIANT) {
+      throw new Error('Invalid quantity');
+    }
+
+    const { data: product, error: productError } = await supabaseAdmin
+      .from('products')
+      .select('id, name, is_active, product_variants (id, weight_label, sku, price, stock_quantity, reserved_quantity)')
+      .eq('slug', slug)
+      .single();
+
+    if (productError || !product) throw new Error(`Product not found: ${slug}`);
+    if (!product.is_active) throw new Error(`Product is no longer available: ${product.name}`);
+
+    const variant = (product.product_variants || []).find((v: any) => v.weight_label === weight);
+    if (!variant) throw new Error(`Selected size is unavailable: ${weight}`);
+
+    const available = Math.max(0, (variant.stock_quantity || 0) - (variant.reserved_quantity || 0));
+    if (qty > available) {
+      throw new Error(`Only ${available} left in stock for ${product.name} (${weight})`);
+    }
+
+    const lineTotal = variant.price * qty;
+    subtotal += lineTotal;
+    lines.push({
+      product_id: product.id,
+      variant_id: variant.id,
+      product_name: product.name,
+      weight_label: weight,
+      sku: variant.sku || null,
+      quantity: qty,
+      unit_price: variant.price,
+      total_price: lineTotal,
+      final_price: lineTotal,
+    });
+  }
+
+  // Coupon validation — entirely server-side, using live columns
+  // (min_cart_value / usage_limit; migrations name them differently).
+  let discount = 0;
+  let appliedCouponCode: string | null = null;
+  const code = couponCode ? String(couponCode).trim().toUpperCase() : '';
+  if (code) {
+    const { data: coupon, error: couponError } = await supabaseAdmin
+      .from('coupons')
+      .select('*')
+      .eq('code', code)
+      .eq('is_active', true)
+      .single();
+
+    if (couponError || !coupon) throw new Error('Invalid or inactive coupon code');
+    if (coupon.expiry_date && new Date(coupon.expiry_date) < new Date()) {
+      throw new Error('This coupon has expired');
+    }
+    if (coupon.min_cart_value && subtotal < coupon.min_cart_value) {
+      throw new Error(`Coupon requires a minimum order of ₹${coupon.min_cart_value}`);
+    }
+    if (coupon.usage_limit && (coupon.times_used || 0) >= coupon.usage_limit) {
+      throw new Error('This coupon has reached its usage limit');
+    }
+
+    if (coupon.discount_type === 'percentage') {
+      discount = (subtotal * coupon.discount_value) / 100;
+      if (coupon.max_discount && discount > coupon.max_discount) discount = coupon.max_discount;
+    } else if (coupon.discount_type === 'fixed') {
+      discount = coupon.discount_value;
+    }
+    discount = Math.max(0, Math.floor(discount));
+    appliedCouponCode = coupon.code;
+  }
+
+  const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : FLAT_SHIPPING_FEE;
+  const total = Math.max(0, subtotal - discount + shipping);
+
+  return { lines, subtotal, discount, shipping, total, couponCode: appliedCouponCode };
+}
+
+// Resolve the caller's user id from the request JWT — never from the body.
+async function getUserIdFromRequest(req: Request): Promise<string | null> {
+  const authHeader = req.headers.get('Authorization') ?? '';
+  if (!authHeader.startsWith('Bearer ')) return null;
+  try {
+    const anonClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+    const { data } = await anonClient.auth.getUser();
+    return data?.user?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+// Fetch a payment from Razorpay to compare the actually-charged amount.
+async function fetchRazorpayPayment(paymentId: string): Promise<any | null> {
+  const keyId = Deno.env.get('RAZORPAY_KEY_ID');
+  const keySecret = Deno.env.get('RAZORPAY_KEY_SECRET');
+  if (!keyId || !keySecret || !paymentId) return null;
+  try {
+    const response = await fetch(`https://api.razorpay.com/v1/payments/${paymentId}`, {
+      headers: { Authorization: `Basic ${btoa(`${keyId}:${keySecret}`)}` }
+    });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
 }
 
 // ====================================================================
@@ -163,17 +316,19 @@ async function verifyWebhookSignature(payloadText: string, signature: string) {
 // tracks coupon usage, generates invoice, creates timeline entries.
 // Idempotent: checks if payment already processed before proceeding.
 // ====================================================================
-async function processPaymentCapture(supabaseAdmin: any, razorpayOrderId: string, razorpayPaymentId: string) {
+async function processPaymentCapture(supabaseAdmin: any, razorpayOrderId: string, razorpayPaymentId: string, paymentEntity?: any): Promise<string> {
   // 1. Idempotency check — has this payment already been processed?
-  const { data: existingPayment } = await supabaseAdmin
-    .from('payments')
-    .select('id')
-    .eq('razorpay_payment_id', razorpayPaymentId)
-    .single();
+  if (razorpayPaymentId) {
+    const { data: existingPayment } = await supabaseAdmin
+      .from('payments')
+      .select('id')
+      .eq('razorpay_payment_id', razorpayPaymentId)
+      .maybeSingle();
 
-  if (existingPayment) {
-    console.log(`Payment ${razorpayPaymentId} already processed. Skipping.`);
-    return;
+    if (existingPayment) {
+      console.log(`Payment ${razorpayPaymentId} already processed. Skipping.`);
+      return 'already_processed';
+    }
   }
 
   // 2. Find the order by the Razorpay Order ID stored in payment_id during checkout
@@ -181,7 +336,7 @@ async function processPaymentCapture(supabaseAdmin: any, razorpayOrderId: string
     .from('orders')
     .select('*')
     .eq('payment_id', razorpayOrderId)
-    .single();
+    .maybeSingle();
 
   if (orderFetchError || !order) {
     // Try razorpay_order_id column as fallback
@@ -189,64 +344,101 @@ async function processPaymentCapture(supabaseAdmin: any, razorpayOrderId: string
       .from('orders')
       .select('*')
       .eq('razorpay_order_id', razorpayOrderId)
-      .single();
+      .maybeSingle();
     if (!order2) {
       console.error(`Order not found for Razorpay order ${razorpayOrderId}`);
-      return;
+      return 'not_found';
     }
     // Use this order instead
-    return await _processOrder(supabaseAdmin, order2, razorpayOrderId, razorpayPaymentId);
+    return _processOrder(supabaseAdmin, order2, razorpayOrderId, razorpayPaymentId, paymentEntity);
   }
 
-  await _processOrder(supabaseAdmin, order, razorpayOrderId, razorpayPaymentId);
+  return _processOrder(supabaseAdmin, order, razorpayOrderId, razorpayPaymentId, paymentEntity);
 }
 
-async function _processOrder(supabaseAdmin: any, order: any, razorpayOrderId: string, razorpayPaymentId: string) {
+async function _processOrder(supabaseAdmin: any, order: any, razorpayOrderId: string, razorpayPaymentId: string, paymentEntity?: any): Promise<string> {
   const orderId = order.id;
 
-  // 3. Create payment record
-  await supabaseAdmin.from('payments').insert([{
-    order_id: orderId,
-    razorpay_payment_id: razorpayPaymentId,
-    razorpay_order_id: razorpayOrderId,
-    payment_method: 'Online / Razorpay',
-    amount: order.total,
-    currency: 'INR',
-    status: 'Paid',
-    payment_date: new Date().toISOString()
-  }]);
+  // Amount verification: the amount Razorpay actually charged must match
+  // the server-computed order total. A mismatch means the Razorpay order
+  // was created outside this flow (or the order row was tampered with) —
+  // keep the order Pending for manual reconciliation instead of marking Paid.
+  let chargedAmount: number | null = null;
+  if (paymentEntity?.amount != null) {
+    chargedAmount = paymentEntity.amount; // paise
+  } else if (razorpayPaymentId) {
+    const rzpPayment = await fetchRazorpayPayment(razorpayPaymentId);
+    if (rzpPayment?.amount != null) chargedAmount = rzpPayment.amount;
+  }
+  const expectedPaise = Math.round(order.total * 100);
+  if (chargedAmount != null && chargedAmount !== expectedPaise) {
+    console.error(`⚠️ Amount mismatch for order ${orderId}: charged ₹${chargedAmount / 100}, expected ₹${order.total}. Keeping order Pending.`);
+    await supabaseAdmin.from('order_timeline').insert([{
+      order_id: orderId,
+      event: 'Amount Mismatch',
+      note: `Charged ₹${chargedAmount / 100} but order total is ₹${order.total}. Manual review required.`,
+      created_by: 'system'
+    }]);
+    return 'amount_mismatch';
+  }
+
+  // 3. Create payment record (idempotent on razorpay_payment_id via unique
+  // index; the pre-check above handles DBs where the index isn't applied yet).
+  if (razorpayPaymentId) {
+    const { error: paymentInsertError } = await supabaseAdmin.from('payments').upsert([{
+      order_id: orderId,
+      razorpay_payment_id: razorpayPaymentId,
+      razorpay_order_id: razorpayOrderId,
+      payment_method: paymentEntity?.method || 'Online / Razorpay',
+      amount: chargedAmount != null ? chargedAmount / 100 : order.total,
+      currency: 'INR',
+      status: 'Paid',
+      payment_date: new Date().toISOString()
+    }], { onConflict: 'razorpay_payment_id' });
+    if (paymentInsertError) {
+      console.error(`Failed to record payment for order ${orderId}:`, paymentInsertError.message);
+    }
+  }
 
   // 4. Update order status
   const estimatedDelivery = new Date();
   estimatedDelivery.setDate(estimatedDelivery.getDate() + 7); // 5-7 days
 
-  await supabaseAdmin
+  const { error: orderUpdateError } = await supabaseAdmin
     .from('orders')
     .update({
       status: 'Paid',
       payment_status: 'Paid',
       order_status: 'Confirmed',
-      payment_id: razorpayPaymentId,
+      payment_id: razorpayPaymentId || razorpayOrderId,
       razorpay_order_id: razorpayOrderId,
       estimated_delivery: estimatedDelivery.toISOString().split('T')[0],
       updated_at: new Date().toISOString()
     })
     .eq('id', orderId);
+  if (orderUpdateError) {
+    console.error(`Failed to mark order ${orderId} as Paid:`, orderUpdateError.message);
+  }
 
   // 5. Timeline entries
-  await supabaseAdmin.from('order_timeline').insert([
+  const { error: timelineError } = await supabaseAdmin.from('order_timeline').insert([
     { order_id: orderId, event: 'Payment Received', note: `Razorpay Payment ID: ${razorpayPaymentId}`, created_by: 'system' },
     { order_id: orderId, event: 'Order Confirmed', note: 'Payment verified successfully', created_by: 'system' }
   ]);
+  if (timelineError) {
+    console.error(`Failed to add payment timeline for order ${orderId}:`, timelineError.message);
+  }
 
   // 6. Process inventory reduction
-  const { data: items } = await supabaseAdmin
+  const { data: items, error: itemsError } = await supabaseAdmin
     .from('order_items')
     .select('*')
     .eq('order_id', orderId);
 
-  if (items && items.length > 0) {
-    // Inventory is now handled automatically by PostgreSQL triggers on the orders table
+  if (itemsError) {
+    console.error(`Failed to fetch order items for ${orderId}:`, itemsError.message);
+  } else if (items && items.length > 0) {
+    // Inventory is handled automatically by PostgreSQL triggers on the orders table
     // Timeline entry for inventory
     await supabaseAdmin.from('order_timeline').insert([{
       order_id: orderId,
@@ -256,28 +448,42 @@ async function _processOrder(supabaseAdmin: any, order: any, razorpayOrderId: st
     }]);
   }
 
-  // 7. Track coupon usage
+  // 7. Track coupon usage — atomic increment when the RPC exists,
+  // read-modify-write fallback otherwise.
   if (order.coupon_code) {
     const { data: couponData } = await supabaseAdmin
       .from('coupons')
       .select('id, times_used')
       .eq('code', order.coupon_code)
-      .single();
+      .maybeSingle();
 
     if (couponData) {
-      // Increment times_used
-      await supabaseAdmin
-        .from('coupons')
-        .update({ times_used: (couponData.times_used || 0) + 1 })
-        .eq('id', couponData.id);
+      const { error: rpcError } = await supabaseAdmin.rpc('increment_coupon_usage', { p_code: order.coupon_code });
+      if (rpcError) {
+        // RPC not installed (pre-020 database) — fall back, best effort
+        await supabaseAdmin
+          .from('coupons')
+          .update({ times_used: (couponData.times_used || 0) + 1 })
+          .eq('id', couponData.id);
+      }
 
-      // Create coupon_usage record
-      await supabaseAdmin.from('coupon_usage').insert([{
-        coupon_id: couponData.id,
-        customer_id: order.customer_id,
-        order_id: orderId,
-        discount_amount: order.discount_amount || 0
-      }]);
+      // Create coupon_usage record (idempotent on the order)
+      const { data: existingUsage } = await supabaseAdmin
+        .from('coupon_usage')
+        .select('id')
+        .eq('order_id', orderId)
+        .maybeSingle();
+      if (!existingUsage) {
+        const { error: usageError } = await supabaseAdmin.from('coupon_usage').insert([{
+          coupon_id: couponData.id,
+          customer_id: order.customer_id,
+          order_id: orderId,
+          discount_amount: order.discount_amount || 0
+        }]);
+        if (usageError) {
+          console.error(`Failed to record coupon usage for order ${orderId}:`, usageError.message);
+        }
+      }
     }
   }
 
@@ -293,7 +499,7 @@ async function _processOrder(supabaseAdmin: any, order: any, razorpayOrderId: st
     final_price: item.total_price
   })) : [];
 
-  await supabaseAdmin.from('invoices').insert([{
+  const { error: invoiceError } = await supabaseAdmin.from('invoices').insert([{
     order_id: orderId,
     invoice_date: new Date().toISOString(),
     customer_name: shippingDetails.name || order.customer_name || '',
@@ -309,6 +515,9 @@ async function _processOrder(supabaseAdmin: any, order: any, razorpayOrderId: st
     grand_total: order.total,
     status: 'Generated'
   }]);
+  if (invoiceError) {
+    console.error(`Failed to generate invoice for order ${orderId}:`, invoiceError.message);
+  }
 
   // 9. Trigger WhatsApp Notification for Order Placed
   await triggerNotification(supabaseAdmin, 'order_placed', order);
@@ -325,6 +534,7 @@ async function _processOrder(supabaseAdmin: any, order: any, razorpayOrderId: st
   }
 
   console.log(`✅ Order ${orderId} fully processed: payment recorded, inventory reduced, invoice generated.`);
+  return 'processed';
 }
 
 // ====================================================================
@@ -493,20 +703,23 @@ serve(async (req) => {
       if (body.event === 'payment.captured' || body.event === 'order.paid') {
         let razorpayOrderId = '';
         let razorpayPaymentId = '';
+        let paymentEntity: any = null;
 
         if (body.event === 'payment.captured') {
           const payment = body.payload.payment.entity;
           razorpayOrderId = payment.order_id;
           razorpayPaymentId = payment.id;
+          paymentEntity = payment;
         } else if (body.event === 'order.paid') {
           const order = body.payload.order.entity;
           razorpayOrderId = order.id;
           // For order.paid, we may not have payment ID directly
           razorpayPaymentId = body.payload.payment?.entity?.id || '';
+          paymentEntity = body.payload.payment?.entity || null;
         }
 
         if (razorpayOrderId) {
-          await processPaymentCapture(supabaseAdmin, razorpayOrderId, razorpayPaymentId);
+          await processPaymentCapture(supabaseAdmin, razorpayOrderId, razorpayPaymentId, paymentEntity);
         }
       } else if (body.event === 'payment.failed') {
         // ── Payment failed: mark the order as failed + record the attempt ──
@@ -534,26 +747,111 @@ serve(async (req) => {
     }
 
     // --- Frontend API Handling ---
-    const { action, amount, receipt, razorpay_order_id, razorpay_payment_id, razorpay_signature } = body;
+    const { action, items, coupon_code, customer, receipt, razorpay_order_id, razorpay_payment_id, razorpay_signature } = body;
 
     if (action === 'create_order') {
-      if (!amount || amount <= 0 || !receipt) {
-        return new Response(JSON.stringify({ error: 'Missing or invalid amount/receipt' }), {
+      // Server-side pricing: the client sends the cart (slug + weight_label +
+      // quantity) and a coupon code; every rupee is recomputed from the DB.
+      // The `amount` field is intentionally ignored — it is client-controlled.
+      if (!receipt) {
+        return new Response(JSON.stringify({ error: 'Missing receipt' }), {
           status: 400, headers: { ...cors, 'Content-Type': 'application/json' }
         });
       }
       try {
-        const order = await createRazorpayOrder(amount, receipt);
-        return new Response(JSON.stringify({ order }), {
+        const supabaseAdmin = createClient(
+          Deno.env.get('SUPABASE_URL') ?? '',
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+        );
+
+        const priced = await priceOrderServerSide(supabaseAdmin, items, coupon_code);
+
+        // Identity comes from the request JWT, never from the body.
+        let customerId = await getUserIdFromRequest(req);
+        if (customerId) {
+          const { data: profile } = await supabaseAdmin
+            .from('profiles').select('id').eq('id', customerId).maybeSingle();
+          if (!profile) customerId = null; // FK would fail — treat as guest
+        }
+
+        const rzpOrder = await createRazorpayOrder(priced.total, receipt);
+
+        // Persist the order with server-computed amounts (service role).
+        const orderId = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+        const shippingDetails = customer ? {
+          name: String(customer.name || ''),
+          email: String(customer.email || ''),
+          phone: String(customer.phone || ''),
+          address: String(customer.address || ''),
+          city: String(customer.city || ''),
+          state: String(customer.state || ''),
+          zip: String(customer.zip || ''),
+        } : {};
+
+        const { error: orderInsertError } = await supabaseAdmin.from('orders').insert([{
+          id: orderId,
+          customer_id: customerId,
+          customer_name: shippingDetails.name || null,
+          customer_email: shippingDetails.email || null,
+          customer_phone: shippingDetails.phone || null,
+          subtotal: priced.subtotal,
+          shipping_fee: priced.shipping,
+          cod_fee: 0,
+          discount_amount: priced.discount,
+          total: priced.total,
+          payment_method: 'Online / Razorpay',
+          payment_id: rzpOrder.id,
+          razorpay_order_id: rzpOrder.id,
+          shipping_details: shippingDetails,
+          billing_details: shippingDetails,
+          shipping: priced.shipping,
+          coupon_code: priced.couponCode,
+          items: items,
+          status: 'Pending',
+          payment_status: 'Pending',
+          order_status: 'Pending',
+          checkout_expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+          created_at: new Date().toISOString(),
+        }]);
+        if (orderInsertError) throw new Error(`Failed to create order: ${orderInsertError.message}`);
+
+        const { error: itemsInsertError } = await supabaseAdmin.from('order_items').insert(
+          priced.lines.map((line) => ({
+            order_id: orderId,
+            product_id: line.product_id,
+            variant_id: line.variant_id,
+            product_name: line.product_name,
+            weight_label: line.weight_label,
+            sku: line.sku,
+            quantity: line.quantity,
+            unit_price: line.unit_price,
+            total_price: line.total_price,
+            final_price: line.final_price,
+          }))
+        );
+        if (itemsInsertError) {
+          // Order row without items is unusable — roll it back
+          await supabaseAdmin.from('orders').delete().eq('id', orderId);
+          throw new Error(`Failed to create order items: ${itemsInsertError.message}`);
+        }
+
+        return new Response(JSON.stringify({
+          order: rzpOrder,
+          order_id: orderId,
+          totals: {
+            subtotal: priced.subtotal,
+            discount: priced.discount,
+            shipping: priced.shipping,
+            total: priced.total,
+          },
+        }), {
           headers: { ...cors, 'Content-Type': 'application/json' },
         });
       } catch (err: any) {
         console.error('create_order failed:', err);
-        // Surface a meaningful message so the frontend can show what went wrong
-        // (e.g. missing keys, Razorpay API error) instead of a generic failure.
         const message = err?.message || 'Failed to create Razorpay order';
         return new Response(JSON.stringify({ error: message }), {
-          status: 200, headers: { ...cors, 'Content-Type': 'application/json' },
+          status: 400, headers: { ...cors, 'Content-Type': 'application/json' },
         });
       }
     }
@@ -565,9 +863,43 @@ serve(async (req) => {
         });
       }
       const isValid = await verifyPaymentSignature(razorpay_order_id, razorpay_payment_id, razorpay_signature);
-      return new Response(JSON.stringify({ success: isValid }), {
-        headers: { ...cors, 'Content-Type': 'application/json' },
-      });
+      if (!isValid) {
+        return new Response(JSON.stringify({ success: false, error: 'Payment signature verification failed' }), {
+          status: 200, headers: { ...cors, 'Content-Type': 'application/json' },
+        });
+      }
+
+      // Payment transitions are server-side only: verify the charged amount
+      // against the stored order total and mark Paid via the same idempotent
+      // pipeline the webhook uses. The client never writes order status.
+      try {
+        const supabaseAdmin = createClient(
+          Deno.env.get('SUPABASE_URL') ?? '',
+          Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+        );
+        const result = await processPaymentCapture(supabaseAdmin, razorpay_order_id, razorpay_payment_id, null);
+        if (result === 'amount_mismatch') {
+          return new Response(JSON.stringify({
+            success: false,
+            error: 'Payment amount does not match the order total. Our team will contact you.'
+          }), {
+            headers: { ...cors, 'Content-Type': 'application/json' },
+          });
+        }
+        if (result === 'not_found') {
+          return new Response(JSON.stringify({ success: false, error: 'Order not found for this payment' }), {
+            headers: { ...cors, 'Content-Type': 'application/json' },
+          });
+        }
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { ...cors, 'Content-Type': 'application/json' },
+        });
+      } catch (err: any) {
+        console.error('verify_payment processing failed:', err);
+        return new Response(JSON.stringify({ success: false, error: err?.message || 'Payment processing failed' }), {
+          headers: { ...cors, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     return new Response(JSON.stringify({ error: 'Invalid action or event' }), {

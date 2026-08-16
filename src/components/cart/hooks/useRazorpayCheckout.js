@@ -33,6 +33,12 @@ const ensureRazorpayScript = async (retries = 2) => {
  * Extracted Razorpay checkout logic — script loading, order creation,
  * payment verification, and order finalization.
  *
+ * Security model: the cart (slug + weight + quantity) is sent to the
+ * `razorpay` edge function, which recomputes every amount from the
+ * database and creates the order row itself. The client never sends a
+ * total and never writes order/payment status — `verify_payment`
+ * verifies the signature + charged amount server-side.
+ *
  * Used by CheckoutFooter to initiate payment after the 700ms transition.
  */
 export default function useRazorpayCheckout({
@@ -45,65 +51,21 @@ export default function useRazorpayCheckout({
     const [processingStep, setProcessingStep] = useState('');
     const [error, setError] = useState(null);
 
-    const createPendingOrder = useCallback(async (razorpayOrderId, orderParams) => {
-        const {
-            formData, subtotal, shipping, discountAmount, total, appliedCoupon, cart,
-        } = orderParams;
-
-        const customerId = currentUser ? currentUser.id : null;
-        const orderId = `ORD-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
-        const shippingDetails = {
-            name: formData.name, email: formData.email, phone: formData.phone,
-            address: formData.address, city: formData.city, state: formData.state, zip: formData.zip,
-        };
-
-        const orderData = {
-            id: orderId, customer_id: customerId,
-            customer_name: formData.name, customer_email: formData.email, customer_phone: formData.phone,
-            subtotal, shipping_fee: shipping, cod_fee: 0, discount_amount: discountAmount,
-            total, payment_method: 'Online / Razorpay',
-            payment_id: razorpayOrderId, razorpay_order_id: razorpayOrderId,
-            shipping_details: shippingDetails, billing_details: shippingDetails, shipping,
-            coupon_code: appliedCoupon ? appliedCoupon.code : null,
-            items: cart, status: 'Pending', payment_status: 'Pending', order_status: 'Pending',
-            checkout_expires_at: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
-            created_at: new Date().toISOString(),
-        };
-
-        let { error: orderError } = await supabase.from('orders').insert([orderData]);
-        if (orderError && orderError.message && orderError.message.includes('orders_customer_id_fkey')) {
-            orderData.customer_id = null;
-            const retry = await supabase.from('orders').insert([orderData]);
-            orderError = retry.error;
-        }
-        if (orderError) throw orderError;
-
-        const orderItems = cart.map((item) => ({
-            order_id: orderId, product_name: item.name, weight_label: item.weight,
-            sku: item.sku || '',
-            quantity: item.quantity, unit_price: item.price,
-            total_price: item.price * item.quantity, final_price: item.price * item.quantity,
-        }));
-        const { error: itemsError } = await supabase.from('order_items').insert(orderItems);
-        if (itemsError) throw itemsError;
-
-        // Save address for future orders
-        if (currentUser && currentUser.id) {
-            try {
-                const { data: existingAddrs } = await supabase
-                    .from('addresses').select('id').eq('customer_id', currentUser.id);
-                if (!existingAddrs || existingAddrs.length === 0) {
-                    await supabase.from('addresses').insert([{
-                        customer_id: currentUser.id, label: 'Home',
-                        full_name: formData.name, phone: formData.phone, email: formData.email,
-                        street: formData.address, city: formData.city, state: formData.state,
-                        pin_code: formData.zip, country: 'India', is_default: true,
-                    }]);
-                }
-            } catch (e) { /* non-critical */ }
-        }
-
-        return orderId;
+    const saveAddressForFuture = useCallback(async (formData) => {
+        if (!currentUser || !currentUser.id) return;
+        try {
+            const { data: existingAddrs, error: fetchError } = await supabase
+                .from('addresses').select('id').eq('customer_id', currentUser.id);
+            if (fetchError) return;
+            if (!existingAddrs || existingAddrs.length === 0) {
+                await supabase.from('addresses').insert([{
+                    customer_id: currentUser.id, label: 'Home',
+                    full_name: formData.name, phone: formData.phone, email: formData.email,
+                    street: formData.address, city: formData.city, state: formData.state,
+                    pin_code: formData.zip, country: 'India', is_default: true,
+                }]);
+            }
+        } catch (e) { /* non-critical */ }
     }, [currentUser]);
 
     const initiateCheckout = useCallback(async (orderParams) => {
@@ -118,23 +80,43 @@ export default function useRazorpayCheckout({
             setProcessingStep('Creating payment order...');
             const receiptId = `rcpt_${Date.now()}`;
             const { data, error: invokeError } = await supabase.functions.invoke('razorpay', {
-                body: { action: 'create_order', amount: orderParams.total, receipt: receiptId },
+                body: {
+                    action: 'create_order',
+                    // Items only — the server recomputes all amounts from DB prices
+                    items: orderParams.cart.map((item) => ({
+                        slug: item.slug,
+                        weight: item.weight,
+                        quantity: item.quantity,
+                    })),
+                    coupon_code: orderParams.appliedCoupon ? orderParams.appliedCoupon.code : null,
+                    customer: orderParams.formData,
+                    receipt: receiptId,
+                },
             });
 
             if (invokeError) throw new Error(invokeError.message || 'Payment service unavailable.');
             if (data?.error) throw new Error(data.error);
-            if (!data?.order?.id) throw new Error('Payment order could not be created.');
+            if (!data?.order?.id || !data?.order_id) throw new Error('Payment order could not be created.');
+
+            // If the server's authoritative total differs from what the drawer
+            // displayed (price change, coupon state, stock), stop and let the
+            // customer review instead of silently charging a different amount.
+            const serverTotal = data.totals?.total;
+            if (typeof serverTotal === 'number' && Math.abs(serverTotal - orderParams.total) > 0.5) {
+                throw new Error('The order total has changed (prices or coupon updated). Please review your cart and try again.');
+            }
 
             const rzpOrderId = data.order.id;
+            const internalOrderId = data.order_id;
             const backendKeyId = data.order.key_id || import.meta.env.VITE_RAZORPAY_KEY_ID;
             if (!backendKeyId) throw new Error('Payment key not configured.');
 
-            setProcessingStep('Creating order...');
-            const internalOrderId = await createPendingOrder(rzpOrderId, orderParams);
+            setProcessingStep('Preparing checkout...');
+            saveAddressForFuture(orderParams.formData);
 
             const options = {
                 key: backendKeyId,
-                amount: Math.round(orderParams.total * 100),
+                amount: Math.round((typeof serverTotal === 'number' ? serverTotal : orderParams.total) * 100),
                 currency: 'INR',
                 name: 'Swadyum',
                 description: 'Authentic Pickles',
@@ -159,13 +141,10 @@ export default function useRazorpayCheckout({
                         });
                         if (verifyError) throw verifyError;
                         if (verifyData?.error) throw new Error(verifyData.error);
-                        if (!verifyData.success) throw new Error('Payment verification failed');
+                        if (!verifyData.success) throw new Error(verifyData.error || 'Payment verification failed');
 
-                        setProcessingStep('Finalizing order...');
-                        await supabase.from('orders')
-                            .update({ status: 'Paid', payment_id: response.razorpay_payment_id })
-                            .eq('id', internalOrderId);
-
+                        // Order status is finalized server-side (payments row, invoice,
+                        // inventory, notifications) before this point.
                         clearCart();
                         sessionStorage.setItem('lastCompletedOrder', internalOrderId);
                         onClose();
@@ -188,7 +167,7 @@ export default function useRazorpayCheckout({
             setError(err.message || 'Failed to initialize checkout.');
             setIsProcessing(false);
         }
-    }, [createPendingOrder, clearCart, onClose, onNavigate]);
+    }, [saveAddressForFuture, clearCart, onClose, onNavigate]);
 
     const reset = useCallback(() => {
         setIsProcessing(false);

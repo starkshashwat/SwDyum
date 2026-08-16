@@ -20,6 +20,42 @@ function corsHeaders(origin: string | null) {
   };
 }
 
+// ─── Authentication ──────────────────────────────────────────────────────────
+// This function sends messages AS the business. config.toml disables the
+// platform JWT gate (verify_jwt = false), so authorization is enforced here.
+// Accepted callers:
+//   1. The service-role key — internal edge-function calls (e.g. the razorpay
+//      payment notifier invoking this function server-side).
+//   2. A valid user JWT whose profiles.role is Admin or Editor (admin panel).
+async function isAuthorizedCaller(req: Request): Promise<boolean> {
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || "";
+  const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+  const callerToken = (req.headers.get("Authorization") || "").replace("Bearer ", "");
+  if (!callerToken || !supabaseUrl || !anonKey) return false;
+
+  // Internal service-role call (another edge function)
+  if (serviceKey && callerToken === serviceKey) return true;
+
+  // User JWT — resolve the caller and require an admin-capable role
+  const userClient = createClient(
+    supabaseUrl,
+    anonKey,
+    { global: { headers: { Authorization: `Bearer ${callerToken}` } } }
+  );
+  const { data: { user } } = await userClient.auth.getUser();
+  if (!user) return false;
+
+  const adminClient = createClient(supabaseUrl, serviceKey);
+  const { data: profile } = await adminClient
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+  const roleStr = String(profile?.role || "").toLowerCase();
+  return roleStr.includes("admin") || roleStr.includes("editor");
+}
+
 export default {
   async fetch(req: Request) {
     const cors = corsHeaders(req.headers.get("Origin"));
@@ -35,6 +71,13 @@ export default {
       if (!phone) {
         return new Response(JSON.stringify({ error: "Phone number is required" }), {
           status: 400,
+          headers: { ...cors, "Content-Type": "application/json" },
+        });
+      }
+
+      if (!(await isAuthorizedCaller(req))) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
           headers: { ...cors, "Content-Type": "application/json" },
         });
       }

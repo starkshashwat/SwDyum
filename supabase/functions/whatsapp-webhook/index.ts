@@ -2,6 +2,33 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.8";
 
+// ─── Webhook signature verification ──────────────────────────────────────────
+// Meta signs every POST with X-Hub-Signature-256 = "sha256=" + HMAC-SHA256 of
+// the RAW request body keyed with the app secret. Without this check anyone
+// who knows the function URL can forge inbound customer messages.
+async function verifyMetaSignature(rawBody: string, signatureHeader: string | null): Promise<boolean> {
+  const appSecret = Deno.env.get("WHATSAPP_APP_SECRET") || Deno.env.get("META_APP_SECRET") || "";
+  if (!appSecret) {
+    // Fail closed: an unconfigured secret must not mean "accept everything".
+    console.error("WHATSAPP_APP_SECRET is not configured; rejecting webhook POST.");
+    return false;
+  }
+  if (!signatureHeader || !signatureHeader.startsWith("sha256=")) return false;
+
+  const key = await crypto.subtle.importKey(
+    "raw", new TextEncoder().encode(appSecret),
+    { name: "HMAC", hash: "SHA-256" }, false, ["sign"]
+  );
+  const sig = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode(rawBody));
+  const expected = Array.from(new Uint8Array(sig))
+    .map((b) => b.toString(16).padStart(2, "0")).join("");
+  const provided = signatureHeader.slice("sha256=".length);
+  if (expected.length !== provided.length) return false;
+  let diff = 0;
+  for (let i = 0; i < expected.length; i++) diff |= expected.charCodeAt(i) ^ provided.charCodeAt(i);
+  return diff === 0;
+}
+
 async function processMedia(mediaId: string, supabase: any): Promise<string | null> {
   try {
     const WHATSAPP_API_TOKEN = Deno.env.get("WHATSAPP_API_TOKEN");
@@ -102,7 +129,12 @@ export default {
     // 2. Handle POST requests (Actual WhatsApp Webhook Events)
     if (method === "POST") {
       try {
-        const body = await req.json();
+        const rawBody = await req.text();
+        const signatureValid = await verifyMetaSignature(rawBody, req.headers.get("x-hub-signature-256"));
+        if (!signatureValid) {
+          return new Response("Invalid signature", { status: 401 });
+        }
+        const body = JSON.parse(rawBody);
         console.log("Received WhatsApp Webhook event:", JSON.stringify(body, null, 2));
 
         const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
