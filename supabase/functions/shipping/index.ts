@@ -226,36 +226,42 @@ serve(async (req) => {
 
     if (action === 'sync_warehouse') {
         const { warehouse_id } = payload
-        const { data: wh } = await supabaseAdmin.from('warehouses').select('*').eq('id', warehouse_id).single()
-        if (!wh) throw new Error('Warehouse not found')
+        const { data: warehouse } = await supabaseAdmin.from('warehouses').select('*').eq('id', warehouse_id).single()
+        if (!warehouse) throw new Error('Warehouse not found')
 
         const velocityPayload = {
-            name: wh.name,
-            email: wh.email || "admin@swadyum.com",
-            phone: wh.phone || "0000000000",
-            address_line_1: wh.address,
-            address_line_2: "",
-            pincode: wh.pincode,
-            city: wh.city,
-            state: wh.state,
-            country: wh.country || 'India',
-            return_address_line_1: wh.address,
-            return_address_line_2: "",
-            return_pincode: wh.pincode,
-            return_city: wh.city,
-            return_state: wh.state,
-            return_country: wh.country || 'India',
-            lat: 0,
-            long: 0
+            name: warehouse.name,
+            phone_number: warehouse.phone || '',
+            email: warehouse.email || '',
+            contact_person: warehouse.name,
+            address_attributes: {
+                street_address: warehouse.address || '',
+                zip: warehouse.pincode || '',
+                city: warehouse.city || '',
+                state: warehouse.state || '',
+                country: warehouse.country || 'India'
+            }
         }
 
-        const res = await fetchVelocity('/custom/api/v1/warehouse/create', { method: 'POST', body: JSON.stringify([velocityPayload]) }, supabaseAdmin)
-        if (!res.meta?.success) throw new Error(`Failed to sync warehouse to Velocity: ${JSON.stringify(res.errors || res)}`)
-        
-        const velId = res.data && res.data.length > 0 ? res.data[0].id : null
-        if (velId) await supabaseAdmin.from('warehouses').update({ velocity_warehouse_id: velId.toString() }).eq('id', warehouse_id)
+        const res = await fetchVelocity('/custom/api/v1/warehouse', {
+            method: 'POST',
+            body: JSON.stringify(velocityPayload)
+        }, supabaseAdmin)
 
-        return new Response(JSON.stringify({ success: true, velocity_warehouse_id: velId }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+        const velocityWarehouseId = res?.payload?.warehouse_id || res?.data?.warehouse_id || res?.warehouse_id || res?.id
+
+        if (velocityWarehouseId) {
+            await supabaseAdmin.from('warehouses').update({
+                velocity_warehouse_id: String(velocityWarehouseId),
+                updated_at: new Date().toISOString()
+            }).eq('id', warehouse_id)
+
+            return new Response(JSON.stringify({ success: true, velocity_warehouse_id: velocityWarehouseId }), {
+                headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            })
+        }
+
+        throw new Error(`Velocity did not return a warehouse ID: ${JSON.stringify(res)}`)
     }
 
     if (action === 'sync_shipment') {
@@ -263,10 +269,18 @@ serve(async (req) => {
         const { data: shipment } = await supabaseAdmin.from('shipments').select('*').eq('id', shipment_id).single()
         if (!shipment) throw new Error('Shipment not found')
 
-        const trackingRes = await fetchVelocity('/custom/api/v1/order-tracking', { method: 'POST', body: JSON.stringify({ awbs: [shipment.awb_code] }) }, supabaseAdmin)
+        const trackingRes = await fetchVelocity('/custom/api/v1/order-tracking', {
+            method: 'POST',
+            body: JSON.stringify({ awbs: [shipment.awb_code] })
+        }, supabaseAdmin)
+
         if (trackingRes.meta?.success && trackingRes.data?.length > 0) {
             const newStatus = trackingRes.data[0].status || shipment.velocity_status
-            await supabaseAdmin.from('shipments').update({ velocity_status: newStatus, customer_visible_status: newStatus, last_synced_at: new Date().toISOString() }).eq('id', shipment_id)
+            await supabaseAdmin.from('shipments').update({
+                velocity_status: newStatus,
+                customer_visible_status: newStatus,
+                last_synced_at: new Date().toISOString()
+            }).eq('id', shipment_id)
             return new Response(JSON.stringify({ success: true, status: newStatus }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
         }
         throw new Error('Failed to track shipment from Velocity')
@@ -277,8 +291,10 @@ serve(async (req) => {
         const { data: shipment } = await supabaseAdmin.from('shipments').select('*').eq('id', shipment_id).single()
         if (!shipment) throw new Error('Shipment not found')
 
-        const res = await fetchVelocity('/custom/api/v1/cancel-shipment', { method: 'POST', body: JSON.stringify({ awbs: [shipment.awb_code] }) }, supabaseAdmin)
-        if (!res.meta?.success) throw new Error(`Velocity cancellation failed: ${JSON.stringify(res.errors || res)}`)
+        const res = await fetchVelocity('/custom/api/v1/cancel-order', {
+            method: 'POST',
+            body: JSON.stringify({ awbs: [shipment.awb_code] })
+        }, supabaseAdmin)
 
         await supabaseAdmin.from('shipments').update({ is_canceled: true, velocity_status: 'Cancelled' }).eq('id', shipment_id)
         await supabaseAdmin.from('shipment_events').insert([{ shipment_id, velocity_status: 'Cancelled', event_time: new Date().toISOString(), created_by_admin_id: user.id }])
