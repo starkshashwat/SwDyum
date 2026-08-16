@@ -116,7 +116,10 @@ serve(async (req) => {
     if (authError || !user) throw new Error('Unauthorized')
 
     const { data: profile } = await supabaseClient.from('profiles').select('role').eq('id', user.id).single()
-    if (profile?.role !== 'Admin' && profile?.role !== 'Editor') throw new Error('Forbidden: Admin access required')
+    const userRole = (profile?.role || '').toLowerCase()
+    if (!['admin', 'super admin', 'super_admin', 'editor', 'manager'].includes(userRole)) {
+      throw new Error(`Forbidden: Admin access required (Current role: ${profile?.role || 'none'})`)
+    }
 
     const supabaseAdmin = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '')
     const payload = await req.json()
