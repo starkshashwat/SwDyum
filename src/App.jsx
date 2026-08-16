@@ -37,33 +37,36 @@ const TermsPage = lazy(() => import('./TermsPage'));
 
 function App() {
   const parsePath = (path) => {
-    if (path === '/shop') return 'shop';
-    if (path === '/about') return 'about';
-    if (path === '/contact') return 'contact';
-    if (path === '/thank-you') return 'thank-you';
-    if (path === '/reviews') return 'reviews';
-    if (path === '/privacy-policy') return 'privacy-policy';
-    if (path === '/delete-account') return 'delete-account';
-    if (path === '/shipping-policy') return 'shipping-policy';
-    if (path === '/return-policy') return 'terms';
-    if (path === '/terms') return 'terms';
-    if (path === '/cart') return 'cart';
-    if (path === '/checkout') return 'checkout';
-    if (path === '/login') return 'login';
-    if (path === '/signup') return 'signup';
-    if (path === '/forgot-password') return 'forgot-password';
-    if (path === '/account') return 'account';
-    if (path.startsWith('/account/orders/')) {
-      const orderId = path.substring('/account/orders/'.length);
+    // Normalize: '' , '/' and '/shop/' all resolve like their canonical form
+    const normalized = (path || '/').replace(/\/+$/, '') || '/';
+    if (normalized === '/' ) return 'home';
+    if (normalized === '/shop') return 'shop';
+    if (normalized === '/about') return 'about';
+    if (normalized === '/contact') return 'contact';
+    if (normalized === '/thank-you') return 'thank-you';
+    if (normalized === '/reviews') return 'reviews';
+    if (normalized === '/privacy-policy') return 'privacy-policy';
+    if (normalized === '/delete-account') return 'delete-account';
+    if (normalized === '/shipping-policy') return 'shipping-policy';
+    if (normalized === '/return-policy') return 'terms';
+    if (normalized === '/terms') return 'terms';
+    if (normalized === '/cart') return 'cart';
+    if (normalized === '/checkout') return 'checkout';
+    if (normalized === '/login') return 'login';
+    if (normalized === '/signup') return 'signup';
+    if (normalized === '/forgot-password') return 'forgot-password';
+    if (normalized === '/account') return 'account';
+    if (normalized.startsWith('/account/orders/')) {
+      const orderId = normalized.substring('/account/orders/'.length);
       return `order-details-${orderId}`;
     }
-    if (path === '/pickles') return 'category-pickles';
-    if (path === '/mango-pickle') return 'category-mango-pickle';
-    if (path === '/lemon-pickle') return 'category-lemon-pickle';
-    if (path === '/green-chilli-pickle') return 'category-green-chilli-pickle';
-    if (path === '/garlic-pickle') return 'category-garlic-pickle';
-    if (path.startsWith('/product/')) {
-      const slug = path.substring('/product/'.length);
+    if (normalized === '/pickles') return 'category-pickles';
+    if (normalized === '/mango-pickle') return 'category-mango-pickle';
+    if (normalized === '/lemon-pickle') return 'category-lemon-pickle';
+    if (normalized === '/green-chilli-pickle') return 'category-green-chilli-pickle';
+    if (normalized === '/garlic-pickle') return 'category-garlic-pickle';
+    if (normalized.startsWith('/product/')) {
+      const slug = normalized.substring('/product/'.length);
       return `product-${slug}`;
     }
     return 'not-found';
