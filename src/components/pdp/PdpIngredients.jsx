@@ -13,12 +13,12 @@ export default function PdpIngredients({ product }) {
 
   // Resolve and clean the ingredient list from product config (removing Hindi prefixes if any)
   const INGREDIENTS = useMemo(() => {
-    const rawList = product?.pdp_config?.tabs?.ingredients_table || product?.pdp_config?.detailed_ingredients;
+    const rawList = product?.pdp_config?.ingredients_table || product?.pdp_config?.tabs?.ingredients_table || product?.pdp_config?.detailed_ingredients;
     if (Array.isArray(rawList) && rawList.length > 0) {
       return rawList.map(item => {
         if (typeof item === 'object' && item !== null) {
-          const name = item.name || item.english || '';
-          const why = item.reason || item.why || '';
+          const name = item.ingredient || item.name || item.english || '';
+          const why = item.reason || item.why || item.desc || '';
           // Remove Hindi part if any (split by — or - or :)
           const parts = name.split(/[—\-:]/);
           const englishName = parts.length > 1 ? parts[parts.length - 1].trim() : name.trim();

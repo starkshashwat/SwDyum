@@ -1,293 +1,257 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
-import { Send, User, Phone, Loader2, MessageSquare } from 'lucide-react';
+import ChatList from './inbox/ChatList';
+import ChatWindow from './inbox/ChatWindow';
+import CustomerContext from './inbox/CustomerContext';
 
 export default function Inbox() {
+  const [chats, setChats] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [contacts, setContacts] = useState([]);
-  const [activePhone, setActivePhone] = useState(null);
-  const [activeName, setActiveName] = useState('');
-  const [newMessage, setNewMessage] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [activeChat, setActiveChat] = useState(null);
+  
+  const [loadingChats, setLoadingChats] = useState(true);
+  const [loadingMessages, setLoadingMessages] = useState(false);
   const [sending, setSending] = useState(false);
-  const messagesEndRef = useRef(null);
+  
+  // Templates
+  const [templates, setTemplates] = useState([]);
+  const [loadingTemplates, setLoadingTemplates] = useState(false);
 
-  // Fetch all messages initially
+  // Initialize and subscribe
   useEffect(() => {
-    fetchMessages();
+    fetchChats();
+    fetchTemplates();
 
-    // Subscribe to realtime database changes
-    const channel = supabase
-      .channel('whatsapp_messages_realtime')
+    // Subscribe to Chats (New, Updates)
+    const chatsChannel = supabase
+      .channel('whatsapp_chats_realtime')
       .on(
         'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'whatsapp_messages'
-        },
+        { event: '*', schema: 'public', table: 'whatsapp_chats' },
         (payload) => {
-          console.log('New realtime message:', payload.new);
-          setMessages(prev => {
-            // Avoid duplicate messages
-            if (prev.some(m => m.id === payload.new.id)) return prev;
-            return [...prev, payload.new];
-          });
+          if (payload.eventType === 'INSERT') {
+            setChats(prev => [payload.new, ...prev].sort((a,b) => new Date(b.last_message_at) - new Date(a.last_message_at)));
+          } else if (payload.eventType === 'UPDATE') {
+            setChats(prev => prev.map(c => c.id === payload.new.id ? payload.new : c).sort((a,b) => new Date(b.last_message_at) - new Date(a.last_message_at)));
+            setActiveChat(prev => prev?.id === payload.new.id ? payload.new : prev);
+          }
         }
       )
       .subscribe();
 
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(chatsChannel);
     };
   }, []);
 
-  // Recalculate unique contacts when messages change
+  // Subscribe to messages for active chat
   useEffect(() => {
-    if (messages.length === 0) return;
+    if (!activeChat) {
+      setMessages([]);
+      return;
+    }
 
-    // Group by sender_phone and find the latest message for each
-    const contactsMap = {};
-    
-    // Process messages in chronological order so the latest one overrides
-    const sortedMessages = [...messages].sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    fetchMessages(activeChat.id);
 
-    sortedMessages.forEach(msg => {
-      // For inbound, sender is the customer. For outbound, sender_phone is the recipient.
-      const phone = msg.sender_phone;
-      
-      contactsMap[phone] = {
-        phone,
-        name: msg.direction === 'inbound' ? msg.sender_name : (contactsMap[phone]?.name || 'Customer'),
-        lastMessage: msg.message_body,
-        lastMessageTime: msg.created_at,
-        direction: msg.direction
-      };
-    });
+    const messagesChannel = supabase
+      .channel(`whatsapp_messages_${activeChat.id}`)
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'whatsapp_messages', filter: `chat_id=eq.${activeChat.id}` },
+        (payload) => {
+          setMessages(prev => {
+            if (prev.some(m => m.id === payload.new.id)) return prev;
+            return [...prev, payload.new];
+          });
+          // If we receive a message in the active chat and it's inbound, we can optionally clear unread_count here
+        }
+      )
+      .subscribe();
 
-    // Convert map to array and sort by latest message time descending
-    const contactsList = Object.values(contactsMap).sort(
-      (a, b) => new Date(b.lastMessageTime) - new Date(a.lastMessageTime)
-    );
+    return () => {
+      supabase.removeChannel(messagesChannel);
+    };
+  }, [activeChat?.id]); // Note: using activeChat?.id so we only resubscribe if ID changes
 
-    setContacts(contactsList);
-  }, [messages]);
-
-  // Scroll to bottom when active chat or messages change
+  // Clear unread count when a chat becomes active
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [activePhone, messages]);
+    if (activeChat && activeChat.unread_count > 0) {
+      clearUnreadCount(activeChat.id);
+    }
+  }, [activeChat]);
 
-  const fetchMessages = async () => {
+  const fetchChats = async () => {
+    setLoadingChats(true);
     try {
-      setLoading(true);
+      const { data, error } = await supabase
+        .from('whatsapp_chats')
+        .select('*')
+        .order('last_message_at', { ascending: false });
+      if (error) throw error;
+      setChats(data || []);
+    } catch (err) {
+      console.error('Error fetching chats:', err);
+    } finally {
+      setLoadingChats(false);
+    }
+  };
+
+  const fetchMessages = async (chatId) => {
+    setLoadingMessages(true);
+    try {
       const { data, error } = await supabase
         .from('whatsapp_messages')
         .select('*')
+        .eq('chat_id', chatId)
         .order('created_at', { ascending: true });
-
       if (error) throw error;
       setMessages(data || []);
     } catch (err) {
       console.error('Error fetching messages:', err);
     } finally {
-      setLoading(false);
+      setLoadingMessages(false);
     }
   };
 
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!newMessage.trim() || !activePhone) return;
-
-    setSending(true);
-    const textToSend = newMessage;
-    setNewMessage('');
-
+  const fetchTemplates = async () => {
+    setLoadingTemplates(true);
     try {
-      const { data, error } = await supabase.functions.invoke('send-whatsapp-message', {
-        body: { phone: activePhone, message: textToSend }
-      });
-
-      if (error) throw error;
-      
-      // If mock/success, immediately append it locally (if not caught by realtime yet)
-      if (data && data.message) {
-        setMessages(prev => {
-          if (prev.some(m => m.id === data.message.id)) return prev;
-          return [...prev, data.message];
-        });
+      const { data, error } = await supabase.functions.invoke('whatsapp-templates', { method: 'GET' });
+      if (!error && data?.status === 'success') {
+        setTemplates(data.data.filter(t => t.status === 'APPROVED'));
       }
     } catch (err) {
-      console.error('Error sending WhatsApp message:', err);
-      alert(`Failed to send message: ${err.message}`);
-      setNewMessage(textToSend); // Restore input on error
+      console.error('Failed to load templates:', err);
+    } finally {
+      setLoadingTemplates(false);
+    }
+  };
+
+  const clearUnreadCount = async (chatId) => {
+    try {
+      // Optimistic update
+      setChats(prev => prev.map(c => c.id === chatId ? { ...c, unread_count: 0 } : c));
+      await supabase.from('whatsapp_chats').update({ unread_count: 0 }).eq('id', chatId);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  // Handlers for sending messages
+  const handleSendMessage = async (text) => {
+    if (!activeChat) return;
+    setSending(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('send-whatsapp-message', {
+        body: { phone: activeChat.phone, message: text }
+      });
+      if (error) throw error;
+      if (data && data.message) {
+        // Optimistic update (trigger will also fire)
+        setMessages(prev => prev.some(m => m.id === data.message.id) ? prev : [...prev, data.message]);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to send message: ' + err.message);
     } finally {
       setSending(false);
     }
   };
 
-  // Filter messages for the active conversation
-  const activeChatMessages = messages.filter(
-    msg => msg.sender_phone === activePhone
-  );
+  const handleSendMedia = async (file) => {
+    if (!activeChat) return;
+    setSending(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `inbox/${fileName}`;
+      
+      const { error: uploadError } = await supabase.storage.from('whatsapp_media').upload(filePath, file);
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage.from('whatsapp_media').getPublicUrl(filePath);
+      const type = file.type.startsWith('image/') ? 'image' : 'document';
+      
+      const { error: sendError, data } = await supabase.functions.invoke('send-whatsapp-message', {
+        body: { phone: activeChat.phone, type, mediaUrl: publicUrl, message: file.name }
+      });
+      if (sendError) throw sendError;
+      
+      if (data && data.message) {
+        setMessages(prev => prev.some(m => m.id === data.message.id) ? prev : [...prev, data.message]);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to send file: ' + err.message);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleSendTemplate = async (selectedTemplate, templateVariables) => {
+    if (!activeChat) return;
+    setSending(true);
+    try {
+       const components = [];
+       if (Object.keys(templateVariables).length > 0) {
+         const parameters = Object.keys(templateVariables).sort().map(k => ({
+           type: 'text',
+           text: templateVariables[k]
+         }));
+         components.push({ type: 'body', parameters });
+       }
+       
+       const templatePayload = {
+         name: selectedTemplate.name,
+         language: { code: selectedTemplate.language },
+         components: components.length > 0 ? components : undefined
+       };
+
+       const { error, data } = await supabase.functions.invoke('send-whatsapp-message', {
+         body: { phone: activeChat.phone, type: 'template', template: templatePayload }
+       });
+       if (error) throw error;
+       
+       if (data && data.message) {
+         setMessages(prev => prev.some(m => m.id === data.message.id) ? prev : [...prev, data.message]);
+       }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to send template: ' + err.message);
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const handleUpdateChat = (chatId, updates) => {
+    setChats(prev => prev.map(c => c.id === chatId ? { ...c, ...updates } : c));
+    if (activeChat?.id === chatId) {
+      setActiveChat(prev => ({ ...prev, ...updates }));
+    }
+  };
 
   return (
-    <div className="flex h-[calc(100vh-10rem)] border border-gray-200 rounded-xl bg-white overflow-hidden shadow-sm">
-      {/* Left Pane - Contact List */}
-      <div className="w-1/3 border-r border-gray-200 flex flex-col bg-gray-50">
-        <div className="p-4 border-b border-gray-200 bg-white">
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-            <MessageSquare className="w-5 h-5 text-green-600" />
-            WhatsApp Chats
-          </h2>
-          <p className="text-xs text-gray-500 mt-1">Real-time customer inbox</p>
-        </div>
-
-        <div className="flex-1 overflow-y-auto">
-          {loading && contacts.length === 0 ? (
-            <div className="flex items-center justify-center p-8">
-              <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
-            </div>
-          ) : contacts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center p-8 text-center text-gray-400">
-              <MessageSquare className="w-10 h-10 mb-2 stroke-1" />
-              <p className="text-sm font-medium">No chats found</p>
-              <p className="text-xs mt-1">Incoming WhatsApp messages will appear here.</p>
-            </div>
-          ) : (
-            contacts.map((contact) => (
-              <button
-                key={contact.phone}
-                onClick={() => {
-                  setActivePhone(contact.phone);
-                  setActiveName(contact.name);
-                }}
-                className={`w-full text-left p-4 border-b border-gray-100 flex items-start gap-3 transition-colors ${
-                  activePhone === contact.phone
-                    ? 'bg-green-50/70 border-l-4 border-l-green-600'
-                    : 'bg-white hover:bg-gray-50'
-                }`}
-              >
-                <div className="w-10 h-10 rounded-full bg-green-100 text-green-700 flex items-center justify-center flex-shrink-0">
-                  <User className="w-5 h-5" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex justify-between items-baseline mb-1">
-                    <span className="font-semibold text-sm text-gray-900 truncate">
-                      {contact.name || 'WhatsApp User'}
-                    </span>
-                    <span className="text-[10px] text-gray-400 whitespace-nowrap">
-                      {new Date(contact.lastMessageTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-500 truncate">
-                    {contact.phone}
-                  </p>
-                  <p className="text-xs text-gray-600 truncate mt-1">
-                    {contact.direction === 'outbound' ? 'You: ' : ''}
-                    {contact.lastMessage}
-                  </p>
-                </div>
-              </button>
-            ))
-          )}
-        </div>
-      </div>
-
-      {/* Right Pane - Chat Window */}
-      <div className="w-2/3 flex flex-col bg-white">
-        {activePhone ? (
-          <>
-            {/* Chat Header */}
-            <div className="p-4 border-b border-gray-200 flex items-center justify-between bg-white z-10">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-green-100 text-green-700 flex items-center justify-center">
-                  <User className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-sm text-gray-900">{activeName || 'Customer'}</h3>
-                  <p className="text-xs text-gray-500 flex items-center gap-1">
-                    <Phone className="w-3 h-3" />
-                    {activePhone}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Messages Thread */}
-            <div className="flex-1 p-6 overflow-y-auto bg-gray-50 space-y-4">
-              {activeChatMessages.map((msg) => {
-                const isInbound = msg.direction === 'inbound';
-                return (
-                  <div
-                    key={msg.id}
-                    className={`flex ${isInbound ? 'justify-start' : 'justify-end'}`}
-                  >
-                    <div
-                      className={`max-w-[70%] rounded-2xl px-4 py-2.5 shadow-sm text-sm ${
-                        isInbound
-                          ? 'bg-white text-gray-800 rounded-tl-none'
-                          : 'bg-green-600 text-white rounded-tr-none'
-                      }`}
-                    >
-                      <p className="leading-relaxed whitespace-pre-wrap">{msg.message_body}</p>
-                      <div
-                        className={`text-[9px] mt-1 text-right ${
-                          isInbound ? 'text-gray-400' : 'text-green-100'
-                        }`}
-                      >
-                        {new Date(msg.created_at).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Input Bar */}
-            <form onSubmit={handleSendMessage} className="p-4 border-t border-gray-200 bg-white">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Type a message..."
-                  disabled={sending}
-                  className="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-50"
-                />
-                <button
-                  type="submit"
-                  disabled={sending || !newMessage.trim()}
-                  className="px-4 py-2.5 bg-green-600 hover:bg-green-700 disabled:bg-green-300 text-white font-medium rounded-lg text-sm transition-colors flex items-center justify-center gap-1.5"
-                >
-                  {sending ? (
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4" />
-                      Send
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </>
-        ) : (
-          <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-gray-400">
-            <div className="w-16 h-16 rounded-full bg-green-50 text-green-600 flex items-center justify-center mb-4">
-              <MessageSquare className="w-8 h-8" />
-            </div>
-            <h3 className="font-semibold text-lg text-gray-800">No Chat Selected</h3>
-            <p className="text-sm max-w-sm mt-1">
-              Select a customer from the left sidebar to view history and send messages.
-            </p>
-          </div>
-        )}
-      </div>
+    <div className="flex h-[calc(100vh-6rem)] border border-gray-200 rounded-xl overflow-hidden shadow-sm">
+      <ChatList 
+        chats={chats}
+        activeChatId={activeChat?.id}
+        onSelectChat={setActiveChat}
+        loading={loadingChats}
+      />
+      <ChatWindow
+        activeChat={activeChat}
+        messages={messages}
+        onSendMessage={handleSendMessage}
+        onSendMedia={handleSendMedia}
+        onSendTemplate={handleSendTemplate}
+        templates={templates}
+        loadingTemplates={loadingTemplates}
+        sending={sending}
+      />
+      <CustomerContext
+        activeChat={activeChat}
+        onUpdateChat={handleUpdateChat}
+      />
     </div>
   );
 }

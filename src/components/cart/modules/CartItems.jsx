@@ -40,7 +40,7 @@ export default function CartItems({ cart, updateCartQty, removeFromCart }) {
                 {cart.map((item, idx) => {
                     const oldPrice = item.mrp || Math.round(item.price * 1.25);
                     const savings = oldPrice - item.price;
-                    const itemKey = `${item.slug}-${item.weight}-${item.subscription}`;
+                    const itemKey = `${item.slug}-${item.weight}`;
 
                     return (
                         <motion.div
@@ -65,8 +65,6 @@ export default function CartItems({ cart, updateCartQty, removeFromCart }) {
                                     <h4 className="cart-item-name">{item.name}</h4>
                                     <div className="cart-item-meta">
                                         <span className="cart-item-weight">{item.weight}</span>
-                                        <span className="cart-item-dot">•</span>
-                                        <span className="cart-item-sub">{item.subscription}</span>
                                     </div>
                                     {/* Star rating */}
                                     <div className="cart-item-stars">
@@ -99,7 +97,7 @@ export default function CartItems({ cart, updateCartQty, removeFromCart }) {
                                     <div className="cart-item-qty">
                                         <button
                                             className="qty-btn"
-                                            onClick={() => updateCartQty(item.slug, item.weight, item.subscription, item.quantity - 1)}
+                                            onClick={() => updateCartQty(item.slug, item.weight, item.quantity - 1)}
                                             aria-label="Decrease quantity"
                                         >
                                             −
@@ -115,7 +113,7 @@ export default function CartItems({ cart, updateCartQty, removeFromCart }) {
                                         </motion.span>
                                         <button
                                             className="qty-btn"
-                                            onClick={() => updateCartQty(item.slug, item.weight, item.subscription, item.quantity + 1)}
+                                            onClick={() => updateCartQty(item.slug, item.weight, item.quantity + 1)}
                                             aria-label="Increase quantity"
                                         >
                                             +
@@ -123,7 +121,7 @@ export default function CartItems({ cart, updateCartQty, removeFromCart }) {
                                     </div>
                                     <button
                                         className="cart-item-remove"
-                                        onClick={() => removeFromCart(item.slug, item.weight, item.subscription)}
+                                        onClick={() => removeFromCart(item.slug, item.weight)}
                                         aria-label="Remove item"
                                         title="Remove item"
                                     >

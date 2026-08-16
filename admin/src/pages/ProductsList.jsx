@@ -1,60 +1,92 @@
+// ============================================================================
+// pages/ProductsList.jsx
+// ----------------------------------------------------------------------------
+// Product catalog list screen. Wired to the backend API:
+//   GET    /api/products?search=&limit=          (list, includes nested
+//                                                  product_variants/product_images)
+//   PATCH  /api/products/:id                      (toggle is_active)
+//   DELETE /api/products/:id                      (delete, cascades to all
+//                                                  nested content entities)
+//   GET    /api/categories?limit=                 (for category name lookup —
+//                                                  listProducts does not join
+//                                                  category name server-side)
+// ============================================================================
+
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
 import { Link } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Search, ArrowUpDown, Filter } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, Filter } from 'lucide-react';
+import { apiClient, ApiError } from '../lib/apiClient';
 
 export default function ProductsList() {
   const [products, setProducts] = useState([]);
+  const [categoriesById, setCategoriesById] = useState({});
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [search, setSearch] = useState('');
 
   useEffect(() => {
+    fetchCategories();
     fetchProducts();
   }, []);
 
+  const fetchCategories = async () => {
+    try {
+      const res = await apiClient.get('/categories', { limit: 100 });
+      const map = {};
+      (res?.data || []).forEach((c) => {
+        map[c.id] = c.name;
+      });
+      setCategoriesById(map);
+    } catch {
+      // Non-fatal — category names just won't resolve in the table.
+    }
+  };
+
   const fetchProducts = async () => {
     setLoading(true);
-    // Fetch products along with their category name
-    const { data, error } = await supabase
-      .from('products')
-      .select(`
-        *,
-        categories (name)
-      `)
-      .order('created_at', { ascending: false });
-
-    if (!error && data) {
-      setProducts(data);
+    setError('');
+    try {
+      const res = await apiClient.get('/products', { limit: 100 });
+      setProducts(res?.data || []);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to load products.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleDelete = async (id, name) => {
     if (!window.confirm(`Are you sure you want to delete the product "${name}"? This action cannot be undone.`)) return;
-
-    const { error } = await supabase.from('products').delete().eq('id', id);
-    if (!error) {
-      setProducts(products.filter(p => p.id !== id));
-    } else {
-      alert(`Error deleting product: ${error.message}`);
+    try {
+      await apiClient.delete(`/products/${id}`);
+      setProducts((prev) => prev.filter((p) => p.id !== id));
+    } catch (err) {
+      alert(`Error deleting product: ${err instanceof ApiError ? err.message : 'Unknown error'}`);
     }
   };
 
   const toggleStatus = async (id, currentStatus) => {
-    const { error } = await supabase
-      .from('products')
-      .update({ is_active: !currentStatus })
-      .eq('id', id);
-      
-    if (!error) {
-      setProducts(products.map(p => p.id === id ? { ...p, is_active: !currentStatus } : p));
+    try {
+      await apiClient.patch(`/products/${id}`, { is_active: !currentStatus });
+      setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, is_active: !currentStatus } : p)));
+    } catch (err) {
+      alert(`Error updating status: ${err instanceof ApiError ? err.message : 'Unknown error'}`);
     }
   };
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(search.toLowerCase()) || 
-    p.slug.toLowerCase().includes(search.toLowerCase())
+  const filteredProducts = products.filter(
+    (p) =>
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.slug.toLowerCase().includes(search.toLowerCase())
   );
+
+  const priceRangeFor = (product) => {
+    const prices = (product.product_variants || []).map((v) => Number(v.price)).filter((n) => !Number.isNaN(n));
+    if (prices.length === 0) return '—';
+    const min = Math.min(...prices);
+    const max = Math.max(...prices);
+    return min === max ? `₹${min}` : `₹${min} - ₹${max}`;
+  };
 
   return (
     <div className="space-y-6">
@@ -63,14 +95,16 @@ export default function ProductsList() {
           <h1 className="text-2xl font-bold text-gray-900">Products</h1>
           <p className="text-sm text-gray-500 mt-1">Manage your inventory, pricing, and product details.</p>
         </div>
-        <Link 
-          to="/products/new" 
+        <Link
+          to="/products/new"
           className="inline-flex items-center justify-center px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Product
         </Link>
       </div>
+
+      {error && <div className="bg-red-50 text-red-700 p-4 rounded-lg text-sm border border-red-100">{error}</div>}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-4 border-b border-gray-200 flex flex-col sm:flex-row gap-4">
@@ -98,21 +132,22 @@ export default function ProductsList() {
               <tr>
                 <th scope="col" className="px-6 py-3 font-semibold">Product</th>
                 <th scope="col" className="px-6 py-3 font-semibold">Category</th>
+                <th scope="col" className="px-6 py-3 font-semibold">Price Range</th>
+                <th scope="col" className="px-6 py-3 font-semibold text-center">Sort Order</th>
                 <th scope="col" className="px-6 py-3 font-semibold text-center">Status</th>
-                <th scope="col" className="px-6 py-3 font-semibold text-center">Bestseller</th>
                 <th scope="col" className="px-6 py-3 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
                     Loading products...
                   </td>
                 </tr>
               ) : filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan="6" className="px-6 py-8 text-center text-gray-500">
                     No products found. Click "Add Product" to create one.
                   </td>
                 </tr>
@@ -120,43 +155,48 @@ export default function ProductsList() {
                 filteredProducts.map((product) => (
                   <tr key={product.id} className="bg-white border-b border-gray-100 hover:bg-gray-50 transition-colors">
                     <td className="px-6 py-4">
-                      <div className="flex flex-col">
-                        <span className="font-medium text-gray-900">{product.name}</span>
-                        <span className="text-xs text-gray-500">/{product.slug}</span>
+                      <div className="flex items-center gap-3">
+                        {product.product_images?.[0]?.url ? (
+                          <img
+                            src={product.product_images[0].url}
+                            alt=""
+                            className="w-10 h-10 rounded object-cover border border-gray-200 bg-gray-50"
+                          />
+                        ) : (
+                          <div className="w-10 h-10 rounded bg-gray-100 border border-gray-200" />
+                        )}
+                        <div className="flex flex-col">
+                          <span className="font-medium text-gray-900">{product.name}</span>
+                          <span className="text-xs text-gray-500">/{product.slug}</span>
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 text-gray-500">
-                      {product.categories?.name || <span className="text-gray-400 italic">Uncategorized</span>}
+                      {categoriesById[product.category_id] || <span className="text-gray-400 italic">Uncategorized</span>}
                     </td>
+                    <td className="px-6 py-4 text-gray-700">{priceRangeFor(product)}</td>
+                    <td className="px-6 py-4 text-center text-gray-500">{product.sort_order ?? 0}</td>
                     <td className="px-6 py-4 text-center">
-                      <button 
+                      <button
                         onClick={() => toggleStatus(product.id, product.is_active)}
-                        className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full transition-colors ${
-                          product.is_active 
-                            ? 'bg-green-100 text-green-800 hover:bg-green-200' 
+                        className={`px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full transition-colors ${product.is_active
+                            ? 'bg-green-100 text-green-800 hover:bg-green-200'
                             : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                        }`}
+                          }`}
                       >
-                        {product.is_active ? 'Active' : 'Draft'}
+                        {product.is_active ? 'Active' : 'Inactive'}
                       </button>
-                    </td>
-                    <td className="px-6 py-4 text-center">
-                      {product.is_bestseller ? (
-                        <span className="text-amber-500 text-lg">★</span>
-                      ) : (
-                        <span className="text-gray-300 text-lg">☆</span>
-                      )}
                     </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Link 
+                        <Link
                           to={`/products/${product.id}`}
                           className="p-2 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
                           title="Edit"
                         >
                           <Edit2 className="w-4 h-4" />
                         </Link>
-                        <button 
+                        <button
                           onClick={() => handleDelete(product.id, product.name)}
                           className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
                           title="Delete"

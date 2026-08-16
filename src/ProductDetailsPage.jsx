@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import './ProductDetailsPage.css';
-import { getProductBySlug, getRelatedProducts } from './data/products';
-import { pdpContentMap } from './data/pdpContentMap';
+import { getProductBySlug, getRelatedProducts } from './lib/api/catalogService';
 
 import PdpHero from './components/pdp/PdpHero';
 import PdpStickyBar from './components/pdp/PdpStickyBar';
@@ -12,31 +11,24 @@ import ReviewSection from './ReviewSection';
 import PdpUgc from './components/pdp/PdpUgc';
 import PdpRelated from './components/pdp/PdpRelated';
 import PdpFaq from './components/pdp/PdpFaq';
+import PdpSkeleton from './components/pdp/PdpSkeleton';
 
 function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow }) {
   const [p, setP] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedSize, setSelectedSize] = useState('250g');
   const [quantity, setQuantity] = useState(1);
-  const [subscription, setSubscription] = useState('One Time');
 
   useEffect(() => {
     const loadProduct = async () => {
       setLoading(true);
       const data = await getProductBySlug(slug);
       if (data) {
-        // Inject custom PDP content if it exists in the map
-        if (pdpContentMap[slug]) {
-          data.pdp_config = {
-            ...data.pdp_config,
-            ...pdpContentMap[slug]
-          };
-        }
-
+        // PDP content overrides (tabs/faq/taste-profile) are merged into
+        // pdp_config inside catalogService.getProductBySlug().
         setP({ ...data, related: [] }); // Set product immediately
         setSelectedSize(Object.keys(data.prices)[0] || '250g');
         setQuantity(1);
-        setSubscription('One Time');
         setLoading(false); // Stop loader immediately
 
         // Fetch related asynchronously so it doesn't block
@@ -51,7 +43,7 @@ function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow }) {
     loadProduct();
   }, [slug]);
 
-  if (loading) return null; // Remove huge blocking text to fix delay perception
+  if (loading) return <PdpSkeleton />;
   if (!p) return <div className="pdp-loader">Product not found.</div>;
 
   return (
@@ -64,8 +56,7 @@ function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow }) {
         setSelectedSize={setSelectedSize}
         quantity={quantity}
         setQuantity={setQuantity}
-        subscription={subscription}
-        setSubscription={setSubscription}
+
         addToCart={addToCart}
         onNavigate={onNavigate}
         handleBuyNow={handleBuyNow}
@@ -97,7 +88,7 @@ function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow }) {
           </div>
           <button
             className="pdp-midpage-cta-btn"
-            onClick={() => handleBuyNow(p, selectedSize, quantity, subscription)}
+            onClick={() => handleBuyNow(p, selectedSize, quantity)}
           >
             Buy Now · ₹{(p.prices?.[selectedSize] || p.base_price) * quantity}
           </button>
@@ -116,7 +107,7 @@ function ProductDetailsPage({ slug, onNavigate, addToCart, handleBuyNow }) {
       <PdpUgc />
 
       {/* 9. FAQ — objection handling before upsell */}
-      <PdpFaq faqData={p.pdp_config?.faq} />
+      <PdpFaq faqData={p.product_faqs?.length ? p.product_faqs : p.pdp_config?.faq} />
 
       {/* 11. RELATED PRODUCTS — broader cross-sell */}
       <PdpRelated products={p.related} onNavigate={onNavigate} />

@@ -205,8 +205,8 @@ export default function PurchaseDrawer({
 
     // ─── FBT add handler ───
     const handleFbtAdd = useCallback(
-        (product, weight, qty, subscription) => {
-            addToCart(product, weight, qty, subscription, false);
+        (product, weight, qty) => {
+            addToCart(product, weight, qty, false);
         },
         [addToCart]
     );

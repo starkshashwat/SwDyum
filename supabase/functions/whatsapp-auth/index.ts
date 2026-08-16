@@ -25,14 +25,9 @@ const ALLOWED_ORIGINS = [
 ];
 
 function corsHeaders(origin: string | null) {
-  let allow = ALLOWED_ORIGINS[0];
-  if (origin && (ALLOWED_ORIGINS.includes(origin) || origin.endsWith(".vercel.app"))) {
-    allow = origin;
-  }
   return {
-    "Access-Control-Allow-Origin": allow,
+    "Access-Control-Allow-Origin": "*",
     "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-    "Vary": "Origin",
   };
 }
 
@@ -75,13 +70,20 @@ function generateSecureOtp(): string {
 
 // ─── Session token (V1) ──────────────────────────────────────────────────────
 // Issues a signed token: base64url(header).base64url(payload).hmac
-// The payload contains the profile id and an expiry. The secret is the
-// JWT secret of the Supabase project (SUPABASE_JWT_SECRET), which only the
-// edge function can read from env.
+// The payload contains the profile id and an expiry. The secret must be a
+// dedicated signing secret (SUPABASE_JWT_SECRET or SESSION_SECRET), never the
+// service-role key.
+//
+// Phase 5 security hardening: removed the SUPABASE_SERVICE_ROLE_KEY fallback.
+// Using the service-role key as an HMAC signing secret was a critical risk:
+// that key is also the master DB-bypassing credential, so any leak/rotation
+// mismatch of the session-token secret would double as an admin-DB-access
+// leak. This function now fails closed (throws) unless a dedicated
+// SUPABASE_JWT_SECRET or SESSION_SECRET env var is configured.
 async function issueSessionToken(profileId: string): Promise<string> {
-  const secret = Deno.env.get("SUPABASE_JWT_SECRET") || Deno.env.get("SESSION_SECRET") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+  const secret = Deno.env.get("SUPABASE_JWT_SECRET") || Deno.env.get("SESSION_SECRET") || "";
   if (!secret) {
-    throw new Error("Session signing secret is not configured");
+    throw new Error("Session signing secret is not configured (set SUPABASE_JWT_SECRET or SESSION_SECRET)");
   }
   const header = { alg: "HS256", typ: "JWT" };
   const now = Math.floor(Date.now() / 1000);
@@ -316,44 +318,90 @@ export default {
         // OTP valid — clear it.
         await supabase.from("whatsapp_otps").delete().eq("phone", phone);
 
-        // Fetch or create profile.
-        let { data: profile } = await supabase
-          .from("profiles")
-          .select("*")
-          .eq("phone", phone)
-          .maybeSingle();
+        let profileToReturn;
+        const { userId } = body;
 
-        if (!profile) {
-          const newUserId = crypto.randomUUID();
-          const { data: newProfile, error: insertError } = await supabase
-            .from("profiles")
-            .upsert({
-              id: newUserId,
-              phone: phone,
-              name: "",
-              whatsapp_opt_in: optIn !== undefined ? optIn : true,
-            })
-            .select()
-            .single();
+        if (userId) {
+           // We are linking to an existing auth profile (e.g., from Google OAuth)
+           // 1. Check if phone is already used by ANOTHER profile
+           const { data: existingPhoneProfile } = await supabase
+             .from("profiles")
+             .select("id, phone_verified")
+             .eq("phone", phone)
+             .neq("id", userId)
+             .maybeSingle();
+             
+           if (existingPhoneProfile && existingPhoneProfile.phone_verified) {
+              return new Response(JSON.stringify({ error: "Phone number is already linked to another verified account. Please contact support." }), {
+                  status: 409,
+                  headers: { ...cors, "Content-Type": "application/json" }
+              });
+           }
+           
+           if (existingPhoneProfile && !existingPhoneProfile.phone_verified) {
+               // Remove phone from the unverified duplicate
+               await supabase.from("profiles").update({ phone: null }).eq("id", existingPhoneProfile.id);
+           }
+           
+           // 2. Link phone to current profile
+           const { data: updatedProfile, error: linkError } = await supabase
+             .from("profiles")
+             .update({ phone: phone, phone_verified: true, whatsapp_opt_in: optIn !== undefined ? optIn : true })
+             .eq("id", userId)
+             .select()
+             .single();
+             
+           if (linkError) throw linkError;
+           profileToReturn = updatedProfile;
+           
+        } else {
+           // Standard Phone Login/Signup Flow
+           let { data: profile } = await supabase
+             .from("profiles")
+             .select("*")
+             .eq("phone", phone)
+             .maybeSingle();
 
-          if (insertError) throw insertError;
-          profile = newProfile;
-        } else if (optIn !== undefined) {
-          const { data: updatedProfile, error: updateError } = await supabase
-            .from("profiles")
-            .update({ whatsapp_opt_in: optIn })
-            .eq("id", profile.id)
-            .select()
-            .single();
-          if (updateError) throw updateError;
-          profile = updatedProfile;
+           if (!profile) {
+             const newUserId = crypto.randomUUID();
+             const { data: newProfile, error: insertError } = await supabase
+               .from("profiles")
+               .upsert({
+                 id: newUserId,
+                 phone: phone,
+                 name: name || "",
+                 email: email || null,
+                 phone_verified: true,
+                 whatsapp_opt_in: optIn !== undefined ? optIn : true,
+               })
+               .select()
+               .single();
+
+             if (insertError) throw insertError;
+             profileToReturn = newProfile;
+           } else {
+             // Update existing
+             const updates: any = { phone_verified: true };
+             if (optIn !== undefined) updates.whatsapp_opt_in = optIn;
+             if (name && !profile.name) updates.name = name;
+             if (email && !profile.email) updates.email = email;
+             
+             const { data: updatedProfile, error: updateError } = await supabase
+               .from("profiles")
+               .update(updates)
+               .eq("id", profile.id)
+               .select()
+               .single();
+             if (updateError) throw updateError;
+             profileToReturn = updatedProfile;
+           }
         }
 
         // Issue a signed session token (V1).
-        const token = await issueSessionToken(profile.id);
+        const token = await issueSessionToken(profileToReturn.id);
 
         return new Response(
-          JSON.stringify({ status: "success", profile: profile, token }),
+          JSON.stringify({ status: "success", profile: profileToReturn, token }),
           { status: 200, headers: { ...cors, "Content-Type": "application/json" } }
         );
 

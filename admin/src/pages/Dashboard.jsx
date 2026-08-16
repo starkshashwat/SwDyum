@@ -5,8 +5,10 @@ import { TrendingUp, Users, ShoppingBag, Download, DollarSign, Package, XCircle,
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { format, subDays, startOfDay, startOfWeek, startOfMonth, startOfYear } from 'date-fns';
 
+import { useAuth } from '../context/AuthContext';
+
 export default function Dashboard() {
-  const [profile, setProfile] = useState(null);
+  const { profile } = useAuth();
   const [dateRange, setDateRange] = useState('This Month');
   const [metrics, setMetrics] = useState({});
   const [topProducts, setTopProducts] = useState([]);
@@ -14,16 +16,7 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { navigate('/login'); return; }
-      const { data, error } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-      if (error || data?.role === 'Customer') { navigate('/login'); return; }
-      setProfile(data);
-    };
-    fetchProfile();
-  }, [navigate]);
+
 
   useEffect(() => {
     if (profile) fetchDashboardData();

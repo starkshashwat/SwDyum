@@ -80,7 +80,7 @@ export default function useRazorpayCheckout({
 
         const orderItems = cart.map((item) => ({
             order_id: orderId, product_name: item.name, weight_label: item.weight,
-            sku: item.sku || '', subscription_type: item.subscription,
+            sku: item.sku || '',
             quantity: item.quantity, unit_price: item.price,
             total_price: item.price * item.quantity, final_price: item.price * item.quantity,
         }));

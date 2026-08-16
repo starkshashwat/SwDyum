@@ -7,8 +7,7 @@ export default function PdpHero({
   setSelectedSize,
   quantity,
   setQuantity,
-  subscription,
-  setSubscription,
+
   addToCart,
   onNavigate,
   handleBuyNow,
@@ -30,7 +29,7 @@ export default function PdpHero({
     ];
     const merged = [...imgs];
     extras.forEach((e) => { if (!merged.includes(e)) merged.push(e); });
-    return merged.slice(0, 5);
+    return merged;
   }, [product]);
 
   const tabsList = useMemo(() => {
@@ -41,9 +40,10 @@ export default function PdpHero({
     }
     if (product.pdp_config?.tabs && typeof product.pdp_config.tabs === 'object') {
       return Object.entries(product.pdp_config.tabs)
-        .filter(([key]) => key !== 'ingredients_table' && key !== 'ingredients')
+        .filter(([key]) => key !== 'ingredients_table' && key !== 'ingredients' && key !== 'product_details' && key !== 'shipping_support')
         .map(([key, val]) => {
-          let label = key.charAt(0).toUpperCase() + key.slice(1).replace('_', ' ');
+          let label = key.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+          if (key === 'shipping_support') label = 'Shipping & Support';
           let content = val;
           if (Array.isArray(val)) {
             content = val.map(i => `<strong>${i.name}</strong>: ${i.reason}`).join('<br/>');
@@ -64,7 +64,7 @@ export default function PdpHero({
   const currentPrice = product.prices?.[selectedSize] || product.base_price;
   const variant = (product.variants || []).find((v) => v.weight_label === selectedSize);
   const mrp = variant?.mrp || Math.round(currentPrice * 1.35);
-  const outOfStock = variant?.stock_quantity !== undefined && variant.stock_quantity <= 0;
+  const outOfStock = variant?.available_stock !== undefined ? variant.available_stock <= 0 : (variant?.stock_quantity !== undefined && variant.stock_quantity <= 0);
 
   const displayPrice = currentPrice;
 
@@ -92,7 +92,7 @@ export default function PdpHero({
     if (added || adding) return;
     setAdding(true);
     setTimeout(() => {
-      addToCart(product, selectedSize, quantity, subscription);
+      addToCart(product, selectedSize, quantity);
       setAdding(false);
       setAdded(true);
       setTimeout(() => setAdded(false), 1800);
@@ -205,7 +205,7 @@ export default function PdpHero({
           </div>
           {/* Description */}
           <p className="text-gray-500 text-sm leading-relaxed">
-            Sharp, tangy raw Langda mango pickle, sun-cured in cold-pressed mustard oil, made in small batches in Ara, Bihar.
+            {product.short_description || 'Sharp, tangy raw Langda mango pickle, sun-cured in cold-pressed mustard oil, made in small batches in Ara, Bihar.'}
           </p>
 
           <div className="h-px bg-gray-100" />
@@ -214,14 +214,14 @@ export default function PdpHero({
           <div>
             <div className="flex items-center justify-between mb-3">
               <p className="text-xs font-semibold text-gray-500 tracking-widest uppercase">Choose Your Size</p>
-              {variant?.stock_quantity > 0 && variant?.stock_quantity <= 8 && (
-                <span className="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-0.5 rounded">Only {variant.stock_quantity} left</span>
+              {variant?.available_stock > 0 && variant?.available_stock <= 8 && (
+                <span className="text-xs font-medium text-orange-600 bg-orange-50 px-2 py-0.5 rounded">Only {variant.available_stock} left</span>
               )}
             </div>
             <div className="flex gap-4 flex-wrap">
               {sizes.map((s) => {
                 const v = (product.variants || []).find((x) => x.weight_label === s);
-                const soldOut = v?.stock_quantity !== undefined && v.stock_quantity <= 0;
+                const soldOut = v?.available_stock !== undefined ? v.available_stock <= 0 : (v?.stock_quantity !== undefined && v.stock_quantity <= 0);
                 return (
                   <button
                     key={s}
@@ -288,7 +288,7 @@ export default function PdpHero({
 
           {/* Buy Now */}
           <button
-            onClick={() => handleBuyNow(product, selectedSize, quantity, subscription)}
+            onClick={() => handleBuyNow(product, selectedSize, quantity)}
             disabled={outOfStock}
             className={`w-full border-2 font-semibold py-3 rounded-full text-sm transition-colors ${outOfStock ? 'border-gray-200 text-gray-400 cursor-not-allowed' : 'border-[#1A4E28] text-[#1A4E28] hover:bg-[#f0f7ee]'
               }`}
@@ -298,13 +298,16 @@ export default function PdpHero({
 
           {/* Benefit icons moved below Buy Now button */}
           <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs text-gray-500 py-3 border-t border-b border-gray-100">
-            {[
-              { icon: '🌿', label: '100% Natural' },
-              { icon: '☀️', label: 'Sun Cured' },
-              { icon: '🧪', label: 'Lab Tested' },
-              { icon: '🏺', label: 'Micro-Batch Crafted' },
-            ].map(b => (
-              <div key={b.label} className="flex items-center gap-1.5">
+            {(product.product_trust_badges && product.product_trust_badges.length > 0
+              ? product.product_trust_badges
+              : [
+                { icon: '🌿', label: '100% Natural' },
+                { icon: '☀️', label: 'Sun Cured' },
+                { icon: '🧪', label: 'Lab Tested' },
+                { icon: '🏺', label: 'Micro-Batch Crafted' },
+              ]
+            ).map((b, i) => (
+              <div key={b.id || b.label || i} className="flex items-center gap-1.5">
                 <span>{b.icon}</span>
                 <span className="font-medium text-gray-600">{b.label}</span>
               </div>
@@ -323,7 +326,6 @@ export default function PdpHero({
               <div className="text-sm text-gray-500 pb-3 leading-relaxed" dangerouslySetInnerHTML={{ __html: tab.content || '' }} />
             </details>
           ))}
-
           {/* Additional product info accordions */}
           <details className="border-t border-gray-100 pt-3 group">
             <summary className="flex items-center justify-between cursor-pointer text-sm font-semibold text-gray-700 pb-2 list-none">
@@ -333,11 +335,17 @@ export default function PdpHero({
               </svg>
             </summary>
             <div className="text-sm text-gray-500 pb-3 leading-relaxed space-y-2">
-              <p><strong>Shelf Life:</strong> Best before 48 months from date of manufacture</p>
-              <p><strong>Available Sizes:</strong> 250g · 500g · 1kg</p>
-              <p><strong>Storage:</strong> Store in a cool, dry place. Use a dry spoon always.</p>
-              <p><strong>Type:</strong> 100% Vegetarian · No preservatives · No artificial colours</p>
-              <p><strong>Manufactured at:</strong> Bahiro, Arrah, Bhojpur, Bihar — 802301</p>
+              {product.description || product.pdp_config?.tabs?.product_details ? (
+                <div dangerouslySetInnerHTML={{ __html: product.description || product.pdp_config.tabs.product_details }} />
+              ) : (
+                <>
+                  <p><strong>Shelf Life:</strong> Best before 48 months from date of manufacture</p>
+                  <p><strong>Available Sizes:</strong> 250g · 500g · 1kg</p>
+                  <p><strong>Storage:</strong> Store in a cool, dry place. Use a dry spoon always.</p>
+                  <p><strong>Type:</strong> 100% Vegetarian · No preservatives · No artificial colours</p>
+                  <p><strong>Manufactured at:</strong> Bahiro, Arrah, Bhojpur, Bihar — 802301</p>
+                </>
+              )}
             </div>
           </details>
 
@@ -349,10 +357,16 @@ export default function PdpHero({
               </svg>
             </summary>
             <div className="text-sm text-gray-500 pb-3 leading-relaxed space-y-2">
-              <p><strong>Dispatch:</strong> Ships within 24 hours of order</p>
-              <p><strong>Delivery:</strong> 3–5 business days pan-India</p>
-              <p><strong>Free Shipping:</strong> On orders above ₹799</p>
-              <p><strong>Support:</strong> Food products are non-returnable. If your jar arrives damaged, leaked, or wrong, contact us within 24 hours with photos for help.</p>
+              {product.pdp_config?.tabs?.shipping_support ? (
+                <div dangerouslySetInnerHTML={{ __html: product.pdp_config.tabs.shipping_support }} />
+              ) : (
+                <>
+                  <p><strong>Dispatch:</strong> Ships within 24 hours of order</p>
+                  <p><strong>Delivery:</strong> 3–5 business days pan-India</p>
+                  <p><strong>Free Shipping:</strong> On orders above ₹799</p>
+                  <p><strong>Support:</strong> Food products are non-returnable. If your jar arrives damaged, leaked, or wrong, contact us within 24 hours with photos for help.</p>
+                </>
+              )}
             </div>
           </details>
         </div>

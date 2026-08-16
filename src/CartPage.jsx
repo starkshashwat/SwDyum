@@ -42,7 +42,7 @@ function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
 
               <div className="cart-items-list">
                 {cart.map((item, idx) => (
-                  <div key={`${item.slug}-${item.weight}-${item.subscription}-${idx}`} className="cart-item-row">
+                  <div key={`${item.slug}-${item.weight}-${idx}`} className="cart-item-row">
                     {/* Product cell */}
                     <div className="cart-item-product">
                       <div className="cart-item-img-container" onClick={() => onNavigate(`product-${item.slug}`)}>
@@ -52,10 +52,10 @@ function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
                         <h4 className="cart-item-title" onClick={() => onNavigate(`product-${item.slug}`)}>
                           {item.name}
                         </h4>
-                        <span className="cart-item-weight">Net Weight: {item.weight} | Delivery: {item.subscription}</span>
+                        <span className="cart-item-weight">Net Weight: {item.weight}</span>
                         <button
                           className="cart-remove-btn"
-                          onClick={() => removeFromCart(item.slug, item.weight, item.subscription)}
+                          onClick={() => removeFromCart(item.slug, item.weight)}
                         >
                           Remove
                         </button>
@@ -74,14 +74,14 @@ function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
                       <div className="cart-qty-counter">
                         <button
                           className="qty-adjust-btn"
-                          onClick={() => updateCartQty(item.slug, item.weight, item.subscription, item.quantity - 1)}
+                          onClick={() => updateCartQty(item.slug, item.weight, item.quantity - 1)}
                         >
                           -
                         </button>
                         <span className="qty-value">{item.quantity}</span>
                         <button
                           className="qty-adjust-btn"
-                          onClick={() => updateCartQty(item.slug, item.weight, item.subscription, item.quantity + 1)}
+                          onClick={() => updateCartQty(item.slug, item.weight, item.quantity + 1)}
                         >
                           +
                         </button>

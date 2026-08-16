@@ -46,7 +46,6 @@ function Header({ currentPage = 'home', onNavigate, cartCount = 0, onOpenCart, c
           </div>
           
           <div className="top-bar-announcement">
-            <span className="announcement-text">Free shipping on orders above ₹799</span>
           </div>
 
           <div className="top-bar-socials">

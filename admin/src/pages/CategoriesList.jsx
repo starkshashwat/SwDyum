@@ -1,11 +1,22 @@
+// ============================================================================
+// pages/CategoriesList.jsx
+// ----------------------------------------------------------------------------
+// Category list screen. Wired to GET/DELETE /api/categories via apiClient
+// (see backend/src/routes/categories.routes.js). Category GET is public
+// (optionalAuth) but this screen still requires an admin session to reach
+// it at all (ProtectedRoute), and writes always go through the backend so
+// RBAC + validation are enforced server-side.
+// ============================================================================
+
 import { useEffect, useState } from 'react';
-import { supabase } from '../lib/supabase';
 import { Link } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Search, ArrowUpDown } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, ArrowUpDown, Loader2 } from 'lucide-react';
+import { apiClient, ApiError } from '../lib/apiClient';
 
 export default function CategoriesList() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [search, setSearch] = useState('');
 
   useEffect(() => {
@@ -14,31 +25,34 @@ export default function CategoriesList() {
 
   const fetchCategories = async () => {
     setLoading(true);
-    const { data, error } = await supabase
-      .from('categories')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (!error && data) {
-      setCategories(data);
+    setError('');
+    try {
+      // limit=100 keeps this a simple single-page list for now; the backend
+      // supports full pagination (page/limit/search) if this needs to grow.
+      const response = await apiClient.get('/categories', { limit: 100 });
+      setCategories(response?.data || []);
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Failed to load categories.');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const handleDelete = async (id, name) => {
     if (!window.confirm(`Are you sure you want to delete the category "${name}"? This action cannot be undone.`)) return;
 
-    const { error } = await supabase.from('categories').delete().eq('id', id);
-    if (!error) {
-      setCategories(categories.filter(c => c.id !== id));
-    } else {
-      alert(`Error deleting category: ${error.message}`);
+    try {
+      await apiClient.delete(`/categories/${id}`);
+      setCategories((prev) => prev.filter((c) => c.id !== id));
+    } catch (err) {
+      alert(`Error deleting category: ${err instanceof ApiError ? err.message : 'Unknown error'}`);
     }
   };
 
-  const filteredCategories = categories.filter(c => 
-    c.name.toLowerCase().includes(search.toLowerCase()) || 
-    c.slug.toLowerCase().includes(search.toLowerCase())
+  const filteredCategories = categories.filter(
+    (c) =>
+      c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.slug.toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -48,14 +62,18 @@ export default function CategoriesList() {
           <h1 className="text-2xl font-bold text-gray-900">Categories</h1>
           <p className="text-sm text-gray-500 mt-1">Manage your product categories and collections.</p>
         </div>
-        <Link 
-          to="/categories/new" 
+        <Link
+          to="/categories/new"
           className="inline-flex items-center justify-center px-4 py-2 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors"
         >
           <Plus className="w-4 h-4 mr-2" />
           Add Category
         </Link>
       </div>
+
+      {error && (
+        <div className="bg-red-50 text-red-700 p-4 rounded-lg text-sm border border-red-100">{error}</div>
+      )}
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
         <div className="p-4 border-b border-gray-200">
@@ -84,20 +102,22 @@ export default function CategoriesList() {
                   </div>
                 </th>
                 <th scope="col" className="px-6 py-3 font-semibold">Slug</th>
-                <th scope="col" className="px-6 py-3 font-semibold">Products</th>
+                <th scope="col" className="px-6 py-3 font-semibold">Status</th>
+                <th scope="col" className="px-6 py-3 font-semibold">Sort Order</th>
                 <th scope="col" className="px-6 py-3 font-semibold text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
+                    <Loader2 className="w-4 h-4 animate-spin inline mr-2" />
                     Loading categories...
                   </td>
                 </tr>
               ) : filteredCategories.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="px-6 py-8 text-center text-gray-500">
+                  <td colSpan="5" className="px-6 py-8 text-center text-gray-500">
                     No categories found. Click "Add Category" to create one.
                   </td>
                 </tr>
@@ -112,20 +132,25 @@ export default function CategoriesList() {
                         /{category.slug}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-gray-500">
-                      {/* Product count placeholder - requires a join or separate fetch */}
-                      <span className="text-gray-400 italic">N/A</span>
+                    <td className="px-6 py-4">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${category.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+                          }`}
+                      >
+                        {category.is_active ? 'Active' : 'Inactive'}
+                      </span>
                     </td>
+                    <td className="px-6 py-4 text-gray-500">{category.sort_order ?? 0}</td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        <Link 
+                        <Link
                           to={`/categories/${category.id}`}
                           className="p-2 text-gray-400 hover:text-blue-600 rounded-lg hover:bg-blue-50 transition-colors"
                           title="Edit"
                         >
                           <Edit2 className="w-4 h-4" />
                         </Link>
-                        <button 
+                        <button
                           onClick={() => handleDelete(category.id, category.name)}
                           className="p-2 text-gray-400 hover:text-red-600 rounded-lg hover:bg-red-50 transition-colors"
                           title="Delete"

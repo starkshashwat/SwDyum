@@ -1,7 +1,17 @@
+// ============================================================================
+// pages/Login.jsx
+// ----------------------------------------------------------------------------
+// Admin login page. Authenticates via the backend's POST /api/auth/login
+// (through AuthContext.login), NOT a direct Supabase call. On success,
+// redirects to /dashboard; on failure, surfaces the backend's error message
+// verbatim (e.g. "Invalid login credentials." or "Access denied. Admin or
+// Editor privileges required.").
+// ============================================================================
+
 import { useState } from 'react';
-import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Mail, AlertCircle } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -9,6 +19,7 @@ export default function Login() {
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -16,28 +27,7 @@ export default function Login() {
     setError(null);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-
-      // Verify if user has an admin role
-      const { data: profileData, error: profileError } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', data.user.id)
-        .single();
-
-      if (profileError) throw profileError;
-
-      if (profileData.role === 'Customer') {
-        await supabase.auth.signOut();
-        throw new Error('Access denied. Admin privileges required.');
-      }
-
-      // Successful admin login
+      await login(email, password);
       navigate('/dashboard');
     } catch (err) {
       setError(err.message || 'Failed to login');

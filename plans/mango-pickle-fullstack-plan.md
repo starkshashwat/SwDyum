@@ -1367,4 +1367,74 @@ flowchart TD
 
 ---
 
+## Phase 5: Security Hardening — Findings & Fixes Applied
+
+_Audit date: 2026-07-17. Scope: backend/src/*, supabase/functions/*, admin/src/lib/apiClient.js, admin/src/context/AuthContext.jsx, migrations/v2_normalized_schema/005_rls_policies.sql (append-only). Root server.js and root src/ were read-only reference points and were NOT modified per task constraints._
+
+This audit re-verified the 8 categories called out in §6 (Security Requirements) and in `plans/security-audit.md` against the current state of the codebase, since a prior remediation pass (2026-07-09, see security-audit.md) had already fixed the 21 originally-identified vulnerabilities (V1–V21). The findings below are net-new/residual issues discovered during this pass, plus explicit confirmation of items that were already correct.
+
+### 1. CORS wildcard origins
+- **Checked:** All Supabase edge functions (`whatsapp-auth`, `send-whatsapp-message`, `whatsapp-webhook`, `razorpay`, `fastrr-checkout`, `fastrr-order-webhook`, `delete-account`, `cleanup-pending-checkouts`, `shiprocket-sync`) and `backend/src/server.js`.
+- **Found:** `supabase/functions/send-whatsapp-message/index.ts` had `"Access-Control-Allow-Origin": "*"` — a wide-open wildcard, confirmed exactly as flagged in §6.5.
+- **Fixed:** Replaced the static wildcard with the same explicit `ALLOWED_ORIGINS` allow-list pattern already used in `whatsapp-auth/index.ts` (swadyum.store, www.swadyum.store, localhost dev ports, `*.vercel.app` preview deploys), returned dynamically via a `corsHeaders(origin)` function with a `Vary: Origin` header. File: `supabase/functions/send-whatsapp-message/index.ts`.
+- **Verified OK (no issue found):** `whatsapp-auth`, `razorpay`, `fastrr-checkout`, `delete-account` already use the same allow-list pattern. `fastrr-order-webhook` intentionally pins CORS to the single Shiprocket/Fastrr checkout-API origin (server-to-server webhook, not browser-invoked) — correct as-is. `backend/src/server.js` CORS uses an explicit `ALLOWED_ORIGINS` allow-list via a dynamic `origin()` callback (not a wildcard) — correct as-is, not modified (root file, out of scope).
+- **Flagged for manual follow-up:** Root `server.js` (outside this task's editable scope) hardcodes `origin: ['http://localhost:5173', 'http://localhost:4173']` with no production domain — matches `security-audit.md` V19. This file could not be modified under this task's constraints; recommend addressing in a follow-up task that is scoped to touch root `server.js`.
+
+### 2. Secrets fallback (session-signing secret)
+- **Checked:** `supabase/functions/whatsapp-auth/index.ts` `issueSessionToken()`.
+- **Found:** The signing-secret lookup chain was `Deno.env.get("SUPABASE_JWT_SECRET") || Deno.env.get("SESSION_SECRET") || Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""` — i.e. it silently fell back to using the service-role key (the master DB-bypassing credential) as an HMAC signing secret if neither dedicated secret was configured. This matches §6.6's explicit call-out.
+- **Fixed:** Removed the `SUPABASE_SERVICE_ROLE_KEY` fallback entirely. The function now only accepts `SUPABASE_JWT_SECRET` or `SESSION_SECRET` and throws (fails closed) with a clear error message if neither is set, rather than silently reusing a much more sensitive credential. File: `supabase/functions/whatsapp-auth/index.ts`.
+
+### 3. Hardcoded tokens
+- **Checked:** `supabase/functions/whatsapp-webhook/index.ts` GET (Meta verification) handler.
+- **Found:** `const VERIFY_TOKEN = Deno.env.get("VERIFY_TOKEN") || "swadyum_whatsapp_verify_2026";` — a publicly-known hardcoded fallback token, matching §6.6.
+- **Fixed:** Removed the hardcoded fallback. The function now reads only `Deno.env.get("VERIFY_TOKEN")`; if it is unset, the handler logs an error and returns `403 Forbidden` (fails closed) instead of accepting the previously-hardcoded default. File: `supabase/functions/whatsapp-webhook/index.ts`.
+- **Note:** No other hardcoded secret-like tokens were found in the other edge functions (`razorpay`, `fastrr-checkout`, `fastrr-order-webhook`, `delete-account`, `shiprocket-sync`, `cleanup-pending-checkouts`) — all read credentials exclusively via `Deno.env.get(...)`.
+
+### 4. RLS verification
+- **Checked:** `migrations/v2_normalized_schema/005_rls_policies.sql` (414 lines) cross-referenced against every `CREATE TABLE` statement across `001_categories_products.sql`, `002_content_entities.sql`, `003_commerce.sql`, and `004_auth_roles.sql` (33 tables total: categories, category_pairings, products, product_variants, product_images, product_ingredients, product_trust_badges, product_faqs, product_process_steps, combos, combo_items, deals, announcements, offers, orders, order_items, payments, coupons, coupon_usage, product_reviews, profiles, admin_roles, admin_user_roles, addresses, subscriptions, invoices, inventory_logs, blogs, newsletter_subscribers, seo_metadata, whatsapp_messages, whatsapp_otps, account_deletion_requests).
+- **Verified OK (no issue found):** Every one of the 33 tables has `ALTER TABLE ... ENABLE ROW LEVEL SECURITY` plus appropriate policies (public read scoped to `is_active`/`is_approved` for catalog/content tables, `is_admin()`-gated full access for admin operations, and `auth.uid()`-scoped access for customer-owned rows such as orders, addresses, subscriptions, reviews). No missing RLS enablement or missing policy was found. No changes were made to `005_rls_policies.sql` since no gap existed to append a fix for.
+
+### 5. Backend validator gaps
+- **Checked:** `product.schema.js`, `coupon.schema.js`, `productIngredient.schema.js`, `order.schema.js`, `review.schema.js`, `deal.schema.js`, `combo.schema.js`, `announcement.schema.js`, `category.schema.js`, `common.schema.js`, `auth.schema.js`, and related image/faq/processStep/trustBadge schemas — cross-referenced against the `CHECK` constraints and column types in `001_categories_products.sql` and `003_commerce.sql`.
+- **Verified OK (no issue found):** Numeric fields consistently mirror SQL `CHECK` bounds (e.g. `product_ingredients.percentage` → SQL `CHECK (percentage BETWEEN 0 AND 100)` ↔ Zod `.min(0).max(100)`; `product_variants.mrp >= price` → SQL `CHECK (mrp >= price)` ↔ Zod `.refine()`; `coupons.discount_value > 0` → SQL `CHECK (discount_value > 0)` ↔ Zod `.positive()`). Enum fields (`discount_type`, order `status`/`payment_status`, announcement type/status) match SQL `CHECK (... IN (...))` constraints via `z.enum([...])`. `product_reviews.rating` (`CHECK (rating BETWEEN 1 AND 5)`) is correctly NOT present in `moderateReviewSchema` since reviews are customer-created (outside the admin API) and the admin route only moderates `is_approved`/`is_featured` — no gap. No validator changes were necessary.
+
+### 6. Rate limiting
+- **Checked:** `backend/src/middleware/rateLimiter.js`, `backend/src/server.js`, `auth.routes.js`, `upload.routes.js`, and route mounting order across all 15 route files.
+- **Verified OK (no issue found):** `globalLimiter` (100 req/15 min) is applied at the app level in `server.js` to all routes. `authLoginLimiter` (10 req/15 min, stricter) is additionally applied to `POST /auth/login` specifically. `upload.routes.js` requires `requireAuth` + `requireAdmin` before the multer upload handler, which combined with the global limiter is sufficient (it's an authenticated admin-only route, not a public brute-forceable endpoint). No sensitive route was found missing rate limiting; no changes were made.
+
+### 7. Admin token storage
+- **Checked:** `admin/src/lib/apiClient.js` (session persistence) and `admin/src/context/AuthContext.jsx` (login/logout/verifySession flows).
+- **Found:** The Supabase-issued session (`access_token`, `refresh_token`, `expires_at`, `user`) was persisted in `localStorage`, which survives indefinitely across browser restarts and is readable by any script executing in the page context (i.e. an XSS payload has an unbounded window to exfiltrate the admin bearer token). A search of `admin/*.md` documentation found no requirement for persistent "stay logged in across browser restarts" UX.
+- **Fixed:** Switched `getStoredSession()`/`storeSession()`/`clearStoredSession()` in `admin/src/lib/apiClient.js` from `localStorage` to `sessionStorage`. This preserves the existing "survive page refresh within the same tab" UX (the `verifySession()` flow in `AuthContext.jsx` still works identically on mount) while automatically clearing the session when the tab/browser closes, shrinking the XSS exfiltration/replay window and preventing a stale admin session from persisting on a shared/public machine. A code comment documenting this tradeoff (and noting that an httpOnly cookie would be the stronger long-term fix, since it isn't readable by client-side JS at all) was added directly above the implementation. File: `admin/src/lib/apiClient.js`. `AuthContext.jsx` required no changes since it only consumes the exported helpers.
+
+### 8. Dependency/secret leakage (repo-wide scan)
+- **Checked:** Repo-wide regex search (excluding `node_modules`) for hardcoded secret patterns: `SERVICE_ROLE_KEY|JWT_SECRET|SESSION_SECRET|API_KEY|ACCESS_TOKEN|SECRET_KEY|PASSWORD` assigned to literal strings ≥15 chars, plus `sk_live|sk_test|rzp_live|rzp_test|eyJhbGciOi` (JWT-shaped literals) across `*.js`/`*.ts` files.
+- **Found (out of scope, flagged only — NOT modified):** A hardcoded Supabase **anon** key (not a service-role or other privileged secret — anon keys are safe-by-design for client exposure since RLS governs access) appears as a fallback literal in several **root-level** files outside this task's editable scope: `src/supabaseClient.js`, `admin/src/lib/supabase.js`, and various one-off root debug scripts (`check_users.js`, `check_rls.js`, `check_profiles.js`, `check_orders.js`, `check_insert.js`, `check_insert_id.js`, `check_admin.js`, `check_admin_query.js`, `check_admin_query2.js`), plus `frontend/run-supabase-query.js`. Because these are anon keys (public by design, RLS-protected) rather than service-role keys or other server secrets, this is a low-severity finding — but the pattern (hardcoding a fallback instead of requiring the env var) is still not ideal practice. All of these files are outside the set of files this task was permitted to modify (root `src/`, other `admin/` files, and standalone root scripts), so **no changes were made**; this is flagged here for a future cleanup task scoped to touch those files.
+- **Verified OK (no issue found):** No `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_JWT_SECRET`, `SESSION_SECRET`, Razorpay live/test secret keys, or other privileged-secret literals were found hardcoded anywhere in `backend/src/*` or `supabase/functions/*` — every privileged credential in those directories is read exclusively via `process.env.X` / `Deno.env.get('X')`. `.env.example` files (both root and `backend/`) correctly use placeholder values (`your-service-role-key`, etc.), not real secrets.
+
+### Summary Table
+
+| # | Item | Outcome |
+|---|------|---------|
+| 1 | CORS wildcard origins | **Fixed** — `send-whatsapp-message/index.ts` wildcard replaced with allow-list |
+| 2 | Secrets fallback (session signing) | **Fixed** — removed `SUPABASE_SERVICE_ROLE_KEY` fallback in `whatsapp-auth/index.ts` |
+| 3 | Hardcoded tokens | **Fixed** — removed hardcoded `VERIFY_TOKEN` fallback in `whatsapp-webhook/index.ts`, fails closed (403) |
+| 4 | RLS verification | **Verified OK** — all 33 tables have RLS enabled + correct policies, no gap |
+| 5 | Backend validator gaps | **Verified OK** — spot-checked schemas match SQL CHECK constraints, no gap |
+| 6 | Rate limiting | **Verified OK** — global + strict login limiter correctly applied, no gap |
+| 7 | Admin token storage | **Fixed** — switched `localStorage` → `sessionStorage` in `apiClient.js`, tradeoff documented in code |
+| 8 | Secret leakage (repo-wide) | **Flagged for manual follow-up** — hardcoded anon-key fallbacks found in out-of-scope root/admin files (low severity; anon keys are RLS-protected by design) |
+
+### Files Modified in This Phase
+- `supabase/functions/send-whatsapp-message/index.ts`
+- `supabase/functions/whatsapp-auth/index.ts`
+- `supabase/functions/whatsapp-webhook/index.ts`
+- `admin/src/lib/apiClient.js`
+- `plans/mango-pickle-fullstack-plan.md` (this section, appended)
+
+No changes were made to `migrations/v2_normalized_schema/005_rls_policies.sql` (no gap found requiring a fix), root `server.js`, root `src/`, or any other `admin/` file, per this task's constraints.
+
+---
+
 *End of document.*

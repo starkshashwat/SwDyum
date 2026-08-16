@@ -1,13 +1,13 @@
 import { useState } from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
-import { 
-  LayoutDashboard, 
-  Package, 
-  Tags, 
-  ShoppingCart, 
-  Users, 
-  Settings, 
+import { useAuth } from '../context/AuthContext';
+import {
+  LayoutDashboard,
+  Package,
+  Tags,
+  ShoppingCart,
+  Users,
+  Settings,
   LogOut,
   Menu,
   X,
@@ -25,35 +25,43 @@ import {
   Mail,
   Shield,
   Activity,
-  BrainCircuit
+  BrainCircuit,
+  Layers,
+  Zap,
+  Truck,
+  BellRing,
+  BarChart3
 } from 'lucide-react';
 
 export default function AdminLayout() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const navigate = useNavigate();
+  // logout() calls POST /api/auth/logout via AuthContext (backend-driven,
+  // not a direct Supabase call) and clears the locally persisted session.
+  const { logout, profile, role } = useAuth();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await logout();
     navigate('/login');
   };
 
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Inbox (WhatsApp)', path: '/inbox', icon: Mail },
+    { name: 'WhatsApp Templates', path: '/whatsapp-templates', icon: Megaphone },
+    { name: 'Notification Settings', path: '/notification-settings', icon: BellRing },
     { name: 'Categories', path: '/categories', icon: Tags },
     { name: 'Products', path: '/products', icon: Package },
     { name: 'Inventory', path: '/inventory', icon: ClipboardList },
     { name: 'Orders', path: '/orders', icon: ShoppingCart },
     { name: 'Invoices', path: '/invoices', icon: FileText },
-    { name: 'Offers', path: '/offers', icon: Percent },
     { name: 'Coupons', path: '/coupons', icon: Tag },
-    { name: 'Subscriptions', path: '/subscriptions', icon: RefreshCw },
+    { name: 'Automations', path: '/automations', icon: BrainCircuit },
     { name: 'Customers', path: '/customers', icon: Users },
     { name: 'Data Deletion', path: '/account-deletion', icon: Shield },
     { name: 'Reviews', path: '/reviews', icon: Star },
-    { name: 'Announcements', path: '/announcements', icon: Megaphone },
-    { name: 'Recipes', path: '/recipes', icon: FileText },
-    { name: 'SEO', path: '/seo', icon: Search },
+    { name: 'Shipping Settings', path: '/shipping-settings', icon: Truck },
+    { name: 'Shipping Reports', path: '/shipping-reports', icon: BarChart3 },
     { name: 'Settings', path: '/settings', icon: Settings },
   ];
 
@@ -61,7 +69,7 @@ export default function AdminLayout() {
     <div className="min-h-screen bg-gray-50 flex">
       {/* Mobile Sidebar Overlay */}
       {isSidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 z-20 bg-black/50 lg:hidden"
           onClick={() => setIsSidebarOpen(false)}
         />
@@ -86,8 +94,8 @@ export default function AdminLayout() {
               to={item.path}
               className={({ isActive }) => `
                 flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-colors
-                ${isActive 
-                  ? 'bg-black text-white' 
+                ${isActive
+                  ? 'bg-black text-white'
                   : 'text-gray-700 hover:bg-gray-100'
                 }
               `}
@@ -99,7 +107,7 @@ export default function AdminLayout() {
         </nav>
 
         <div className="absolute bottom-0 w-full p-4 border-t border-gray-200">
-          <button 
+          <button
             onClick={handleLogout}
             className="flex items-center w-full px-3 py-2 text-sm font-medium text-red-600 rounded-lg hover:bg-red-50 transition-colors"
           >
@@ -113,18 +121,26 @@ export default function AdminLayout() {
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* Topbar */}
         <header className="flex items-center justify-between h-16 px-4 bg-white border-b border-gray-200 lg:px-8">
-          <button 
+          <button
             onClick={() => setIsSidebarOpen(true)}
             className="lg:hidden p-2 rounded-md text-gray-500 hover:bg-gray-100"
           >
             <Menu className="w-6 h-6" />
           </button>
-          
+
           <div className="flex-1" />
-          
-          <div className="flex items-center gap-4">
+
+          <div className="flex items-center gap-3">
+            <div className="text-right hidden sm:block">
+              <p className="text-sm font-medium text-gray-900 leading-tight">
+                {profile?.name || profile?.email || 'Admin'}
+              </p>
+              <p className="text-xs text-gray-500 leading-tight">{role || '—'}</p>
+            </div>
             <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-              <span className="text-sm font-medium text-gray-600">A</span>
+              <span className="text-sm font-medium text-gray-600">
+                {(profile?.name || profile?.email || 'A').charAt(0).toUpperCase()}
+              </span>
             </div>
           </div>
         </header>

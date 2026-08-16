@@ -209,7 +209,6 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
       product_name: item.name,
       weight_label: item.weight,
       sku: item.sku || '',
-      subscription_type: item.subscription,
       quantity: item.quantity,
       unit_price: item.price,
       total_price: item.price * item.quantity,

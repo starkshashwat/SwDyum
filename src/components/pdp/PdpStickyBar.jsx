@@ -20,7 +20,7 @@ function PdpStickyBar({ product, selectedSize, quantity, setQuantity, addToCart,
   const variant = (product.variants || []).find((v) => v.weight_label === selectedSize);
   const mrp = variant?.mrp || Math.round(currentPrice * 1.35);
   const savings = Math.max(0, mrp - currentPrice);
-  const outOfStock = variant?.stock_quantity !== undefined && variant.stock_quantity <= 0;
+  const outOfStock = variant?.available_stock !== undefined ? variant.available_stock <= 0 : (variant?.stock_quantity !== undefined && variant.stock_quantity <= 0);
 
   return (
     <AnimatePresence>

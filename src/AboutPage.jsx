@@ -210,7 +210,7 @@ function AboutPage({ onNavigate }) {
               <p className="about-story-text">
                 This isn't just about food; it's about curating a luxury culinary experience that
                 stays fiercely loyal to its roots. From spicy mango achaar to premium heritage
-                combos, Swadyum is the standard for authentic Bhojpur flavors.
+                products, Swadyum is the standard for authentic Bhojpur flavors.
               </p>
               <div className="about-signature">
                 <strong>Swadyum Foods</strong>

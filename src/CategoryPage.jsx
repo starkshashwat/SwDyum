@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './CategoryPage.css';
 
-import { fetchProducts } from './data/products';
+import { getProducts } from './lib/api/catalogService';
 
 // Category info details
 const categoriesData = {
@@ -21,17 +21,7 @@ const categoriesData = {
   }
 };
 
-// Recipe pairings by category
-const pairingsData = {
-  "Mango": [
-    { title: "Sattu Paratha & Dahi", desc: "The tangy raw mango slices break down the roasted gram flour warmth perfectly." },
-    { title: "Arhar Dal & Steamed Rice", desc: "A classic Bihari lunch complete with a dollop of pure ghee and mango achar." }
-  ],
-  "default": [
-    { title: "Sattu Paratha & Dahi", desc: "The tangy raw mango slices break down the roasted gram flour warmth perfectly." },
-    { title: "Arhar Dal & Steamed Rice", desc: "A classic Bihari lunch complete with a dollop of pure ghee and mango achar." }
-  ]
-};
+
 
 // Customer reviews sample
 const customerReviewsData = [
@@ -43,36 +33,64 @@ const customerReviewsData = [
 function CategoryPage({ categorySlug, onNavigate }) {
   const [filteredProducts, setFilteredProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  const cat = categoriesData[categorySlug] || categoriesData["pickles"];
-  const tag = cat.tag;
+  const [categoryInfo, setCategoryInfo] = useState({
+    title: "Handcrafted Pickles & Preserves",
+    subtitle: "~ From Earthen Jars ~",
+    story: "Explore our collection of traditional, sun-matured pickles made with cold-pressed mustard oil, local organic spices, and generational culinary techniques.",
+    heroImage: "/banner.webp"
+  });
 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      const data = await fetchProducts();
-      // Filter products matching active category tag
-      const filtered = data.filter(p => p.category.includes(tag) || (p.categories && p.categories.includes(tag)) || p.name.includes(tag));
-      setFilteredProducts(filtered);
+      const data = await getProducts();
+
+      if (!categorySlug || categorySlug === 'pickles' || categorySlug === 'all') {
+        setFilteredProducts(data);
+        setCategoryInfo({
+          title: "Signature Bihari Pickles Collection",
+          subtitle: "~ From Earthen Jars ~",
+          story: "Explore our collection of traditional, sun-matured pickles made with cold-pressed mustard oil, local organic spices, and generational culinary techniques.",
+          heroImage: "/banner.webp"
+        });
+      } else {
+        const matching = data.filter(p => {
+          const catName = (p.category || '').toLowerCase();
+          const slug = (categorySlug || '').toLowerCase().replace('category-', '');
+          return catName.includes(slug) || slug.includes(catName);
+        });
+
+        // If specific matching products exist, use them, otherwise show all active catalog items
+        setFilteredProducts(matching.length > 0 ? matching : data);
+
+        const cleanTitle = categorySlug
+          .replace(/-/g, ' ')
+          .replace(/\b\w/g, c => c.toUpperCase());
+
+        setCategoryInfo({
+          title: `${cleanTitle} Collection`,
+          subtitle: "~ Handcrafted Heritage ~",
+          story: `Handcrafted in small batches with traditional spices and cold-pressed mustard oil, celebrating authentic flavors.`,
+          heroImage: categorySlug.includes('mango') ? '/cat_mango.webp' : '/banner.webp'
+        });
+      }
       setLoading(false);
     };
     loadData();
-  }, [tag]);
+  }, [categorySlug]);
 
-  // Get recipe pairings
-  const pairings = pairingsData[tag] || pairingsData["default"];
+  const cat = categoryInfo;
+
+
 
   // Related categories lists
-  const relatedCategoriesList = Object.keys(categoriesData)
-    .filter(slug => slug !== categorySlug)
-    .map(slug => ({
-      slug,
-      name: categoriesData[slug].title.replace(" Pickles", "")
-    }));
+  const relatedCategoriesList = [
+    { slug: 'traditional-pickles', name: 'Traditional Pickles' }
+  ].filter(c => c.slug !== categorySlug);
 
   return (
     <div className="category-page-wrapper">
-      
+
       {/* 1. HERO BANNER */}
       <section className="category-hero-section" style={{ backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.65)), url(${cat.heroImage})` }}>
         <div className="category-hero-container">
@@ -106,24 +124,25 @@ function CategoryPage({ categorySlug, onNavigate }) {
               const size = Object.keys(p.prices)[0];
               const price = p.prices[size];
               return (
-              <div key={p.slug} className="cat-product-card" onClick={() => onNavigate('product-' + p.slug)}>
-                <div className="cat-prod-img-box">
-                  <img src={p.image} alt={p.name} className="cat-prod-img" />
-                </div>
-                <div className="cat-prod-info">
-                  <div className="cat-prod-rating">{"★".repeat(Math.floor(p.rating))} <span className="rating-num">({p.rating})</span></div>
-                  <h3 className="cat-prod-name">{p.name}</h3>
-                  <p className="cat-prod-tagline">{p.description.substring(0, 40)}...</p>
-                  <div className="cat-prod-footer">
-                    <span className="cat-prod-price">₹{price} <small>/ {size}</small></span>
-                    <button className="cat-prod-btn" onClick={(e) => {
-                      e.stopPropagation();
-                      onNavigate('product-' + p.slug);
-                    }}>View Details</button>
+                <div key={p.slug} className="cat-product-card" onClick={() => onNavigate('product-' + p.slug)}>
+                  <div className="cat-prod-img-box">
+                    <img src={p.image} alt={p.name} className="cat-prod-img" />
+                  </div>
+                  <div className="cat-prod-info">
+                    <div className="cat-prod-rating">{"★".repeat(Math.floor(p.rating))} <span className="rating-num">({p.rating})</span></div>
+                    <h3 className="cat-prod-name">{p.name}</h3>
+                    <p className="cat-prod-tagline">{p.description.substring(0, 40)}...</p>
+                    <div className="cat-prod-footer">
+                      <span className="cat-prod-price">₹{price} <small>/ {size}</small></span>
+                      <button className="cat-prod-btn" onClick={(e) => {
+                        e.stopPropagation();
+                        onNavigate('product-' + p.slug);
+                      }}>View Details</button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )})}
+              )
+            })}
           </div>
         </div>
       </section>
@@ -151,27 +170,7 @@ function CategoryPage({ categorySlug, onNavigate }) {
         </div>
       </section>
 
-      {/* 5. RECIPE PAIRINGS */}
-      <section className="category-pairings-section">
-        <div className="category-pairings-container">
-          <div className="section-header-centered">
-            <span className="section-subtitle">~ Perfect Pairings ~</span>
-            <h2 className="section-headline">How To Enjoy It Best</h2>
-          </div>
 
-          <div className="pairings-grid">
-            {pairings.map((pair, idx) => (
-              <div key={idx} className="pairing-card">
-                <div className="pairing-number">0{idx + 1}</div>
-                <div className="pairing-content">
-                  <h3>{pair.title}</h3>
-                  <p>{pair.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* 6. RELATED CATEGORIES */}
       <section className="category-related-section">

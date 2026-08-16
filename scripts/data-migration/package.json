@@ -1,0 +1,17 @@
+{
+    "name": "swadyum-data-migration",
+    "version": "1.0.0",
+    "private": true,
+    "description": "Standalone seed script that extracts real hardcoded catalog data from the root src/ frontend and posts it to the Phase 2 backend admin API.",
+    "type": "module",
+    "main": "seed.js",
+    "engines": {
+        "node": ">=18"
+    },
+    "scripts": {
+        "seed": "node seed.js"
+    },
+    "dependencies": {
+        "dotenv": "^16.4.5"
+    }
+}

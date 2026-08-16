@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import './ShopPage.css';
-import { fetchProducts } from './data/products';
+import { getProducts } from './lib/api/catalogService';
 
 /* ─── Category tab icons ─────────────────────────────────────────────────── */
 const tabIcons = {
@@ -13,9 +13,6 @@ const tabIcons = {
   ),
   pickles: (
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2h8l2 6H6l2-6z" /><rect x="6" y="8" width="12" height="12" rx="2" /><line x1="12" y1="8" x2="12" y2="20" /></svg>
-  ),
-  combos: (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
   ),
 };
 
@@ -78,7 +75,7 @@ function ShopPage({ onNavigate, addToCart }) {
   useEffect(() => {
     const load = async () => {
       setLoading(true);
-      const data = await fetchProducts();
+      const data = await getProducts();
       setProducts(data);
 
       const uniqueCats = Array.from(new Set(data.map(p => p.category))).filter(c => c && c !== 'Uncategorized');
@@ -87,9 +84,7 @@ function ShopPage({ onNavigate, addToCart }) {
       uniqueCats.forEach(cat => {
         let icon = tabIcons.pickles;
         const lowerCat = cat.toLowerCase();
-        if (lowerCat.includes('box') || lowerCat.includes('combo')) {
-          icon = tabIcons.combos;
-        } else if (lowerCat.includes('murabba') || lowerCat.includes('sweet')) {
+        if (lowerCat.includes('murabba') || lowerCat.includes('sweet')) {
           icon = <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 3v9" /></svg>;
         }
 
@@ -244,6 +239,7 @@ function ShopPage({ onNavigate, addToCart }) {
                   const price = product.prices?.[activeWeight] || product.base_price || 0;
                   const mrp = Math.round(price * 1.35);
                   const discount = getDiscount(mrp, price);
+                  const outOfStock = product.stockMap && product.stockMap[activeWeight] !== undefined ? product.stockMap[activeWeight] <= 0 : false;
 
                   return (
                     <motion.div
@@ -286,8 +282,9 @@ function ShopPage({ onNavigate, addToCart }) {
                             {Object.keys(product.prices).map(w => (
                               <button
                                 key={w}
-                                className={`sp-weight-btn ${activeWeight === w ? 'active' : ''}`}
+                                className={`sp-weight-btn ${activeWeight === w ? 'active' : ''} ${product.stockMap?.[w] <= 0 ? 'opacity-50 line-through' : ''}`}
                                 onClick={e => { e.stopPropagation(); handleWeightSelect(product.id, w); }}
+                                disabled={product.stockMap?.[w] <= 0}
                               >
                                 {w}
                               </button>
@@ -304,10 +301,11 @@ function ShopPage({ onNavigate, addToCart }) {
 
                         {/* Add to cart */}
                         <button
-                          className="sp-add-btn"
+                          className={`sp-add-btn ${outOfStock ? 'out-of-stock opacity-50 cursor-not-allowed' : ''}`}
                           onClick={e => { e.stopPropagation(); addToCart && addToCart(product, activeWeight, 1); }}
+                          disabled={outOfStock}
                         >
-                          ADD TO CART
+                          {outOfStock ? 'OUT OF STOCK' : 'ADD TO CART'}
                         </button>
                       </div>
                     </motion.div>

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import './OrderDetailsPage.css';
 import { supabase } from './supabaseClient';
+import { getOrderTracking } from './lib/api/backendClient';
 
 function OrderDetailsPage({ onNavigate, orderId, currentUser }) {
   const [order, setOrder] = useState(null);
   const [orderItems, setOrderItems] = useState([]);
   const [timeline, setTimeline] = useState([]);
+  const [velocityTracking, setVelocityTracking] = useState(null);
   const [invoice, setInvoice] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -48,7 +50,47 @@ function OrderDetailsPage({ onNavigate, orderId, currentUser }) {
           .eq('order_id', cleanOrderId)
           .order('created_at', { ascending: false });
 
-        setTimeline(timelineData || []);
+        // Merge legacy timeline and new JSONB tracking_history
+        let mergedTimeline = [];
+        if (timelineData && timelineData.length > 0) {
+            mergedTimeline = timelineData.map(t => ({
+                status: t.status,
+                description: t.description,
+                timestamp: t.created_at
+            }));
+        }
+        
+        if (orderData.tracking_history && orderData.tracking_history.length > 0) {
+            const historyList = orderData.tracking_history.map(t => ({
+                status: t.status,
+                description: t.note,
+                timestamp: t.timestamp
+            }));
+            mergedTimeline = [...mergedTimeline, ...historyList];
+        }
+
+        // Fetch Velocity Tracking
+        try {
+            const vtRes = await getOrderTracking(cleanOrderId);
+            if (vtRes?.data) {
+                setVelocityTracking(vtRes.data);
+                if (vtRes.data.timeline && vtRes.data.timeline.length > 0) {
+                    const vtTimeline = vtRes.data.timeline.map(t => ({
+                        status: t.status,
+                        description: t.location,
+                        timestamp: t.timestamp,
+                        isVelocity: true
+                    }));
+                    mergedTimeline = [...mergedTimeline, ...vtTimeline];
+                }
+            }
+        } catch (vtErr) {
+            console.error("Failed to fetch Velocity tracking", vtErr);
+        }
+
+        // Sort merged timeline descending
+        mergedTimeline.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        setTimeline(mergedTimeline);
 
         // Fetch invoice
         const { data: invoiceData } = await supabase
@@ -139,19 +181,20 @@ function OrderDetailsPage({ onNavigate, orderId, currentUser }) {
             <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Payment Status</p>
             <p className={`font-bold text-lg ${order.payment_status === 'Paid' ? 'text-green-600' : 'text-orange-500'}`}>{order.payment_status}</p>
           </div>
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Total Amount</p>
-            <p className="font-bold text-lg">₹{order.total}</p>
-          </div>
-          <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
-            <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Est. Delivery</p>
-            <p className="font-bold text-lg">{order.estimated_delivery ? new Date(order.estimated_delivery).toLocaleDateString() : 'TBD'}</p>
-          </div>
         </div>
 
         {/* Order Tracking Timeline */}
         <section className="details-card timeline-card">
-          <h3 className="card-sec-title">Tracking History</h3>
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="card-sec-title mb-0">Tracking History</h3>
+            {velocityTracking && velocityTracking.awb_code && (
+              <div className="text-sm bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-full border border-indigo-100 flex items-center gap-2">
+                <span className="font-medium">Courier: {velocityTracking.courier_name || 'Velocity'}</span>
+                <span className="border-l border-indigo-200 h-4 mx-1"></span>
+                <span className="font-mono text-xs">AWB: {velocityTracking.awb_code}</span>
+              </div>
+            )}
+          </div>
           {timeline.length === 0 ? (
             <p className="text-gray-500 italic p-4">No tracking updates available yet.</p>
           ) : (
@@ -159,13 +202,13 @@ function OrderDetailsPage({ onNavigate, orderId, currentUser }) {
               {timeline.map((item, idx) => (
                 <div key={idx} className={`vt-row ${idx === 0 ? 'vt-latest' : ''}`}>
                   <div className="vt-connector">
-                    <div className="vt-dot"></div>
+                    <div className={`vt-dot ${item.isVelocity ? 'bg-indigo-500 border-indigo-200' : ''}`}></div>
                     {idx < timeline.length - 1 && <div className="vt-line"></div>}
                   </div>
                   <div className="vt-content">
                     <strong className="vt-location text-gray-900">{item.status}</strong>
-                    <span className="vt-status text-gray-600">{item.description}</span>
-                    <span className="vt-time text-xs text-gray-400">{formatDate(item.created_at)}</span>
+                    {item.description && <span className="vt-status text-gray-600">{item.description}</span>}
+                    <span className="vt-time text-xs text-gray-400">{formatDate(item.timestamp)}</span>
                   </div>
                 </div>
               ))}

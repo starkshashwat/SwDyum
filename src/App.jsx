@@ -1,39 +1,39 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import './App.css';
 import { supabase } from './supabaseClient';
 import Header from './Header';
 import FeaturedProducts from './FeaturedProducts';
 import ProcessSection from './ProcessSection';
-import ComboOfferSection from './ComboOfferSection';
+
 import MadhubaniDivider from './MadhubaniDivider';
 import HeroSection from './HeroSection';
 import SocialProofSection from './SocialProofSection';
 import FinalCTASection from './FinalCTASection';
-import ShopPage from './ShopPage';
-import ProductDetailsPage from './ProductDetailsPage';
-import AboutPage from './AboutPage';
-import ContactPage from './ContactPage';
-import ReviewsPage from './ReviewsPage';
-import ThankYouPage from './ThankYouPage';
-import CategoryPage from './CategoryPage';
-import Footer from './Footer';
-import CartPage from './CartPage';
-import CheckoutPage from './CheckoutPage';
-import LoginPage from './LoginPage';
-import SignupPage from './SignupPage';
-import ForgotPasswordPage from './ForgotPasswordPage';
-import AccountPage from './AccountPage';
-import OrderDetailsPage from './OrderDetailsPage';
+const ShopPage = lazy(() => import('./ShopPage'));
+const ProductDetailsPage = lazy(() => import('./ProductDetailsPage'));
+const AboutPage = lazy(() => import('./AboutPage'));
+const ContactPage = lazy(() => import('./ContactPage'));
+const ReviewsPage = lazy(() => import('./ReviewsPage'));
+const ThankYouPage = lazy(() => import('./ThankYouPage'));
+const CategoryPage = lazy(() => import('./CategoryPage'));
+const Footer = lazy(() => import('./Footer'));
+const CartPage = lazy(() => import('./CartPage'));
+const CheckoutPage = lazy(() => import('./CheckoutPage'));
+const LoginPage = lazy(() => import('./LoginPage'));
+const SignupPage = lazy(() => import('./SignupPage'));
+const ForgotPasswordPage = lazy(() => import('./ForgotPasswordPage'));
+const AccountPage = lazy(() => import('./AccountPage'));
+const OrderDetailsPage = lazy(() => import('./OrderDetailsPage'));
 import ChoosePickleSection from './components/ChoosePickleSection';
 
 import PurchaseDrawer from './components/cart/PurchaseDrawer';
 import BottomNav from './components/BottomNav';
-import WhatsAppLoginModal from './components/auth/WhatsAppLoginModal';
-import PrivacyPolicyPage from './PrivacyPolicyPage';
-import DeleteAccountPage from './DeleteAccountPage';
-import ShippingPolicyPage from './ShippingPolicyPage';
-import TermsPage from './TermsPage';
+import AuthModal from './components/auth/AuthModal';
+const PrivacyPolicyPage = lazy(() => import('./PrivacyPolicyPage'));
+const DeleteAccountPage = lazy(() => import('./DeleteAccountPage'));
+const ShippingPolicyPage = lazy(() => import('./ShippingPolicyPage'));
+const TermsPage = lazy(() => import('./TermsPage'));
 
 function App() {
   const parsePath = (path) => {
@@ -80,7 +80,7 @@ function App() {
 
   const [redirectPath, setRedirectPath] = useState(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isWaModalOpen, setIsWaModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [pendingCheckout, setPendingCheckout] = useState(null);
   const [toastMessage, setToastMessage] = useState('');
 
@@ -106,8 +106,11 @@ function App() {
 
           if (profile) {
             setCurrentUser(profile);
+            if (!profile.phone_verified && !profile.phone) {
+              setIsAuthModalOpen(true);
+            }
           } else {
-            setCurrentUser({
+            const tempUser = {
               id: session.user.id,
               name: session.user.user_metadata?.name || 'Valued Customer',
               email: session.user.email,
@@ -116,7 +119,11 @@ function App() {
               city: '',
               state: '',
               zip: ''
-            });
+            };
+            setCurrentUser(tempUser);
+            if (!tempUser.phone) {
+              setIsAuthModalOpen(true);
+            }
           }
         } catch (e) {
           // Keep cached local profile if any
@@ -136,8 +143,11 @@ function App() {
 
           if (profile) {
             setCurrentUser(profile);
+            if (!profile.phone_verified && !profile.phone) {
+              setIsAuthModalOpen(true);
+            }
           } else {
-            setCurrentUser({
+            const tempUser = {
               id: session.user.id,
               name: session.user.user_metadata?.name || 'Valued Customer',
               email: session.user.email,
@@ -146,7 +156,11 @@ function App() {
               city: '',
               state: '',
               zip: ''
-            });
+            };
+            setCurrentUser(tempUser);
+            if (!tempUser.phone) {
+              setIsAuthModalOpen(true);
+            }
           }
         } catch (e) {
           // fallback
@@ -179,14 +193,50 @@ function App() {
     return [];
   });
 
-  // Sync cart to localStorage
+  // Sync cart to localStorage and backend
   useEffect(() => {
     localStorage.setItem('swadyum_cart', JSON.stringify(cart));
-  }, [cart]);
 
-  const addToCart = (product, weight, qty, subscription = 'One Time', openCart = true) => {
+    // Automation Engine: Cart Abandonment Sync
+    if (currentUser?.id) {
+      const syncCartToBackend = async () => {
+        try {
+          const cartValue = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+          const cartId = localStorage.getItem('swadyum_automation_cart_id');
+          
+          const payload = {
+            customer_id: currentUser.id,
+            customer_email: currentUser.email,
+            customer_phone: currentUser.phone,
+            cart_items: cart,
+            cart_value: cartValue,
+            cart_url: window.location.origin + '/cart',
+            status: cart.length > 0 ? 'active' : 'recovered',
+            updated_at: new Date().toISOString(),
+            automation_triggered: false
+          };
+
+          if (cartId) {
+            await supabase.from('abandoned_carts').update(payload).eq('id', cartId);
+          } else if (cart.length > 0) {
+            const { data, error } = await supabase.from('abandoned_carts').insert(payload).select('id').single();
+            if (data?.id) {
+              localStorage.setItem('swadyum_automation_cart_id', data.id);
+            }
+          }
+        } catch (err) {
+          console.error('Failed to sync cart for automation:', err);
+        }
+      };
+      
+      const timeoutId = setTimeout(syncCartToBackend, 1000);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [cart, currentUser]);
+
+  const addToCart = (product, weight, qty, openCart = true) => {
     setCart(prev => {
-      const idx = prev.findIndex(item => item.slug === product.slug && item.weight === weight && item.subscription === subscription);
+      const idx = prev.findIndex(item => item.slug === product.slug && item.weight === weight);
       if (idx > -1) {
         const updated = [...prev];
         updated[idx].quantity += qty;
@@ -199,8 +249,7 @@ function App() {
           price: product.price || product.prices?.[weight] || product.base_price,
           mrp: product.variants?.find(v => v.weight_label === weight)?.mrp || product.mrp || null,
           quantity: qty,
-          image: product.image || product.images?.[0] || '/prod_mango.webp',
-          subscription: subscription
+          image: product.image || product.images?.[0] || '/prod_mango.webp'
         }];
       }
     });
@@ -209,23 +258,23 @@ function App() {
     }
   };
 
-  const handleBuyNow = (product, selectedSize, quantity, subscription) => {
-    addToCart(product, selectedSize, quantity, subscription, false);
+  const handleBuyNow = (product, selectedSize, quantity) => {
+    addToCart(product, selectedSize, quantity, false);
     if (!currentUser) {
-      setIsWaModalOpen(true);
+      setIsAuthModalOpen(true);
       setPendingCheckout({ type: 'checkout' });
     } else {
       setIsCartOpen(true);
     }
   };
 
-  const updateCartQty = (slug, weight, subscription, newQty) => {
+  const updateCartQty = (slug, weight, newQty) => {
     setCart(prev => {
       if (newQty <= 0) {
-        return prev.filter(item => !(item.slug === slug && item.weight === weight && item.subscription === subscription));
+        return prev.filter(item => !(item.slug === slug && item.weight === weight));
       }
       return prev.map(item => {
-        if (item.slug === slug && item.weight === weight && item.subscription === subscription) {
+        if (item.slug === slug && item.weight === weight) {
           return { ...item, quantity: newQty };
         }
         return item;
@@ -233,8 +282,8 @@ function App() {
     });
   };
 
-  const removeFromCart = (slug, weight, subscription) => {
-    setCart(prev => prev.filter(item => !(item.slug === slug && item.weight === weight && item.subscription === subscription)));
+  const removeFromCart = (slug, weight) => {
+    setCart(prev => prev.filter(item => !(item.slug === slug && item.weight === weight)));
   };
 
   const clearCart = () => {
@@ -268,7 +317,7 @@ function App() {
     let targetPage = page;
 
     if (page === 'account' && !currentUser) {
-      setIsWaModalOpen(true);
+      setIsAuthModalOpen(true);
       setPendingCheckout({ type: 'account' });
       if (isCartOpen) setIsCartOpen(false);
       return;
@@ -280,7 +329,7 @@ function App() {
     }
 
     if (page === 'checkout' && !currentUser) {
-      setIsWaModalOpen(true);
+      setIsAuthModalOpen(true);
       setPendingCheckout({ type: 'checkout' });
       if (isCartOpen) setIsCartOpen(false);
       return;
@@ -341,59 +390,61 @@ function App() {
         currentUser={currentUser}
         clearCart={clearCart}
         onOpenLogin={() => {
-          setIsWaModalOpen(true);
+          setIsAuthModalOpen(true);
           setPendingCheckout({ type: 'checkout' });
         }}
       />
-      {currentPage === 'shop' ? (
-        <ShopPage onNavigate={handleNavigate} addToCart={addToCart} />
-      ) : currentPage === 'about' ? (
-        <AboutPage onNavigate={handleNavigate} />
-      ) : currentPage === 'contact' ? (
-        <ContactPage onNavigate={handleNavigate} />
-      ) : currentPage === 'reviews' ? (
-        <ReviewsPage onNavigate={handleNavigate} />
-      ) : currentPage === 'privacy-policy' ? (
-        <PrivacyPolicyPage onNavigate={handleNavigate} />
-      ) : currentPage === 'delete-account' ? (
-        <DeleteAccountPage onNavigate={handleNavigate} />
-      ) : currentPage === 'shipping-policy' ? (
-        <ShippingPolicyPage onNavigate={handleNavigate} />
-      ) : currentPage === 'terms' ? (
-        <TermsPage onNavigate={handleNavigate} />
-      ) : currentPage === 'cart' ? (
-        <CartPage cart={cart} updateCartQty={updateCartQty} removeFromCart={removeFromCart} onNavigate={handleNavigate} />
-      ) : currentPage === 'checkout' ? (
-        <CheckoutPage cart={cart} clearCart={clearCart} onNavigate={handleNavigate} currentUser={currentUser} />
-      ) : currentPage === 'login' ? (
-        <LoginPage onNavigate={handleNavigate} onLogin={setCurrentUser} redirectPath={redirectPath} setRedirectPath={setRedirectPath} />
-      ) : currentPage === 'signup' ? (
-        <SignupPage onNavigate={handleNavigate} onSignup={setCurrentUser} redirectPath={redirectPath} setRedirectPath={setRedirectPath} />
-      ) : currentPage === 'forgot-password' ? (
-        <ForgotPasswordPage onNavigate={handleNavigate} />
-      ) : currentPage === 'thank-you' ? (
-        <ThankYouPage onNavigate={handleNavigate} />
-      ) : currentPage === 'account' ? (
-        <AccountPage onNavigate={handleNavigate} currentUser={currentUser} setCurrentUser={setCurrentUser} />
-      ) : currentPage.startsWith('order-details-') ? (
-        <OrderDetailsPage onNavigate={handleNavigate} orderId={currentPage.substring('order-details-'.length)} currentUser={currentUser} />
-      ) : currentPage.startsWith('category-') ? (
-        <CategoryPage categorySlug={currentPage.substring('category-'.length)} onNavigate={handleNavigate} addToCart={addToCart} />
-      ) : currentPage.startsWith('product-') ? (
-        <ProductDetailsPage slug={currentPage.substring('product-'.length)} onNavigate={handleNavigate} addToCart={addToCart} handleBuyNow={handleBuyNow} />
-      ) : (
-        <>
-          {/* ─── Hero Section ─── */}
-          <HeroSection onNavigate={handleNavigate} />
-          <FeaturedProducts onNavigate={handleNavigate} addToCart={addToCart} />
-          <ChoosePickleSection onNavigate={handleNavigate} />
-          <MadhubaniDivider variant="sun" />
-          <ProcessSection />
-          <MadhubaniDivider variant="fish" />
-          <SocialProofSection />
-          <FinalCTASection onNavigate={handleNavigate} />
-        </>
-      )}
+      <Suspense fallback={<div className="pdp-loader">Loading...</div>}>
+        {currentPage === 'shop' ? (
+          <ShopPage onNavigate={handleNavigate} addToCart={addToCart} />
+        ) : currentPage === 'about' ? (
+          <AboutPage onNavigate={handleNavigate} />
+        ) : currentPage === 'contact' ? (
+          <ContactPage onNavigate={handleNavigate} />
+        ) : currentPage === 'reviews' ? (
+          <ReviewsPage onNavigate={handleNavigate} />
+        ) : currentPage === 'privacy-policy' ? (
+          <PrivacyPolicyPage onNavigate={handleNavigate} />
+        ) : currentPage === 'delete-account' ? (
+          <DeleteAccountPage onNavigate={handleNavigate} />
+        ) : currentPage === 'shipping-policy' ? (
+          <ShippingPolicyPage onNavigate={handleNavigate} />
+        ) : currentPage === 'terms' ? (
+          <TermsPage onNavigate={handleNavigate} />
+        ) : currentPage === 'cart' ? (
+          <CartPage cart={cart} updateCartQty={updateCartQty} removeFromCart={removeFromCart} onNavigate={handleNavigate} />
+        ) : currentPage === 'checkout' ? (
+          <CheckoutPage cart={cart} clearCart={clearCart} onNavigate={handleNavigate} currentUser={currentUser} />
+        ) : currentPage === 'login' ? (
+          <LoginPage onNavigate={handleNavigate} onLogin={setCurrentUser} redirectPath={redirectPath} setRedirectPath={setRedirectPath} />
+        ) : currentPage === 'signup' ? (
+          <SignupPage onNavigate={handleNavigate} onSignup={setCurrentUser} redirectPath={redirectPath} setRedirectPath={setRedirectPath} />
+        ) : currentPage === 'forgot-password' ? (
+          <ForgotPasswordPage onNavigate={handleNavigate} />
+        ) : currentPage === 'thank-you' ? (
+          <ThankYouPage onNavigate={handleNavigate} />
+        ) : currentPage === 'account' ? (
+          <AccountPage onNavigate={handleNavigate} currentUser={currentUser} setCurrentUser={setCurrentUser} />
+        ) : currentPage.startsWith('order-details-') ? (
+          <OrderDetailsPage onNavigate={handleNavigate} orderId={currentPage.substring('order-details-'.length)} currentUser={currentUser} />
+        ) : currentPage.startsWith('category-') ? (
+          <CategoryPage categorySlug={currentPage.substring('category-'.length)} onNavigate={handleNavigate} addToCart={addToCart} />
+        ) : currentPage.startsWith('product-') ? (
+          <ProductDetailsPage slug={currentPage.substring('product-'.length)} onNavigate={handleNavigate} addToCart={addToCart} handleBuyNow={handleBuyNow} />
+        ) : (
+          <>
+            {/* ─── Hero Section ─── */}
+            <HeroSection onNavigate={handleNavigate} />
+            <FeaturedProducts onNavigate={handleNavigate} addToCart={addToCart} />
+            <ChoosePickleSection onNavigate={handleNavigate} />
+            <MadhubaniDivider variant="sun" />
+            <ProcessSection />
+            <MadhubaniDivider variant="fish" />
+            <SocialProofSection />
+            <FinalCTASection onNavigate={handleNavigate} />
+          </>
+        )}
+      </Suspense>
 
       <Footer onNavigate={handleNavigate} />
 
@@ -404,15 +455,17 @@ function App() {
         onOpenCart={() => setIsCartOpen(true)}
       />
 
-      <WhatsAppLoginModal
-        isOpen={isWaModalOpen}
+      <AuthModal
+        isOpen={isAuthModalOpen}
         onClose={() => {
-          setIsWaModalOpen(false);
+          setIsAuthModalOpen(false);
           setPendingCheckout(null);
         }}
+        isLinking={currentUser && (!currentUser.phone || !currentUser.phone_verified)}
+        userId={currentUser?.id}
         onSuccess={(profile) => {
           setCurrentUser(profile);
-          setIsWaModalOpen(false);
+          setIsAuthModalOpen(false);
           setToastMessage("Login successfully!");
           setTimeout(() => setToastMessage(''), 3000);
 

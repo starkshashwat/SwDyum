@@ -229,7 +229,12 @@ function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
 
                   <div className="tab-form-row split">
                     <div className="tab-form-group">
-                      <label htmlFor="profile-email">Email Address</label>
+                      <label htmlFor="profile-email" className="flex items-center gap-2">
+                        Email Address
+                        {currentUser?.email_verified && (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-800 font-medium">✓ Verified</span>
+                        )}
+                      </label>
                       <input 
                         type="email" 
                         id="profile-email" 
@@ -240,7 +245,14 @@ function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
                       />
                     </div>
                     <div className="tab-form-group">
-                      <label htmlFor="profile-phone">Phone Number</label>
+                      <label htmlFor="profile-phone" className="flex items-center gap-2">
+                        Phone Number
+                        {currentUser?.phone_verified ? (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 text-green-800 font-medium">✓ Verified</span>
+                        ) : (
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-yellow-100 text-yellow-800 font-medium">! Unverified</span>
+                        )}
+                      </label>
                       <input 
                         type="tel" 
                         id="profile-phone" 
@@ -300,12 +312,12 @@ function AccountPage({ onNavigate, currentUser, setCurrentUser }) {
                                 {order.order_items ? order.order_items.map(item => `${item.product_name} (${item.quantity}x)`).join(', ') : 'N/A'}
                               </td>
                               <td className="order-total-cell font-bold">₹{order.total}</td>
-                              <td className="action-cell">
+                              <td className="action-cell flex flex-col gap-2 items-end">
                                 <button 
                                   className="order-details-view-btn"
                                   onClick={() => onNavigate(`order-details-${order.id}`)}
                                 >
-                                  View Details ➔
+                                  Track Order →
                                 </button>
                               </td>
                             </tr>

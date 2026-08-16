@@ -1,0 +1,27 @@
+{
+    "name": "swadyum-backend",
+    "version": "2.0.0",
+    "private": true,
+    "description": "Structured Express backend API for the Swadyum Mango Pickle storefront (Phase 2). Talks to Supabase via the JS client (anon key for public/user-context reads honoring RLS, service-role key for admin-authenticated writes after requireAdmin checks).",
+    "type": "module",
+    "main": "src/server.js",
+    "engines": {
+        "node": ">=18"
+    },
+    "scripts": {
+        "dev": "node --watch src/server.js",
+        "start": "node src/server.js"
+    },
+    "dependencies": {
+        "@supabase/supabase-js": "^2.45.0",
+        "cors": "^2.8.5",
+        "dotenv": "^16.4.5",
+        "express": "^4.19.2",
+        "express-rate-limit": "^7.4.0",
+        "helmet": "^7.1.0",
+        "morgan": "^1.10.0",
+        "multer": "^1.4.5-lts.1",
+        "undici": "^8.7.0",
+        "zod": "^3.23.8"
+    }
+}

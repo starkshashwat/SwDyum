@@ -2,6 +2,7 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import AdminLayout from './components/AdminLayout';
+import ProtectedRoute from './components/ProtectedRoute';
 import CategoriesList from './pages/CategoriesList';
 import CategoryEditor from './pages/CategoryEditor';
 import ProductsList from './pages/ProductsList';
@@ -12,15 +13,17 @@ import OrderRedirect from './pages/OrderRedirect';
 import CustomersList from './pages/CustomersList';
 import CustomerDetails from './pages/CustomerDetails';
 import ReviewsList from './pages/ReviewsList';
-import OffersList from './pages/OffersList';
 import CouponsList from './pages/CouponsList';
-import SubscriptionsList from './pages/SubscriptionsList';
-import AnnouncementsList from './pages/AnnouncementsList';
-import RecipesList from './pages/RecipesList';
-import SEOCenter from './pages/SEOCenter';
 import Inbox from './pages/Inbox';
 import AccountDeletionList from './pages/AccountDeletionList';
 import InvoicesList from './pages/InvoicesList';
+import ShippingSettings from './pages/ShippingSettings';
+import ShippingReports from './pages/ShippingReports';
+import WhatsAppTemplates from './pages/WhatsAppTemplates';
+import EmailTemplates from './pages/EmailTemplates';
+import NotificationSettings from './pages/NotificationSettings';
+import AutomationsList from './pages/AutomationsList';
+import AutomationEditor from './pages/AutomationEditor';
 import './index.css';
 
 function App() {
@@ -29,8 +32,16 @@ function App() {
       <Route path="/" element={<Navigate to="/dashboard" replace />} />
       <Route path="/login" element={<Login />} />
 
-      {/* Protected Admin Routes */}
-      <Route element={<AdminLayout />}>
+      {/* Protected Admin Routes — ProtectedRoute verifies the backend
+          session (GET /api/auth/session) and role before AdminLayout ever
+          renders any nested page. */}
+      <Route
+        element={
+          <ProtectedRoute>
+            <AdminLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route path="/dashboard" element={<Dashboard />} />
 
         {/* Categories */}
@@ -52,9 +63,7 @@ function App() {
         <Route path="/invoices" element={<InvoicesList />} />
 
         {/* Commerce & Promotions */}
-        <Route path="/offers" element={<OffersList />} />
         <Route path="/coupons" element={<CouponsList />} />
-        <Route path="/subscriptions" element={<SubscriptionsList />} />
 
         {/* Customers */}
         <Route path="/customers" element={<CustomersList />} />
@@ -66,17 +75,17 @@ function App() {
         {/* Data Deletion */}
         <Route path="/account-deletion" element={<AccountDeletionList />} />
 
-        {/* CMS & Content */}
-        <Route path="/announcements" element={<AnnouncementsList />} />
-        <Route path="/recipes" element={<RecipesList />} />
-
-        {/* Growth & Analytics */}
-        <Route path="/seo" element={<SEOCenter />} />
-
         {/* Inbox */}
         <Route path="/inbox" element={<Inbox />} />
+        <Route path="/whatsapp-templates" element={<WhatsAppTemplates />} />
+        <Route path="/email-templates" element={<EmailTemplates />} />
+        <Route path="/notification-settings" element={<NotificationSettings />} />
 
         {/* Settings */}
+        <Route path="/shipping-settings" element={<ShippingSettings />} />
+        <Route path="/shipping-reports" element={<ShippingReports />} />
+        <Route path="/automations" element={<AutomationsList />} />
+        <Route path="/automations/:id" element={<AutomationEditor />} />
         <Route path="/settings" element={<div className="p-4">Settings Component (Coming Soon)</div>} />
       </Route>
     </Routes>

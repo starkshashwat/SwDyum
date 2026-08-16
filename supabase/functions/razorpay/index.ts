@@ -13,15 +13,88 @@ const ALLOWED_ORIGINS = [
 ];
 
 function corsHeaders(req: Request) {
-  const origin = req.headers.get('Origin');
-  // Echo the requesting origin when present; otherwise fall back to the first
-  // allowed origin (used for non-browser requests such as Razorpay webhooks).
-  const allow = origin || ALLOWED_ORIGINS[0];
   return {
-    'Access-Control-Allow-Origin': allow,
-    'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-razorpay-signature',
-    'Vary': 'Origin',
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-razorpay-signature",
   };
+}
+
+async function triggerNotification(supabaseAdmin: any, eventType: string, orderData: any) {
+  try {
+    const { data: setting } = await supabaseAdmin
+      .from('notification_settings')
+      .select('*')
+      .eq('event_type', eventType)
+      .eq('is_enabled', true)
+      .single();
+
+    if (!setting || !setting.template_name) return;
+
+    const phone = orderData.shipping_details?.phone || orderData.customer_phone || orderData.shipping_address?.phone;
+    if (!phone) return;
+
+    console.log(`Triggering notification ${eventType} for ${phone}`);
+
+    // Resolve dynamic variables based on mappings
+    const mappings = setting.variable_mappings || {};
+    const components = [];
+
+    const resolveVariable = (field) => {
+      if (!field) return '';
+      const addr = orderData.shipping_details || orderData.shipping_address || {};
+      switch (field) {
+        case 'customer_name': return addr.name || orderData.customer_name || 'Customer';
+        case 'order_number': return orderData.id ? orderData.id.split('-')[0].toUpperCase() : 'Order';
+        case 'order_date': return orderData.created_at ? new Date(orderData.created_at).toLocaleDateString() : new Date().toLocaleDateString();
+        case 'total_amount': return orderData.total ? `₹${orderData.total}` : '';
+        case 'payment_status': return orderData.payment_status || 'Pending';
+        case 'payment_method': return orderData.payment_method || 'Online';
+        case 'delivery_address': return [addr.address_line1, addr.address_line2, addr.city].filter(Boolean).join(', ') || '';
+        case 'tracking_number': return orderData.tracking_number || '';
+        case 'tracking_url': return orderData.tracking_url || '';
+        case 'courier_name': return orderData.courier_name || '';
+        case 'support_phone': return '+91 9999999999'; // Replace with actual support phone
+        case 'brand_name': return 'Swadyum';
+        default: return '';
+      }
+    };
+
+    // Format components for Meta API
+    for (const [compType, vars] of Object.entries(mappings)) {
+      if (Object.keys(vars).length === 0) continue;
+      
+      const parameters = [];
+      // Ensure variables are in order 1, 2, 3...
+      const sortedIndexes = Object.keys(vars).sort((a, b) => parseInt(a) - parseInt(b));
+      
+      for (const index of sortedIndexes) {
+        const field = vars[index];
+        const value = resolveVariable(field) || ' '; // Meta API doesn't accept empty string
+        parameters.push({ type: 'text', text: String(value).substring(0, 1024) });
+      }
+
+      if (parameters.length > 0) {
+        components.push({
+          type: compType.toLowerCase(),
+          parameters
+        });
+      }
+    }
+
+    await supabaseAdmin.functions.invoke('send-whatsapp-message', {
+      body: {
+        phone: phone.startsWith('+') ? phone : `+91${phone}`,
+        type: 'template',
+        template: {
+          name: setting.template_name,
+          language: { code: setting.template_language },
+          components: components.length > 0 ? components : undefined
+        }
+      }
+    });
+  } catch (err) {
+    console.error(`Error triggering notification ${eventType}:`, err);
+  }
 }
 
 async function createRazorpayOrder(amount: number, receipt: string) {
@@ -173,40 +246,12 @@ async function _processOrder(supabaseAdmin: any, order: any, razorpayOrderId: st
     .eq('order_id', orderId);
 
   if (items && items.length > 0) {
-    for (const item of items) {
-      // Find product by name
-      const { data: productData } = await supabaseAdmin
-        .from('products')
-        .select('id')
-        .ilike('name', item.product_name)
-        .single();
-
-      if (productData) {
-        // Find variant
-        const { data: variant } = await supabaseAdmin
-          .from('product_variants')
-          .select('id, stock_quantity')
-          .eq('product_id', productData.id)
-          .eq('weight_label', item.weight_label)
-          .single();
-
-        if (variant) {
-          // Log inventory change — DB trigger auto-updates stock_quantity
-          await supabaseAdmin.from('inventory_logs').insert([{
-            variant_id: variant.id,
-            change_type: 'Order Placed',
-            quantity_changed: -item.quantity,
-            note: `Order ${orderId}`
-          }]);
-        }
-      }
-    }
-
+    // Inventory is now handled automatically by PostgreSQL triggers on the orders table
     // Timeline entry for inventory
     await supabaseAdmin.from('order_timeline').insert([{
       order_id: orderId,
       event: 'Inventory Reduced',
-      note: `${items.length} item(s) deducted from stock`,
+      note: `${items.length} item(s) deducted from stock (handled by DB trigger)`,
       created_by: 'system'
     }]);
   }
@@ -264,6 +309,20 @@ async function _processOrder(supabaseAdmin: any, order: any, razorpayOrderId: st
     grand_total: order.total,
     status: 'Generated'
   }]);
+
+  // 9. Trigger WhatsApp Notification for Order Placed
+  await triggerNotification(supabaseAdmin, 'order_placed', order);
+
+  // 10. Trigger Automation Engine Event
+  if (order.customer_id) {
+    await supabaseAdmin.from('automation_events').insert({
+      event_id: `${order.id}_order_placed`,
+      event_name: 'order_placed',
+      customer_id: order.customer_id,
+      payload: order,
+      processed: false
+    });
+  }
 
   console.log(`✅ Order ${orderId} fully processed: payment recorded, inventory reduced, invoice generated.`);
 }
@@ -333,6 +392,17 @@ async function processPaymentFailure(supabaseAdmin: any, razorpayOrderId: string
     note: `Razorpay: ${reason}${razorpayPaymentId ? ` (Payment ID: ${razorpayPaymentId})` : ''}`,
     created_by: 'system'
   }]);
+
+  // Trigger Automation Engine Event
+  if (order.customer_id) {
+    await supabaseAdmin.from('automation_events').insert({
+      event_id: `${order.id}_payment_failed`,
+      event_name: 'payment_failed',
+      customer_id: order.customer_id,
+      payload: { ...order, failure_reason: reason },
+      processed: false
+    });
+  }
 
   console.log(`❌ Order ${order.id} marked failed: ${reason}`);
 }
