@@ -66,6 +66,15 @@ CREATE TABLE IF NOT EXISTS public.products (
     name        TEXT NOT NULL,
     description TEXT,
     category_id UUID REFERENCES public.categories(id) ON DELETE SET NULL,
+    short_description TEXT,
+    is_bestseller BOOLEAN DEFAULT FALSE,
+    seo_title   TEXT,
+    seo_description TEXT,
+    seo_keywords TEXT,
+    base_price  NUMERIC(10,2),
+    mrp         NUMERIC(10,2),
+    cost_price  NUMERIC(10,2),
+    pure_ingredients JSONB,
     pdp_config  JSONB DEFAULT '{}'::jsonb,
     is_active   BOOLEAN NOT NULL DEFAULT TRUE,
     sort_order  INTEGER NOT NULL DEFAULT 0,
@@ -105,6 +114,7 @@ CREATE TABLE IF NOT EXISTS public.product_images (
     product_id    UUID NOT NULL REFERENCES public.products(id) ON DELETE CASCADE,
     url           TEXT NOT NULL,
     alt_text      TEXT,
+    is_primary    BOOLEAN DEFAULT FALSE,
     display_order INTEGER NOT NULL DEFAULT 0,
     created_at    TIMESTAMPTZ NOT NULL DEFAULT now()
 );

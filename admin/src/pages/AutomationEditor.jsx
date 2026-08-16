@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { apiClient } from '../lib/apiClient';
 import { toast } from 'react-hot-toast';
 import { ArrowLeft, Plus, Trash2, CheckCircle2, Clock, Mail, MessageSquare, GitMerge, Tag, Ticket, Ban } from 'lucide-react';
 
@@ -33,11 +33,11 @@ export default function AutomationEditor() {
   const fetchTemplates = async () => {
     try {
       const [emailRes, waRes] = await Promise.all([
-        axios.get('/api/automations/config/templates?channel=email', { withCredentials: true }),
-        axios.get('/api/automations/config/templates?channel=whatsapp', { withCredentials: true })
+        apiClient.get('/automations/config/templates', { channel: 'email' }),
+        apiClient.get('/automations/config/templates', { channel: 'whatsapp' })
       ]);
-      setEmailTemplates(emailRes.data?.data || []);
-      setWaTemplates(waRes.data?.data || []);
+      setEmailTemplates(emailRes?.data || []);
+      setWaTemplates(waRes?.data || []);
     } catch (error) {
       console.error('Failed to load templates');
     }
@@ -45,8 +45,8 @@ export default function AutomationEditor() {
 
   const fetchAutomation = async () => {
     try {
-      const res = await axios.get(`/api/automations/${id}`, { withCredentials: true });
-      const data = res.data?.data;
+      const res = await apiClient.get(`/automations/${id}`);
+      const data = res?.data;
       if (data) {
         setAutomation({
           name: data.name || '',
@@ -101,11 +101,11 @@ export default function AutomationEditor() {
     setIsSaving(true);
     try {
       if (isNew) {
-        await axios.post('/api/automations', automation, { withCredentials: true });
+        await apiClient.post('/automations', automation);
         toast.success('Automation created');
         navigate('/automations');
       } else {
-        await axios.put(`/api/automations/${id}`, automation, { withCredentials: true });
+        await apiClient.put(`/automations/${id}`, automation);
         toast.success('Automation updated (Version bumped)');
         fetchAutomation();
       }

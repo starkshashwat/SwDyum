@@ -53,8 +53,17 @@ export const shippingJobs = {
         
         logger.info(`Starting shipping fallback polling job (interval: ${intervalMs}ms)`);
         
-        this.intervalId = setInterval(() => {
-            this.syncActiveShipments();
+        this.intervalId = setInterval(async () => {
+            if (this.isSyncing) {
+                logger.warn('Skipping shipping sync — previous run still in progress.');
+                return;
+            }
+            this.isSyncing = true;
+            try {
+                await this.syncActiveShipments();
+            } finally {
+                this.isSyncing = false;
+            }
         }, intervalMs);
     },
 

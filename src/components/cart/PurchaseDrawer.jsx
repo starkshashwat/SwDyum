@@ -15,9 +15,9 @@ import FrequentlyBoughtTogether from './modules/FrequentlyBoughtTogether';
 import SmartCheckoutAssistant from './modules/SmartCheckoutAssistant';
 import CheckoutFooter from './modules/CheckoutFooter';
 import RazorpayTransition from './modules/RazorpayTransition';
+import { getShippingFee } from '../../lib/shippingConstants';
 import './PurchaseDrawer.css';
 
-const FREE_SHIPPING_THRESHOLD = 799;
 
 const drawerTransition = { type: 'tween', ease: [0.22, 1, 0.36, 1], duration: 0.32 };
 
@@ -67,12 +67,20 @@ export default function PurchaseDrawer({
         clearCart,
         onClose,
         onNavigate,
+        // Keep the purchase state machine in sync so the overlay never
+        // sticks on "Preparing Secure Payment..." after a dismiss/failure.
+        onModalOpened: useCallback(() => purchaseState.transition('razorpay_open'), [purchaseState]),
+        onAborted: useCallback(() => purchaseState.transition('idle'), [purchaseState]),
+        onPaymentFailed: useCallback(
+            (msg) => purchaseState.transition('payment_failed', { error: msg }),
+            [purchaseState]
+        ),
     });
 
     // ─── Computed Values ───
     const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : subtotal > 0 ? 50 : 0;
+    const shipping = getShippingFee(subtotal);
     const discount = calculateDiscount(subtotal);
     const total = Math.max(0, subtotal - discount + shipping);
 
@@ -113,15 +121,14 @@ export default function PurchaseDrawer({
 
     // ─── PIN verification handler ───
     const handleVerifyPin = useCallback(
-        (pin) => {
+        async (pin) => {
             purchaseState.transition('checking_pin');
-            pinVerification.verifyPin(pin).then(() => {
-                if (pinVerification.status === 'deliverable') {
-                    purchaseState.transition('pin_valid');
-                } else if (pinVerification.status === 'not_deliverable') {
-                    purchaseState.transition('pin_invalid');
-                }
-            });
+            // verifyPin returns its final status; reading
+            // pinVerification.status here would be a stale closure value.
+            const result = await pinVerification.verifyPin(pin);
+            if (result === 'deliverable') purchaseState.transition('pin_valid');
+            else if (result === 'not_deliverable') purchaseState.transition('pin_invalid');
+            else purchaseState.transition('idle');
         },
         [pinVerification, purchaseState]
     );
@@ -130,12 +137,12 @@ export default function PurchaseDrawer({
     const handleApplyCoupon = useCallback(
         (code) => {
             purchaseState.transition('applying_coupon');
-            applyCoupon(code).then(() => {
-                // State will be updated by the hook's internal state change
-                purchaseState.transition('coupon_applied');
+            applyCoupon(code, subtotal).then((ok) => {
+                // applyCoupon returns false and sets its own error message on failure
+                purchaseState.transition(ok ? 'coupon_applied' : 'idle');
             });
         },
-        [applyCoupon, purchaseState]
+        [applyCoupon, purchaseState, subtotal]
     );
 
     const handleRemoveCoupon = useCallback(() => {
@@ -299,6 +306,25 @@ export default function PurchaseDrawer({
 
                         {/* ─── SCROLLABLE CONTENT ─── */}
                         <div className="purchase-drawer-content">
+                            {/* Payment error banner — dismiss/failure reasons must be visible */}
+                            {(razorpay.error || purchaseState.error) && (
+                                <div
+                                    role="alert"
+                                    style={{
+                                        margin: '0 0 12px',
+                                        padding: '10px 14px',
+                                        background: '#fef2f2',
+                                        border: '1px solid #fecaca',
+                                        borderRadius: 10,
+                                        color: '#b91c1c',
+                                        fontSize: 13,
+                                        fontWeight: 500,
+                                    }}
+                                >
+                                    {razorpay.error || purchaseState.error}
+                                </div>
+                            )}
+
                             {/* Free Shipping Progress Bar */}
                             {cart.length > 0 && <FreeShippingBar subtotal={subtotal} />}
 

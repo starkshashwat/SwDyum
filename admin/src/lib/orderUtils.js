@@ -121,7 +121,7 @@ export function exportOrdersCSV(orders) {
         const c = getCustomerInfo(o);
         return [
             o.id,
-            format(new Date(o.created_at), 'dd-MMM-yyyy'),
+            o.created_at ? format(new Date(o.created_at), 'dd-MMM-yyyy') : '',
             c.name, c.email, c.phone,
             o.total, o.payment_status || 'Pending', o.status || 'Pending',
             o.coupon_code || '',

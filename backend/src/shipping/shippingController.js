@@ -86,12 +86,12 @@ export const getCustomerTracking = asyncHandler(async (req, res) => {
     // Validate order belongs to user
     const { data: order, error: orderErr } = await supabaseAdmin
         .from('orders')
-        .select('user_id')
+        .select('customer_id')
         .eq('id', orderId)
         .single();
         
     if (orderErr || !order) return res.status(404).json({ error: 'Order not found' });
-    if (order.user_id !== userId) return res.status(403).json({ error: 'Forbidden' });
+    if (order.customer_id && order.customer_id !== userId) return res.status(403).json({ error: 'Forbidden' });
     
     const { data: shipment, error: shipErr } = await supabaseAdmin
         .from('shipments')

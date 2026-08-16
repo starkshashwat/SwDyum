@@ -143,7 +143,7 @@ app.use(notFoundHandler);
 app.use(errorHandler);
 
 // ── 7. Start listening ──────────────────────────────────────────────────────
-app.listen(env.PORT, () => {
+const server = app.listen(env.PORT, () => {
     logger.info(`Mango Pickle backend API listening on port ${env.PORT} (${env.NODE_ENV})`);
     
     // Start shipping fallback polling job
@@ -155,5 +155,16 @@ app.listen(env.PORT, () => {
     // Start cart abandonment detection worker
     startCartAbandonmentWorker();
 });
+
+// ── 8. Graceful shutdown ────────────────────────────────────────────────────
+const shutdown = (signal) => {
+    logger.info(`${signal} received — shutting down gracefully...`);
+    shippingJobs.stopPolling();
+    process.exit(0);
+};
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+
+export { server };
 
 export default app;

@@ -14,11 +14,13 @@ import { requireAdmin } from '../middleware/requireAdmin.js';
 import { validate } from '../middleware/validate.js';
 import { idParamSchema } from '../validators/common.schema.js';
 import { updateOrderSchema, listOrdersQuerySchema } from '../validators/order.schema.js';
-import { listOrders, getOrder, updateOrder } from '../controllers/orders.controller.js';
+import { listOrders, getOrder, updateOrder, getOrderStats } from '../controllers/orders.controller.js';
 
 const router = Router();
 
 router.get('/', requireAuth, requireAdmin, validate(listOrdersQuerySchema, 'query'), listOrders);
+// MUST be registered before /:id or "stats" parses as an order id.
+router.get('/stats', requireAuth, requireAdmin, getOrderStats);
 router.get('/:id', requireAuth, requireAdmin, validate(idParamSchema, 'params'), getOrder);
 
 // No POST — orders originate from checkout/webhooks, never admin-created.

@@ -1,11 +1,11 @@
+import { getShippingFee } from './lib/shippingConstants';
 import React, { useState } from 'react';
 import { supabase } from './supabaseClient';
 import './CartPage.css';
 
 function CartPage({ cart, updateCartQty, removeFromCart, onNavigate }) {
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shippingThreshold = 799;
-  const shippingFee = subtotal >= shippingThreshold || subtotal === 0 ? 0 : 60;
+  const shippingFee = getShippingFee(subtotal);
   const total = subtotal + shippingFee;
 
   return (

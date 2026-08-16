@@ -18,7 +18,7 @@
 // ============================================================================
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react';
-import { apiClient, getStoredSession, storeSession, clearStoredSession } from '../lib/apiClient';
+import { apiClient, getStoredSession, storeSession, clearStoredSession, setSessionRefreshHandler } from '../lib/apiClient';
 import { supabase } from '../lib/supabase';
 
 const AuthContext = createContext(null);
@@ -61,6 +61,28 @@ export function AuthProvider({ children }) {
         verifySession();
     }, [verifySession]);
 
+    // Keep apiClient armed with a session refresher so an expired access
+    // token triggers one silent refresh+retry instead of a forced logout.
+    useEffect(() => {
+        setSessionRefreshHandler(async () => {
+            try {
+                const { data, error } = await supabase.auth.refreshSession();
+                if (error || !data?.session?.access_token) return false;
+                const stored = getStoredSession();
+                storeSession({
+                    ...stored,
+                    access_token: data.session.access_token,
+                    refresh_token: data.session.refresh_token,
+                    expires_at: data.session.expires_at,
+                });
+                return true;
+            } catch {
+                return false;
+            }
+        });
+        return () => setSessionRefreshHandler(null);
+    }, []);
+
     const login = useCallback(async (email, password) => {
         const data = await apiClient.post('/auth/login', { email, password });
         // data.session = { access_token, refresh_token, expires_at, ... }
@@ -83,7 +105,8 @@ export function AuthProvider({ children }) {
         // we shouldn't let a plain Customer account land in the admin UI).
         const role = sessionData.profile?.role;
         const roleLower = (role || '').toLowerCase();
-        const isAdminCapable = !role || roleLower.includes('admin') || roleLower.includes('editor');
+        // A null/missing role must NOT grant admin access.
+        const isAdminCapable = !!role && (roleLower.includes('admin') || roleLower.includes('editor'));
         if (!isAdminCapable) {
             clearStoredSession();
             setUser(null);
@@ -115,7 +138,7 @@ export function AuthProvider({ children }) {
         user,
         profile,
         role: profile?.role || null,
-        isAdmin: !profile?.role || (profile?.role || '').toLowerCase().includes('admin'),
+        isAdmin: !!profile?.role && profile.role.toLowerCase().includes('admin'),
         isEditor: (profile?.role || '').toLowerCase().includes('editor'),
         login,
         logout,

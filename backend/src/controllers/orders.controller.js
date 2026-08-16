@@ -67,6 +67,27 @@ export const getOrder = asyncHandler(async (req, res) => {
 });
 
 /**
+ * GET /orders/stats
+ * Grouped counts + paid revenue per order status, for the admin summary
+ * cards. Replaces the client's old "fetch 1000 orders and count" approach.
+ */
+export const getOrderStats = asyncHandler(async (req, res) => {
+    const { data, error } = await supabaseAdmin
+        .from('orders')
+        .select('status, payment_status, total');
+    if (error) throw error;
+
+    const stats = {};
+    for (const row of data || []) {
+        const status = row.status || 'Pending';
+        if (!stats[status]) stats[status] = { count: 0, revenue: 0 };
+        stats[status].count += 1;
+        if (row.payment_status === 'Paid') stats[status].revenue += Number(row.total || 0);
+    }
+    res.json({ data: stats });
+});
+
+/**
  * PATCH /orders/:id
  * Updates ONLY status, payment_status, tracking_number, tracking_history
  * (enforced by updateOrderSchema — no other order fields, e.g. total or
@@ -75,13 +96,31 @@ export const getOrder = asyncHandler(async (req, res) => {
 export const updateOrder = asyncHandler(async (req, res) => {
     const { id } = req.params;
     
-    // Fetch original order to check for status changes
+    // Fetch original order to check for status changes (and to append
+    // tracking entries server-side below).
     const { data: originalOrder } = await resilientQuery(supabaseAdmin, {
         table: 'orders',
-        select: 'status, customer_email, customer_phone, shipping_details',
+        select: 'status, customer_email, customer_phone, shipping_details, tracking_history',
         single: true,
         filters: (q) => q.eq('id', id),
     });
+
+    // Server-side timeline append: clients send { status, note } and the
+    // controller appends the entry to the existing tracking_history. This
+    // replaces the admin UI's old read-modify-write PATCH, which lost
+    // concurrent entries (two admins / webhook + admin).
+    if (req.body.tracking_entry) {
+        const entry = {
+            status: req.body.tracking_entry.status || req.body.status || originalOrder?.status || 'Updated',
+            note: req.body.tracking_entry.note || '',
+            timestamp: new Date().toISOString(),
+        };
+        const existingHistory = Array.isArray(originalOrder?.tracking_history) ? originalOrder.tracking_history : [];
+        req.body.tracking_history = [...existingHistory, entry];
+        delete req.body.tracking_entry;
+        // A note-only update must not reset the order status
+        if (!req.body.status) req.body.status = originalOrder?.status;
+    }
 
     const { data, error } = await supabaseAdmin
         .from('orders')
@@ -94,9 +133,8 @@ export const updateOrder = asyncHandler(async (req, res) => {
         if (error.code === 'PGRST116') return res.status(404).json({ error: 'Order not found.' });
         throw error;
     }
-
     // Trigger Automation Engine if status changed
-    if (originalOrder?.data && req.body.status && originalOrder.data.status !== req.body.status) {
+    if (originalOrder && req.body.status && originalOrder.status !== req.body.status) {
         const newStatus = req.body.status;
         let eventType = null;
         

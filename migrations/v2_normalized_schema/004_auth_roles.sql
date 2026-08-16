@@ -35,13 +35,16 @@ BEGIN;
 -- ============================================================
 -- PROFILES (auth users)
 -- ============================================================
+-- Note: no FK to auth.users — live has phone-first profiles created by the
+-- whatsapp-auth edge function that are not auth.users rows; migrations match
+-- production. (The table may already exist from the 003 bootstrap.)
 CREATE TABLE IF NOT EXISTS public.profiles (
-    id              UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    id              UUID PRIMARY KEY,
     name            TEXT,
     email           TEXT UNIQUE,
     phone           TEXT UNIQUE,
-    role            TEXT NOT NULL DEFAULT 'Customer' CHECK (role IN ('Customer','Admin','Editor')),
-    admin_role      TEXT CHECK (admin_role IN ('Admin','Editor','Order Manager','Customer Support')),
+    role            TEXT NOT NULL DEFAULT 'Customer',
+    admin_role      TEXT,
     whatsapp_opt_in BOOLEAN DEFAULT FALSE,
     address         TEXT,
     city            TEXT,
@@ -50,6 +53,26 @@ CREATE TABLE IF NOT EXISTS public.profiles (
     created_at      TIMESTAMPTZ NOT NULL DEFAULT now(),
     updated_at      TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS whatsapp_wa_id TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS email_verified BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS phone_verified BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS provider TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS admin_role TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS whatsapp_opt_in BOOLEAN DEFAULT FALSE;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS address TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS city TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS state TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS zip TEXT;
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT now();
+ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT now();
+ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_role_check;
+ALTER TABLE public.profiles
+    ADD CONSTRAINT profiles_role_check CHECK (role IN ('Customer','Admin','Editor'));
+ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_admin_role_check;
+ALTER TABLE public.profiles
+    ADD CONSTRAINT profiles_admin_role_check CHECK (admin_role IN ('Admin','Editor','Order Manager','Customer Support'));
 
 COMMENT ON TABLE public.profiles IS 'User profile, one row per auth.users entry. Auto-created on signup by fix_auth_trigger.sql trigger.';
 COMMENT ON COLUMN public.profiles.role IS 'Coarse role flag for backward compatibility with is_admin(). Constrained to Customer/Admin/Editor.';
@@ -126,7 +149,7 @@ COMMENT ON COLUMN public.subscriptions.plan_type IS 'Subscription plan label (e.
 CREATE TABLE IF NOT EXISTS public.invoices (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     invoice_number  TEXT NOT NULL UNIQUE,
-    order_id        UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
+    order_id        TEXT NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
     customer_id     UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
     customer_name   TEXT,
     customer_email  TEXT,

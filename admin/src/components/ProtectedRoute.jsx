@@ -30,9 +30,11 @@ export default function ProtectedRoute({ children }) {
         return <Navigate to="/login" replace />;
     }
 
-    // Allow access if role is Admin, Editor, Super Admin, OR null/undefined
+    // Allow access only with an explicit Admin/Editor role. A null/missing
+    // role (e.g. a profiles row that failed to load) must NOT grant access —
+    // several pages still query Supabase directly, so this gate matters.
     const roleLower = (role || '').toLowerCase();
-    const isAdminCapable = !role || roleLower.includes('admin') || roleLower.includes('editor');
+    const isAdminCapable = !!role && (roleLower.includes('admin') || roleLower.includes('editor'));
     if (!isAdminCapable) {
         return <Navigate to="/login" replace />;
     }

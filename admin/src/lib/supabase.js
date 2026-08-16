@@ -1,17 +1,19 @@
 import { createClient } from '@supabase/supabase-js';
 
-// V10: Read Supabase URL and anon key from environment variables.
-// Create a .env.local file with:
+// Read Supabase URL and anon key from environment variables.
+// Create a .env.local (or Vercel env) with:
 //   VITE_SUPABASE_URL=https://<project>.supabase.co
 //   VITE_SUPABASE_ANON_KEY=<anon-key>
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://dligrptvajjsbzlcpjsk.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRsaWdycHR2YWpqc2J6bGNwanNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE3MDQwMDksImV4cCI6MjA5NzI4MDAwOX0.6840Jbg6FZjOVN_KC6M0wyREEtXlxdKAGxU5U92-CRM';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseAnonKey) {
-    console.warn(
-        '[supabase] VITE_SUPABASE_ANON_KEY is not set. Admin features will not work. ' +
-        'Add it to your .env.local file.'
+if (!supabaseUrl || !supabaseAnonKey) {
+    console.error(
+        '[supabase] VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY are not set. ' +
+        'Add them to .env.local (dev) or the Vercel project env (prod).'
     );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Empty-string placeholders keep createClient from throwing at import time;
+// requests will fail loudly until the env vars are provided.
+export const supabase = createClient(supabaseUrl || 'https://placeholder.supabase.co', supabaseAnonKey || 'placeholder');

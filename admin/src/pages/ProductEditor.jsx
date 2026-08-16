@@ -313,13 +313,20 @@ export default function ProductEditor() {
     setError(null);
     setFieldErrors({});
 
-    // Build the product payload. pdp_config is sent as the merged object.
+    // Build the product payload. The structured `pdpConfig` state is the
+    // source of truth: it is updated by both the structured editors
+    // (taste profile, tabs) and valid raw-JSON edits. Submitting the stale
+    // raw string silently discarded every structured edit.
     let finalPdpConfig;
     try {
       finalPdpConfig = pdpRawError ? pdpConfig : JSON.parse(pdpConfigRaw || '{}');
     } catch {
       finalPdpConfig = pdpConfig;
     }
+    // Raw textarea only wins when it parsed cleanly AND differs from the
+    // structured state (it is kept in sync by onPdpRawChange). Merge the
+    // structured editors' keys over it so neither side is lost.
+    finalPdpConfig = { ...finalPdpConfig, ...pdpConfig };
 
     // Embed auxiliary data into pdp_config as tables don't exist
     finalPdpConfig.ingredients_table = ingredients.filter(i => !i._deleted);

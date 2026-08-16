@@ -58,7 +58,7 @@ export default function Dashboard() {
       const dateFilter = getDateFilter();
 
       // Fetch all orders (with optional date filter)
-      let ordersQuery = supabase.from('orders').select('*');
+      let ordersQuery = supabase.from('orders').select('id, created_at, status, payment_status, total, customer_id, shipping_details');
       if (dateFilter) ordersQuery = ordersQuery.gte('created_at', dateFilter);
       const { data: orders } = await ordersQuery;
       const allOrders = orders || [];

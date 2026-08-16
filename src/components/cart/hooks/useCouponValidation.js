@@ -3,54 +3,55 @@ import { supabase } from '../../../supabaseClient';
 
 /**
  * Validate and apply coupon codes against the Supabase coupons table.
- * Also supports the hardcoded WELCOME10 fallback for demo purposes.
+ *
+ * The coupon shown here is a PREVIEW only — the razorpay edge function
+ * re-validates the coupon server-side at create_order (active, expiry,
+ * min_cart_value, usage_limit) and recomputes the final discount, so a
+ * tampered client cannot obtain a discount that isn't in the database.
+ * The hardcoded WELCOME10 fallback was removed for exactly that reason.
  */
 export default function useCouponValidation() {
     const [appliedCoupon, setAppliedCoupon] = useState(null);
     const [isApplying, setIsApplying] = useState(false);
     const [error, setError] = useState('');
 
-    const applyCoupon = useCallback(async (code) => {
-        if (!code || !code.trim()) return;
+    const applyCoupon = useCallback(async (code, subtotal) => {
+        if (!code || !code.trim()) return false;
         setIsApplying(true);
         setError('');
 
         try {
-            // Try Supabase first
-            const { data, err } = await supabase
+            const normalized = code.trim().toUpperCase();
+            const { data, error: dbError } = await supabase
                 .from('coupons')
                 .select('*')
-                .eq('code', code.trim().toUpperCase())
+                .eq('code', normalized)
                 .eq('is_active', true)
-                .single();
+                .maybeSingle();
 
-            if (err || !data) {
-                // Fallback: hardcoded WELCOME10
-                if (code.trim().toUpperCase() === 'WELCOME10') {
-                    setAppliedCoupon({
-                        code: 'WELCOME10',
-                        discount_type: 'percentage',
-                        discount_value: 10,
-                        max_discount: 100,
-                    });
-                    return;
-                }
-                throw new Error('Invalid or expired coupon code');
+            if (dbError) {
+                throw new Error(dbError.message || 'Could not validate this coupon right now.');
             }
-
+            if (!data) {
+                throw new Error('Invalid or inactive coupon code');
+            }
             if (data.expiry_date && new Date(data.expiry_date) < new Date()) {
                 throw new Error('This coupon has expired');
             }
-
-            if (data.min_order_value) {
-                // min_order_value check will be done by the caller
-                data._min_order = data.min_order_value;
+            // Live schema column is min_cart_value
+            if (data.min_cart_value && (subtotal ?? 0) < data.min_cart_value) {
+                throw new Error(`This coupon requires a minimum order of ₹${data.min_cart_value}`);
+            }
+            if (data.usage_limit && (data.times_used || 0) >= data.usage_limit) {
+                throw new Error('This coupon has reached its usage limit');
             }
 
             setAppliedCoupon(data);
+            return true;
         } catch (e) {
-            setError(e.message);
+            setError(e.message || 'Could not apply this coupon.');
             setAppliedCoupon(null);
+            return false;
         } finally {
             setIsApplying(false);
         }
@@ -61,18 +62,18 @@ export default function useCouponValidation() {
         setError('');
     }, []);
 
-    const calculateDiscount = useCallback((subtotal) => {
+    const calculateDiscount = useCallback((subtotalAmount) => {
         if (!appliedCoupon) return 0;
         let discount = 0;
         if (appliedCoupon.discount_type === 'percentage') {
-            discount = (subtotal * appliedCoupon.discount_value) / 100;
+            discount = (subtotalAmount * appliedCoupon.discount_value) / 100;
             if (appliedCoupon.max_discount && discount > appliedCoupon.max_discount) {
                 discount = appliedCoupon.max_discount;
             }
         } else if (appliedCoupon.discount_type === 'fixed') {
             discount = appliedCoupon.discount_value;
         }
-        return Math.floor(discount);
+        return Math.max(0, Math.floor(discount));
     }, [appliedCoupon]);
 
     return {

@@ -78,6 +78,7 @@ export const shippingService = {
         const shipmentData = {
             order_id: orderId,
             provider_id: velocityProvider.id,
+            direction: 'reverse', // forward | reverse — the unique key includes this
             warehouse_id: warehouse.id,
             velocity_order_id: vPayload.order_id,
             velocity_shipment_id: vPayload.shipment_id,
@@ -142,15 +143,37 @@ export const shippingService = {
     },
 
     async processWebhook(rawPayload) {
-        // 1. Insert into webhook_events
+        // 1. Insert into webhook_events — with a stable event_uid so webhook
+        //    redeliveries are skipped instead of duplicating timeline entries.
         const { data: velocityProvider } = await supabaseAdmin.from('shipping_providers').select('id').eq('code', 'velocity').single();
+        const uidParts = [
+            'velocity',
+            rawPayload.shipment_id || '',
+            rawPayload.awb || '',
+            rawPayload.status || 'unknown',
+            rawPayload.current_status || '',
+            rawPayload.pickup_scheduled_date || '',
+            rawPayload.manifest_date || ''
+        ];
+        const eventUid = uidParts.join('|');
         const { data: webhookEvent } = await supabaseAdmin.from('webhook_events').insert([{
             provider_id: velocityProvider?.id,
             event_type: rawPayload.status || 'unknown',
             awb_code: rawPayload.awb,
             velocity_shipment_id: rawPayload.shipment_id,
+            event_uid: eventUid,
             raw_payload_json: rawPayload
-        }]).select().single();
+        }])
+        .select().single()
+        .then((res) => {
+            if (res?.error?.code === '23505') return null; // duplicate delivery
+            if (res?.error) throw res.error;
+            return res?.data ?? null;
+        });
+        if (!webhookEvent) {
+            logger.info('Duplicate Velocity webhook delivery skipped', { eventUid });
+            return;
+        }
 
         try {
             // 2. Find shipment
@@ -527,6 +550,7 @@ export const shippingService = {
         const shipmentData = {
             order_id: orderId,
             provider_id: velocityProvider.id,
+            direction: 'reverse', // forward | reverse — the unique key includes this
             warehouse_id: warehouse.id,
             velocity_order_id: vPayload.order_id,
             velocity_shipment_id: vPayload.shipment_id,

@@ -138,23 +138,47 @@ export default function InventoryList() {
 
   const handleUpdateStock = async () => {
     if (!editingVariant) return;
-    
-    const diff = parseInt(editForm.stock_quantity) - editingVariant.stock_quantity;
-    
-    // We only need a reason if stock quantity changed
-    if (diff !== 0 && !editForm.reason.trim()) {
-      alert("Please provide a reason for the stock adjustment.");
+
+    const newQty = parseInt(editForm.stock_quantity);
+    if (Number.isNaN(newQty) || newQty < 0) {
+      alert("Stock quantity must be zero or a positive number.");
+      return;
+    }
+    if (editForm.manufacturing_date && editForm.expiry_date
+        && new Date(editForm.expiry_date) <= new Date(editForm.manufacturing_date)) {
+      alert("Expiry date must be after the manufacturing date.");
       return;
     }
 
     setSaving(true);
     try {
-      // 1. Update product_variants (the inventory trigger will automatically apply any inventory_log we create, 
-      //    but to update cost_price and dates we must update product_variants directly).
-      //    Wait, our trigger updates stock_quantity from logs. 
-      //    To be safe and avoid trigger recursion/conflicts, let's update variants first, 
-      //    BUT wait, our trigger is on inventory_logs. If we insert into logs, it updates stock_quantity.
-      //    So we should update product_variants for the *other* fields, and insert into logs for the stock change.
+      // Re-read the variant's CURRENT stock right before saving. The diff
+      // must be computed against fresh data — a sale or another admin's
+      // adjustment since page load would otherwise be silently reverted.
+      const { data: freshVariant, error: freshError } = await supabase
+        .from('product_variants')
+        .select('id, stock_quantity')
+        .eq('id', editingVariant.id)
+        .single();
+      if (freshError) throw freshError;
+
+      const diff = newQty - freshVariant.stock_quantity;
+      // A reason is required for any stock change
+      if (diff !== 0 && !editForm.reason.trim()) {
+        alert("Please provide a reason for the stock adjustment.");
+        setSaving(false);
+        return;
+      }
+      // If someone else changed stock while the form was open, warn instead
+      // of overwriting their change blindly.
+      if (freshVariant.stock_quantity !== editingVariant.stock_quantity) {
+        const proceed = window.confirm(
+          `Stock changed while you were editing (was ${editingVariant.stock_quantity}, now ${freshVariant.stock_quantity}).
+` +
+          `Saving will set it to ${newQty}. Continue?`
+        );
+        if (!proceed) { setSaving(false); return; }
+      }
 
       // Update non-stock fields
       const { error: variantError } = await supabase
@@ -170,7 +194,8 @@ export default function InventoryList() {
         
       if (variantError) throw variantError;
 
-      // 2. Insert log for stock adjustment (if changed)
+      // Insert log for stock adjustment (if changed) — the DB trigger
+      // applies quantity_changed to stock_quantity.
       if (diff !== 0) {
         const { data: { user } } = await supabase.auth.getUser();
         
@@ -231,9 +256,10 @@ export default function InventoryList() {
       (i.stock_quantity || 0) * (i.price || 0),
       i.batch_number || '', i.manufacturing_date || '', i.expiry_date || ''
     ]);
-    const csv = [headers, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+    const csv = [headers, ...rows].map(r => r.map(v => `"${String(v ?? '').replace(/"/g, '""')}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
     const a = document.createElement('a');
     a.href = url; a.download = `inventory-${format(new Date(), 'yyyy-MM-dd')}.csv`; a.click();
   };

@@ -46,6 +46,9 @@ export default function useRazorpayCheckout({
     clearCart,
     onClose,
     onNavigate,
+    onModalOpened,
+    onAborted,
+    onPaymentFailed,
 }) {
     const [isProcessing, setIsProcessing] = useState(false);
     const [processingStep, setProcessingStep] = useState('');
@@ -150,24 +153,36 @@ export default function useRazorpayCheckout({
                         onClose();
                         onNavigate('thank-you');
                     } catch (err) {
-                        setError(`Payment verification failed: ${err.message}`);
+                        const msg = `Payment verification failed: ${err.message}`;
+                        setError(msg);
                         setIsProcessing(false);
+                        onPaymentFailed?.(msg);
                     }
                 },
-                modal: { ondismiss: () => setIsProcessing(false) },
+                modal: {
+                    ondismiss: () => {
+                        setIsProcessing(false);
+                        onAborted?.();
+                    },
+                },
             };
 
             const rzp1 = new window.Razorpay(options);
             rzp1.on('payment.failed', (response) => {
-                setError(`Payment failed: ${response.error.description}`);
+                const msg = `Payment failed: ${response.error.description}`;
+                setError(msg);
                 setIsProcessing(false);
+                onPaymentFailed?.(msg);
             });
             rzp1.open();
+            onModalOpened?.();
         } catch (err) {
-            setError(err.message || 'Failed to initialize checkout.');
+            const msg = err.message || 'Failed to initialize checkout.';
+            setError(msg);
             setIsProcessing(false);
+            onPaymentFailed?.(msg);
         }
-    }, [saveAddressForFuture, clearCart, onClose, onNavigate]);
+    }, [saveAddressForFuture, clearCart, onClose, onNavigate, onModalOpened, onAborted, onPaymentFailed]);
 
     const reset = useCallback(() => {
         setIsProcessing(false);

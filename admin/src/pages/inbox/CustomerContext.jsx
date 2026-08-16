@@ -16,16 +16,21 @@ export default function CustomerContext({ activeChat, onUpdateChat }) {
   const [priority, setPriority] = useState('Normal');
   const [tagsInput, setTagsInput] = useState('');
 
+  // Key on activeChat.id (not the object): the realtime handler replaces the
+  // activeChat object on every incoming message, which used to wipe the
+  // admin's in-progress status/priority/tags edits mid-typing.
+  const activeChatId = activeChat?.id;
   useEffect(() => {
-    if (activeChat) {
+    if (activeChatId && activeChat) {
       setStatus(activeChat.status || 'New');
       setPriority(activeChat.priority || 'Normal');
       setTagsInput((activeChat.tags || []).join(', '));
-      
+
       fetchContext();
       fetchNotes();
     }
-  }, [activeChat]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeChatId]);
 
   const fetchContext = async () => {
     setLoadingContext(true);

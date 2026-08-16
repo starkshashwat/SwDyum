@@ -66,7 +66,7 @@ function App() {
       const slug = path.substring('/product/'.length);
       return `product-${slug}`;
     }
-    return 'home';
+    return 'not-found';
   };
 
   const [currentPage, setCurrentPage] = useState(() => {
@@ -74,8 +74,13 @@ function App() {
   });
 
   const [currentUser, setCurrentUser] = useState(() => {
-    const saved = localStorage.getItem('swadyum_current_user');
-    return saved ? JSON.parse(saved) : null;
+    try {
+      const saved = localStorage.getItem('swadyum_current_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      localStorage.removeItem('swadyum_current_user');
+      return null;
+    }
   });
 
   const [redirectPath, setRedirectPath] = useState(null);
@@ -217,7 +222,23 @@ function App() {
           };
 
           if (cartId) {
-            await supabase.from('abandoned_carts').update(payload).eq('id', cartId);
+            // Only update a cart row that actually belongs to this user —
+            // otherwise a shared browser could hijack another account's row.
+            const { data: existing } = await supabase
+              .from('abandoned_carts')
+              .select('id, customer_id')
+              .eq('id', cartId)
+              .maybeSingle();
+            if (existing && existing.customer_id === currentUser.id) {
+              await supabase.from('abandoned_carts').update(payload).eq('id', cartId);
+            } else {
+              localStorage.removeItem('swadyum_automation_cart_id');
+              if (cart.length > 0) {
+                const { data: fresh, error: freshError } = await supabase
+                  .from('abandoned_carts').insert(payload).select('id').single();
+                if (!freshError && fresh?.id) localStorage.setItem('swadyum_automation_cart_id', fresh.id);
+              }
+            }
           } else if (cart.length > 0) {
             const { data, error } = await supabase.from('abandoned_carts').insert(payload).select('id').single();
             if (data?.id) {
@@ -238,17 +259,24 @@ function App() {
     setCart(prev => {
       const idx = prev.findIndex(item => item.slug === product.slug && item.weight === weight);
       if (idx > -1) {
-        const updated = [...prev];
-        updated[idx].quantity += qty;
-        return updated;
+        // Immutable update — mutating the shared object double-increments
+        // under React StrictMode's double-invoked updaters.
+        return prev.map((item, i) => {
+          if (i !== idx) return item;
+          const cap = item.maxStock ?? null;
+          const next = item.quantity + qty;
+          return { ...item, quantity: cap ? Math.min(next, cap) : next };
+        });
       } else {
+        const maxStock = product.stockMap?.[weight] ?? product.variants?.find(v => v.weight_label === weight)?.available_stock ?? null;
         return [...prev, {
           slug: product.slug,
           name: product.name,
           weight: weight,
           price: product.price || product.prices?.[weight] || product.base_price,
           mrp: product.variants?.find(v => v.weight_label === weight)?.mrp || product.mrp || null,
-          quantity: qty,
+          quantity: maxStock ? Math.min(qty, maxStock) : qty,
+          maxStock: maxStock,
           image: product.image || product.images?.[0] || '/prod_mango.webp'
         }];
       }
@@ -275,7 +303,9 @@ function App() {
       }
       return prev.map(item => {
         if (item.slug === slug && item.weight === weight) {
-          return { ...item, quantity: newQty };
+          const cap = item.maxStock ?? null;
+          const clamped = cap ? Math.min(newQty, cap) : newQty;
+          return { ...item, quantity: clamped };
         }
         return item;
       });
@@ -431,6 +461,18 @@ function App() {
           <CategoryPage categorySlug={currentPage.substring('category-'.length)} onNavigate={handleNavigate} addToCart={addToCart} />
         ) : currentPage.startsWith('product-') ? (
           <ProductDetailsPage slug={currentPage.substring('product-'.length)} onNavigate={handleNavigate} addToCart={addToCart} handleBuyNow={handleBuyNow} />
+        ) : currentPage === 'not-found' ? (
+          <div className="not-found-page" style={{ minHeight: '60vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, padding: '48px 24px', textAlign: 'center' }}>
+            <h1 style={{ fontSize: 72, margin: 0, color: 'var(--brand-green, #1A4E28)' }}>404</h1>
+            <p style={{ fontSize: 18, margin: 0 }}>This page could not be found.</p>
+            <button
+              type="button"
+              onClick={() => handleNavigate('home')}
+              style={{ background: 'var(--brand-green, #1A4E28)', color: '#fff', border: 'none', borderRadius: 999, padding: '12px 28px', fontSize: 15, fontWeight: 600, cursor: 'pointer' }}
+            >
+              Back to Home
+            </button>
+          </div>
         ) : (
           <>
             {/* ─── Hero Section ─── */}

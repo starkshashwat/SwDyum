@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { apiClient, ApiError } from '../lib/apiClient';
 import {
     Package, Search, ChevronLeft, ChevronRight, Download, X, RefreshCw,
@@ -23,7 +23,12 @@ function shortId(id) {
 
 function formatPhone(phone) {
     if (!phone) return '';
-    return phone.replace(/\D/g, '');
+    let digits = phone.replace(/\D/g, '');
+    // wa.me needs the full international number. Stored numbers are Indian:
+    // a bare 10-digit local number gets the +91 prefix.
+    if (digits.length === 10) digits = `91${digits}`;
+    if (digits.length === 11 && digits.startsWith('0')) digits = `91${digits.slice(1)}`;
+    return digits;
 }
 
 export default function OrdersManager() {
@@ -32,6 +37,8 @@ export default function OrdersManager() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+    const fetchSeqRef = useRef(0);
     const [orderStatusFilter, setOrderStatusFilter] = useState('All');
     const [paymentStatusFilter, setPaymentStatusFilter] = useState('All');
     const [dateFrom, setDateFrom] = useState('');
@@ -57,6 +64,7 @@ export default function OrdersManager() {
 
     // ── Fetch the master list ─────────────────────────────────────────────────
     const fetchOrders = useCallback(async () => {
+        const seq = ++fetchSeqRef.current;
         try {
             setLoading(true);
             setError('');
@@ -72,9 +80,10 @@ export default function OrdersManager() {
                 end.setHours(23, 59, 59, 999);
                 params.date_to = end.toISOString();
             }
-            if (searchTerm.trim()) params.customer_email = searchTerm.trim();
+            if (debouncedSearch.trim()) params.customer_email = debouncedSearch.trim();
 
             const res = await apiClient.get('/orders', params);
+            if (seq !== fetchSeqRef.current) return; // stale response
             setOrders(res?.data || []);
             setTotalCount(res?.pagination?.total || 0);
         } catch (err) {
@@ -82,23 +91,23 @@ export default function OrdersManager() {
         } finally {
             setLoading(false);
         }
-    }, [page, orderStatusFilter, paymentStatusFilter, dateFrom, dateTo, searchTerm]);
+    }, [page, orderStatusFilter, paymentStatusFilter, dateFrom, dateTo, debouncedSearch]);
 
     // ── Fetch summary card counts ─────────────────────────────────────────────
     const fetchStatusCounts = useCallback(async () => {
         try {
-            const res = await apiClient.get('/orders', { limit: 1000 });
-            const data = res?.data || [];
+            // Server-side GROUP BY — the old approach pulled up to 1000 full
+            // orders just to count them and silently capped there.
+            const res = await apiClient.get('/orders/stats');
+            const stats = res?.data || {};
             const counts = {};
-            for (const o of data) {
-                for (const card of STATUS_CARDS) {
-                    const matchOrder = card.orderStatuses.includes(o.status || 'Pending');
-                    if (matchOrder) {
-                        if (!counts[card.key]) counts[card.key] = { count: 0, revenue: 0 };
-                        counts[card.key].count++;
-                        if (o.payment_status === 'Paid') counts[card.key].revenue += Number(o.total || 0);
-                    }
+            for (const card of STATUS_CARDS) {
+                let count = 0, revenue = 0;
+                for (const s of card.orderStatuses) {
+                    count += stats[s]?.count || 0;
+                    revenue += stats[s]?.revenue || 0;
                 }
+                counts[card.key] = { count, revenue };
             }
             setStatusCounts(counts);
         } catch {
@@ -106,7 +115,13 @@ export default function OrdersManager() {
         }
     }, []);
 
-    useEffect(() => { fetchOrders(); }, [fetchOrders]);
+    // Debounce search so typing doesn't fire a request per keystroke
+    useEffect(() => {
+        const t = setTimeout(() => { setDebouncedSearch(searchTerm); setPage(0); }, 400);
+        return () => clearTimeout(t);
+    }, [searchTerm]);
+
+
     useEffect(() => { fetchStatusCounts(); }, [fetchStatusCounts]);
 
     const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
@@ -119,16 +134,14 @@ export default function OrdersManager() {
 
     const updateOrderStatus = async (id, newStatus, note = null) => {
         try {
-            const entry = {
-                status: newStatus,
-                timestamp: new Date().toISOString(),
-                note: note || `Status changed to ${newStatus} by admin`,
-            };
-            const current = await apiClient.get(`/orders/${id}`);
-            const history = current?.data?.tracking_history || [];
+            // tracking_entry is appended server-side — the old
+            // GET-then-PATCH tracking_history flow lost concurrent entries.
             await apiClient.patch(`/orders/${id}`, {
                 status: newStatus,
-                tracking_history: [...history, entry],
+                tracking_entry: {
+                    status: newStatus,
+                    note: note || `Status changed to ${newStatus} by admin`,
+                },
             });
             fetchOrders(); fetchStatusCounts();
         } catch (err) {
@@ -152,7 +165,20 @@ export default function OrdersManager() {
             <div className="flex justify-between items-center">
                 <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Orders</h1>
                 <div className="flex gap-2 items-center">
-                    <button onClick={() => exportOrdersCSV(orders)} className="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 flex items-center gap-2 text-sm font-semibold shadow-sm transition-colors">
+                    <button onClick={async () => {
+                        try {
+                            // Export every row matching the current filters,
+                            // not just the 25 rows on the visible page.
+                            const params = { page: 1, limit: Math.max(totalCount, orders.length) || PAGE_SIZE };
+                            if (orderStatusFilter !== 'All') params.status = orderStatusFilter;
+                            if (paymentStatusFilter !== 'All') params.payment_status = paymentStatusFilter;
+                            if (dateFrom) params.date_from = new Date(dateFrom).toISOString();
+                            if (dateTo) { const end = new Date(dateTo); end.setHours(23, 59, 59, 999); params.date_to = end.toISOString(); }
+                            if (debouncedSearch.trim()) params.customer_email = debouncedSearch.trim();
+                            const res = await apiClient.get('/orders', params);
+                            exportOrdersCSV(res?.data || orders);
+                        } catch { exportOrdersCSV(orders); }
+                    }} className="bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-50 flex items-center gap-2 text-sm font-semibold shadow-sm transition-colors">
                         <Download className="w-4 h-4" /> Export
                     </button>
                     <button onClick={() => { fetchOrders(); fetchStatusCounts(); }} className="bg-white border border-gray-200 text-gray-700 p-2 rounded-lg hover:bg-gray-50 shadow-sm transition-colors" title="Refresh">
@@ -404,7 +430,7 @@ function OrderDetailsPanel({ orderId, onBack, onStatusChange }) {
         if (order.payment_status === 'Pending') {
             const msg = `Hi ${customer.name}, your payment for Swadyum order ${shortId(order.id)} is pending. Please complete it to confirm your order!`;
             return (
-                <a href={`https://wa.me/${formatPhone(customer.phone)}?text=${encodeURIComponent(msg)}`} target="_blank" rel="noreferrer" className="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition-colors shadow-sm flex items-center justify-center gap-2">
+                <a href={customer.phone ? `https://wa.me/${formatPhone(customer.phone)}?text=${encodeURIComponent(msg)}` : undefined} aria-disabled={!customer.phone} onClick={(e) => { if (!customer.phone) e.preventDefault(); }} target="_blank" rel="noreferrer" className="w-full sm:w-auto bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition-colors shadow-sm flex items-center justify-center gap-2">
                     <MessageCircle className="w-4 h-4" /> Send Payment Reminder
                 </a>
             );
@@ -632,7 +658,7 @@ function OrderDetailsPanel({ orderId, onBack, onStatusChange }) {
                                     {customer.phone && (
                                         <div className="flex items-center gap-2">
                                             <CopyField value={customer.phone} minimal />
-                                            <a href={`https://wa.me/${formatPhone(customer.phone)}`} target="_blank" rel="noreferrer" className="text-green-600 hover:text-green-700 bg-green-50 p-1.5 rounded-md transition-colors" title="Message on WhatsApp">
+                                            <a href={customer.phone ? `https://wa.me/${formatPhone(customer.phone)}` : undefined} aria-disabled={!customer.phone} onClick={(e) => { if (!customer.phone) e.preventDefault(); }} target="_blank" rel="noreferrer" className="text-green-600 hover:text-green-700 bg-green-50 p-1.5 rounded-md transition-colors" title="Message on WhatsApp">
                                                 <MessageCircle className="w-4 h-4" />
                                             </a>
                                         </div>

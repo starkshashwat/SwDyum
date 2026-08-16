@@ -49,7 +49,7 @@ function PdpStickyBar({ product, selectedSize, quantity, setQuantity, addToCart,
               <div className="pdp-sticky-qty" role="group" aria-label="Quantity">
                 <button onClick={() => setQuantity(Math.max(1, quantity - 1))} aria-label="Decrease quantity">−</button>
                 <span aria-live="polite">{quantity}</span>
-                <button onClick={() => setQuantity(quantity + 1)} aria-label="Increase quantity">+</button>
+                <button onClick={() => setQuantity(Math.min(quantity + 1, variant?.available_stock ?? quantity + 1))} aria-label="Increase quantity">+</button>
               </div>
               <button
                 className="pdp-sticky-add"

@@ -44,6 +44,13 @@
 
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000/api').replace(/\/+$/, '');
 
+if (!import.meta.env.VITE_API_BASE_URL && import.meta.env.PROD) {
+    console.error(
+        '[apiClient] VITE_API_BASE_URL is not set in the production build — ' +
+        'every request will target localhost. Configure it in the Vercel project env.'
+    );
+}
+
 const SESSION_STORAGE_KEY = 'swadyum_admin_session';
 
 /** Custom error type carrying the backend's status code + validation details. */
@@ -80,6 +87,29 @@ function getAccessToken() {
     return getStoredSession()?.access_token || null;
 }
 
+// ── Refresh-on-401 ───────────────────────────────────────────────────────────
+// AuthContext registers a handler that refreshes the Supabase session and
+// re-stores it. On a 401 the request is retried once with the fresh token
+// instead of hard-redirecting to /login (which used to log admins out every
+// hour when the access token expired despite a valid refresh token).
+let sessionRefreshHandler = null;
+let refreshInFlight = null;
+
+export function setSessionRefreshHandler(fn) {
+    sessionRefreshHandler = typeof fn === 'function' ? fn : null;
+}
+
+async function tryRefreshSession() {
+    if (!sessionRefreshHandler) return false;
+    // Coalesce concurrent 401s into a single refresh call
+    if (!refreshInFlight) {
+        refreshInFlight = Promise.resolve(sessionRefreshHandler())
+            .catch(() => false)
+            .finally(() => { refreshInFlight = null; });
+    }
+    return refreshInFlight;
+}
+
 /**
  * Builds a query string from a plain object, skipping undefined/null/''
  * values so callers can pass optional filters without manual cleanup.
@@ -104,7 +134,7 @@ function buildQueryString(params) {
  * @param {object} [options.params] query params object
  * @param {FormData} [options.formData] multipart body — takes precedence over body
  */
-async function request(method, path, { body, params, formData } = {}) {
+async function request(method, path, { body, params, formData, _isRetry } = {}) {
     const url = `${API_BASE_URL}${path}${buildQueryString(params)}`;
     const token = getAccessToken();
 
@@ -136,9 +166,17 @@ async function request(method, path, { body, params, formData } = {}) {
         payload = null;
     }
 
+    if (response.status === 401 && !_isRetry) {
+        // Access token likely expired — try one silent refresh and retry.
+        const refreshed = await tryRefreshSession();
+        if (refreshed) {
+            return request(method, path, { body, params, formData, _isRetry: true });
+        }
+    }
+
     if (response.status === 401) {
-        // Token missing/expired/invalid — the backend is the source of truth
-        // here. Clear the stale session and force a re-login.
+        // Refresh failed or token truly invalid — the backend is the source
+        // of truth here. Clear the stale session and force a re-login.
         clearStoredSession();
         if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
             window.location.href = '/login';

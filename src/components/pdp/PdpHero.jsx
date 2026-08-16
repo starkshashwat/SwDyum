@@ -269,7 +269,7 @@ export default function PdpHero({
               </button>
               <span className="w-8 text-center text-sm font-semibold">{quantity}</span>
               <button
-                onClick={() => setQuantity(quantity + 1)}
+                onClick={() => setQuantity(Math.min(quantity + 1, variant?.available_stock ?? quantity + 1))}
                 className="w-10 h-11 flex items-center justify-center text-gray-500 hover:bg-gray-50 text-lg font-medium"
               >
                 +

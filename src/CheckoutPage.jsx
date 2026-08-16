@@ -1,3 +1,4 @@
+import { getShippingFee } from './lib/shippingConstants';
 import React, { useState, useCallback, useEffect } from 'react';
 import './CheckoutPage.css';
 import { supabase } from './supabaseClient';
@@ -67,7 +68,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
   let discountAmount = 0;
   if (appliedCoupon) {
     if (appliedCoupon.discount_type === 'percentage') {
-      discountAmount = (subtotal * appliedCoupon.discount_value) / 100;
+      discountAmount = Math.floor((subtotal * appliedCoupon.discount_value) / 100);
       if (appliedCoupon.max_discount && discountAmount > appliedCoupon.max_discount) {
         discountAmount = appliedCoupon.max_discount;
       }
@@ -76,7 +77,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
     }
   }
 
-  const shippingFee = subtotal >= 799 || subtotal === 0 ? 0 : 60;
+  const shippingFee = getShippingFee(subtotal);
   const total = Math.max(0, subtotal - discountAmount + shippingFee);
 
   const handleApplyCoupon = async (e) => {

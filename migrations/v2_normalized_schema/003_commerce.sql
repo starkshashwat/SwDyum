@@ -57,11 +57,22 @@
 
 BEGIN;
 
+-- Bootstrap profiles (canonical definition lives in 004_auth_roles.sql).
+-- orders.customer_id references profiles, so it must exist before the
+-- orders table below; 004 runs later and is a no-op via IF NOT EXISTS.
+CREATE TABLE IF NOT EXISTS public.profiles (
+    id         UUID PRIMARY KEY,
+    name       TEXT,
+    email      TEXT UNIQUE,
+    phone      TEXT UNIQUE,
+    role       TEXT NOT NULL DEFAULT 'Customer'
+);
+
 -- ============================================================
 -- ORDERS (canonical shape — unifies 3 inconsistent shapes)
 -- ============================================================
 CREATE TABLE IF NOT EXISTS public.orders (
-    id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    id                  TEXT PRIMARY KEY,
     customer_id         UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
     total               NUMERIC(10,2) NOT NULL CHECK (total >= 0),
     subtotal            NUMERIC(10,2) CHECK (subtotal IS NULL OR subtotal >= 0),
@@ -96,7 +107,7 @@ COMMENT ON COLUMN public.orders.razorpay_payment_id IS 'Razorpay payment id capt
 -- ============================================================
 CREATE TABLE IF NOT EXISTS public.order_items (
     id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    order_id        UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
+    order_id        TEXT NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
     product_id      UUID REFERENCES public.products(id) ON DELETE SET NULL,
     variant_id      UUID REFERENCES public.product_variants(id) ON DELETE SET NULL,
     product_name    TEXT NOT NULL,
@@ -115,7 +126,7 @@ COMMENT ON COLUMN public.order_items.product_name IS 'Snapshot of product name a
 -- ============================================================
 CREATE TABLE IF NOT EXISTS public.payments (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    order_id            UUID NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
+    order_id            TEXT NOT NULL REFERENCES public.orders(id) ON DELETE CASCADE,
     razorpay_order_id   TEXT,
     razorpay_payment_id TEXT,
     razorpay_signature  TEXT,
@@ -157,7 +168,7 @@ CREATE TABLE IF NOT EXISTS public.coupon_usage (
     id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     coupon_id   UUID NOT NULL REFERENCES public.coupons(id) ON DELETE CASCADE,
     customer_id UUID REFERENCES public.profiles(id) ON DELETE SET NULL,
-    order_id    UUID REFERENCES public.orders(id) ON DELETE SET NULL,
+    order_id    TEXT REFERENCES public.orders(id) ON DELETE SET NULL,
     used_at     TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 

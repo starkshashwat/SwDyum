@@ -19,20 +19,19 @@ export default function useAddresses(currentUser) {
         setLoading(true);
         setError(null);
         try {
-            const { data, err } = await supabase
+            const { data, error: fetchErr } = await supabase
                 .from('addresses')
                 .select('*')
                 .eq('customer_id', currentUser.id)
                 .order('is_default', { ascending: false })
                 .order('created_at', { ascending: false });
 
-            if (err) throw err;
+            if (fetchErr) throw fetchErr;
             setAddresses(data || []);
-            // Auto-select default address
+            // Auto-select the default address only if nothing is selected.
+            // Functional form avoids the stale selectedAddress closure.
             const defaultAddr = (data || []).find((a) => a.is_default);
-            if (defaultAddr && !selectedAddress) {
-                setSelectedAddress(defaultAddr);
-            }
+            setSelectedAddress((prev) => prev ?? defaultAddr ?? null);
         } catch (e) {
             setError(e.message);
         } finally {
@@ -73,8 +72,8 @@ export default function useAddresses(currentUser) {
                 country: 'India',
                 is_default: formData.is_default || addresses.length === 0,
             };
-            const { data, err } = await supabase.from('addresses').insert([payload]).select().single();
-            if (err) throw err;
+            const { data, error: insertErr } = await supabase.from('addresses').insert([payload]).select().single();
+            if (insertErr) throw insertErr;
             await fetchAddresses();
             setSelectedAddress(data);
             return data;

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { apiClient } from '../lib/apiClient';
 import { toast } from 'react-hot-toast';
 import { 
   Plus, 
@@ -34,8 +34,8 @@ export default function AutomationsList() {
 
   const fetchAutomations = async () => {
     try {
-      const res = await axios.get('/api/automations', { withCredentials: true });
-      setAutomations(res.data?.data || []);
+      const res = await apiClient.get('/automations');
+      setAutomations(res?.data || []);
     } catch (error) {
       toast.error('Failed to load automations');
       setAutomations([]);
@@ -44,8 +44,8 @@ export default function AutomationsList() {
 
   const fetchRuns = async () => {
     try {
-      const res = await axios.get('/api/automations/data/runs', { withCredentials: true });
-      setRuns(res.data?.data || []);
+      const res = await apiClient.get('/automations/data/runs');
+      setRuns(res?.data || []);
     } catch (error) {
       console.error('Failed to load runs', error);
       setRuns([]);
@@ -54,8 +54,8 @@ export default function AutomationsList() {
 
   const fetchLogs = async () => {
     try {
-      const res = await axios.get('/api/automations/data/logs', { withCredentials: true });
-      setLogs(res.data?.data || []);
+      const res = await apiClient.get('/automations/data/logs');
+      setLogs(res?.data || []);
     } catch (error) {
       console.error('Failed to load communication logs', error);
       setLogs([]);
@@ -65,11 +65,11 @@ export default function AutomationsList() {
   const fetchTemplates = async () => {
     try {
       const [emailRes, waRes] = await Promise.all([
-        axios.get('/api/automations/config/templates?channel=email', { withCredentials: true }),
-        axios.get('/api/automations/config/templates?channel=whatsapp', { withCredentials: true })
+        apiClient.get('/automations/config/templates', { channel: 'email' }),
+        apiClient.get('/automations/config/templates', { channel: 'whatsapp' })
       ]);
-      setEmailTemplates(emailRes.data?.data || []);
-      setWaTemplates(waRes.data?.data || []);
+      setEmailTemplates(emailRes?.data || []);
+      setWaTemplates(waRes?.data || []);
     } catch (error) {
       console.error('Failed to load templates', error);
     }
@@ -88,7 +88,7 @@ export default function AutomationsList() {
   const handleDuplicate = async (id) => {
     try {
       const toastId = toast.loading('Duplicating automation...');
-      await axios.post(`/api/automations/${id}/duplicate`, {}, { withCredentials: true });
+      await apiClient.post(`/automations/${id}/duplicate`, {});
       toast.success('Automation duplicated!', { id: toastId });
       fetchAutomations();
     } catch (error) {
@@ -101,7 +101,7 @@ export default function AutomationsList() {
     const toastId = toast.loading('Creating starter automation workflows...');
     try {
       // Create Abandoned Cart Recovery sample
-      await axios.post('/api/automations', {
+      await apiClient.post('/automations', {
         name: 'Abandoned Cart 24h Recovery',
         trigger_event: 'cart_abandoned',
         status: 'Active',
@@ -112,10 +112,10 @@ export default function AutomationsList() {
           { step_type: 'Condition', config: { condition_type: 'order_completed', expected_value: 'No' } },
           { step_type: 'Send WhatsApp', config: { template_id: waTemplates[0]?.id || '' } }
         ]
-      }, { withCredentials: true });
+      });
 
       // Create Order Delivery Followup sample
-      await axios.post('/api/automations', {
+      await apiClient.post('/automations', {
         name: 'Order Delivered Review & Thank You',
         trigger_event: 'order_delivered',
         status: 'Active',
@@ -123,7 +123,7 @@ export default function AutomationsList() {
           { step_type: 'Wait', config: { value: '1', unit: 'days' } },
           { step_type: 'Send WhatsApp', config: { template_id: waTemplates[0]?.id || '' } }
         ]
-      }, { withCredentials: true });
+      });
 
       toast.success('Sample automation workflows created!', { id: toastId });
       fetchAutomations();

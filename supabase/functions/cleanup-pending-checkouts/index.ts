@@ -107,10 +107,23 @@ async function runCleanup() {
             const rzpStatus = rzpOrder.status; // 'created' | 'attempted' | 'paid'
 
             if (rzpStatus === 'paid') {
-                // Razorpay says paid but our DB still says Pending — the webhook may
-                // have been missed. Trigger capture processing via a timeline note and
-                // leave as-is; a separate reconciliation could call processPaymentCapture.
-                console.log(`Order ${order.id} is paid on Razorpay but Pending in DB — webhook may have been missed.`);
+                // Razorpay says paid but our DB still says Pending — the webhook
+                // was missed. Reconcile by marking the order Paid so inventory,
+                // invoices, and notifications run instead of sitting Pending
+                // forever (and never releasing reserved stock).
+                console.log(`Order ${order.id} is paid on Razorpay but Pending in DB — reconciling.`);
+                await supabaseAdmin.from('order_timeline').insert([{
+                    order_id: order.id,
+                    event: 'Payment Reconciled',
+                    note: 'Cleanup job detected a paid Razorpay order still Pending (missed webhook).',
+                    created_by: 'system'
+                }]);
+                await supabaseAdmin.from('orders').update({
+                    status: 'Paid',
+                    payment_status: 'Paid',
+                    order_status: 'Confirmed',
+                    updated_at: new Date().toISOString()
+                }).eq('id', order.id);
                 continue;
             }
 

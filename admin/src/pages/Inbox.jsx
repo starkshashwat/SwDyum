@@ -194,7 +194,7 @@ export default function Inbox() {
     try {
        const components = [];
        if (Object.keys(templateVariables).length > 0) {
-         const parameters = Object.keys(templateVariables).sort().map(k => ({
+         const parameters = Object.keys(templateVariables).sort((a, b) => parseInt(a, 10) - parseInt(b, 10) || a.localeCompare(b)).map(k => ({
            type: 'text',
            text: templateVariables[k]
          }));

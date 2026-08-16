@@ -30,7 +30,7 @@ SELECT cron.schedule(
     SELECT net.http_post(
       url := 'https://dligrptvajjsbzlcpjsk.functions.supabase.co/cleanup-pending-checkouts',
       headers := jsonb_build_object(
-        'Authorization', 'Bearer <SERVICE_ROLE_KEY>',
+        'Authorization', 'Bearer ' || (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'service_role_key'),
         'Content-Type', 'application/json'
       ),
       body := '{}'::jsonb

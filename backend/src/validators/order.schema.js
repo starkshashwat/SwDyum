@@ -45,6 +45,12 @@ export const updateOrderSchema = z.object({
     payment_status: paymentStatusEnum.optional(),
     tracking_number: z.string().max(200).nullable().optional(),
     tracking_history: z.array(trackingHistoryEntrySchema).optional(),
+    // Server-side append: { status?, note? } — the controller merges it into
+    // tracking_history so concurrent updates can't overwrite each other.
+    tracking_entry: z.object({
+        status: z.string().max(100).optional(),
+        note: z.string().max(2000).optional(),
+    }).optional(),
     customer_name: z.string().max(200).optional(),
     customer_phone: z.string().max(50).optional(),
     customer_email: z.string().email().optional(),

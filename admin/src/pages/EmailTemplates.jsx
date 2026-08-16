@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { apiClient } from '../lib/apiClient';
 import { toast } from 'react-hot-toast';
 import { Mail, Plus, Edit2, Trash2, X, Save } from 'lucide-react';
 
@@ -17,8 +17,8 @@ export default function EmailTemplates() {
   const fetchTemplates = async () => {
     try {
       setIsLoading(true);
-      const res = await axios.get('/api/automations/config/templates?channel=email', { withCredentials: true });
-      setTemplates(res.data?.data || []);
+      const res = await apiClient.get('/automations/config/templates', { channel: 'email' });
+      setTemplates(res?.data || []);
     } catch (error) {
       toast.error('Failed to load email templates');
     } finally {
@@ -49,7 +49,7 @@ export default function EmailTemplates() {
 
     setIsSaving(true);
     try {
-      await axios.post('/api/automations/config/templates?channel=email', currentTemplate, { withCredentials: true });
+      await apiClient.post('/automations/config/templates?channel=email', currentTemplate);
       toast.success('Template saved successfully');
       fetchTemplates();
       closeModal();

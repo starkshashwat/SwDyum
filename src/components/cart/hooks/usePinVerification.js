@@ -19,7 +19,7 @@ export default function usePinVerification() {
     const [errorMessage, setErrorMessage] = useState(null);
 
     const verifyPin = useCallback(async (pin, paymentMode = 'prepaid') => {
-        if (!pin || pin.length !== 6) return;
+        if (!pin || pin.length !== 6) return null;
         setPinCode(pin);
         setStatus('checking');
         setErrorMessage(null);
@@ -52,15 +52,18 @@ export default function usePinVerification() {
                     carriers: data.carriers
                 });
                 setStatus('deliverable');
+                return 'deliverable';
             } else {
                 setDeliveryEta(null);
                 setStatus('not_deliverable');
+                return 'not_deliverable';
             }
         } catch (err) {
             console.error('Serviceability check failed:', err);
             setErrorMessage(err.message);
             // Fallback: still show not_deliverable rather than breaking the UI
             setStatus('not_deliverable');
+            return 'not_deliverable';
         }
     }, []);
 
