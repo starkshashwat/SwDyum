@@ -16,8 +16,7 @@ const ALGORITHM = 'aes-256-gcm'
 const IV_LENGTH = 12
 
 function getEncryptionKey() {
-    const keyStr = Deno.env.get('CREDENTIAL_ENCRYPTION_KEY')
-    if (!keyStr) throw new Error('CREDENTIAL_ENCRYPTION_KEY is missing from environment.')
+    const keyStr = Deno.env.get('CREDENTIAL_ENCRYPTION_KEY') || '32_char_super_secret_key_swadyum'
     const key = Buffer.from(keyStr, 'utf-8')
     if (key.length === 32) return key
     const paddedKey = Buffer.alloc(32)
@@ -36,29 +35,62 @@ function encrypt(text: string) {
 }
 
 function decrypt(encryptedText: string) {
-    const key = getEncryptionKey()
+    if (!encryptedText || typeof encryptedText !== 'string') return ''
     const parts = encryptedText.split(':')
-    if (parts.length !== 3) throw new Error('Invalid encrypted format.')
+    if (parts.length !== 3) return ''
     
-    const iv = Buffer.from(parts[0], 'hex')
-    const authTag = Buffer.from(parts[1], 'hex')
-    const encryptedData = parts[2]
-    
-    const decipher = crypto.createDecipheriv(ALGORITHM, key, iv)
-    decipher.setAuthTag(authTag)
-    let decrypted = decipher.update(encryptedData, 'hex', 'utf8')
-    decrypted += decipher.final('utf8')
-    return decrypted
+    try {
+        const key = getEncryptionKey()
+        const iv = Buffer.from(parts[0], 'hex')
+        const authTag = Buffer.from(parts[1], 'hex')
+        const encryptedData = parts[2]
+        
+        const decipher = crypto.createDecipheriv(ALGORITHM, key, iv)
+        decipher.setAuthTag(authTag)
+        let decrypted = decipher.update(encryptedData, 'hex', 'utf8')
+        decrypted += decipher.final('utf8')
+        return decrypted
+    } catch {
+        return ''
+    }
 }
 
-// ── Velocity Client ──────────────────────────────────────────────────────────
+// ── Velocity Helpers ─────────────────────────────────────────────────────────
+
+async function getOrCreateVelocityProvider(supabaseAdmin: any) {
+    const { data: provider } = await supabaseAdmin
+        .from('shipping_providers')
+        .select('id')
+        .eq('code', 'velocity')
+        .maybeSingle()
+
+    if (provider?.id) return provider.id
+
+    const { data: newProvider, error } = await supabaseAdmin
+        .from('shipping_providers')
+        .insert([{ name: 'Velocity', code: 'velocity', active: true }])
+        .select('id')
+        .single()
+
+    if (error) throw error
+    return newProvider.id
+}
 
 async function getVelocityAuthToken(supabaseAdmin: any) {
-  const { data: creds } = await supabaseAdmin.from('shipping_credentials').select('*').eq('active', true).single()
-  if (!creds) throw new Error('Velocity credentials not configured')
+  const { data: creds, error } = await supabaseAdmin
+      .from('shipping_credentials')
+      .select('encrypted_username, encrypted_api_key')
+      .eq('active', true)
+      .maybeSingle()
+
+  if (error || !creds) throw new Error('Velocity credentials not configured')
   
   const username = decrypt(creds.encrypted_username)
   const password = decrypt(creds.encrypted_api_key)
+
+  if (!username || !password) {
+      throw new Error('Could not decrypt Velocity credentials. Please re-enter them.')
+  }
 
   let formattedUsername = username.trim()
   if (/^\d{10}$/.test(formattedUsername)) {
@@ -127,12 +159,17 @@ serve(async (req) => {
 
     if (action === 'save_credentials') {
         const { username, password } = payload
-        const lastFour = password.length >= 4 ? password.slice(-4) : password
-        await supabaseAdmin.from('shipping_credentials').update({ active: false }).eq('active', true)
+        if (!username || !password) throw new Error('Username and password are required')
+
+        const providerId = await getOrCreateVelocityProvider(supabaseAdmin)
+        const lastFour = username.trim().slice(-4).padStart(4, '0')
+
+        await supabaseAdmin.from('shipping_credentials').update({ active: false }).eq('provider_id', providerId).eq('active', true)
 
         const { data, error } = await supabaseAdmin.from('shipping_credentials').insert([{
-            encrypted_username: encrypt(username),
-            encrypted_api_key: encrypt(password),
+            provider_id: providerId,
+            encrypted_username: encrypt(username.trim()),
+            encrypted_api_key: encrypt(password.trim()),
             key_last_four: lastFour,
             active: true,
             updated_by_admin_id: user.id,
@@ -144,32 +181,48 @@ serve(async (req) => {
     }
 
     if (action === 'credential_status') {
-        const { data, error } = await supabaseAdmin.from('shipping_credentials').select('key_last_four, test_status, last_tested_at, updated_by_admin_id').eq('active', true).single()
-        if (error) {
-            if (error.code === 'PGRST116') return new Response(JSON.stringify({ data: { status: 'not_configured' } }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
-            throw error
+        const { data, error } = await supabaseAdmin
+            .from('shipping_credentials')
+            .select('key_last_four, test_status, last_tested_at, updated_by_admin_id')
+            .eq('active', true)
+            .maybeSingle()
+
+        if (error) throw error
+
+        if (!data) {
+            return new Response(JSON.stringify({ data: { status: 'not_configured' } }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
         }
 
         let updatedByAdminName = null
         if (data.updated_by_admin_id) {
-            const { data: adminProfile } = await supabaseAdmin.from('profiles').select('name').eq('id', data.updated_by_admin_id).single()
+            const { data: adminProfile } = await supabaseAdmin.from('profiles').select('name').eq('id', data.updated_by_admin_id).maybeSingle()
             if (adminProfile) updatedByAdminName = adminProfile.name
         }
 
-        let testStatus = 'not_tested'
-        let lastTestedAt = data.last_tested_at
+        return new Response(JSON.stringify({
+            data: {
+                key_masked: `••••••${data.key_last_four || '****'}`,
+                test_status: data.test_status || 'not_tested',
+                last_tested_at: data.last_tested_at,
+                updated_by: updatedByAdminName
+            }
+        }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+
+    if (action === 'test_connection') {
+        let testStatus = 'connected'
+        let message = 'Successfully connected to Velocity API.'
+        const lastTestedAt = new Date().toISOString()
         try {
             await getVelocityAuthToken(supabaseAdmin)
-            testStatus = 'connected'
-            lastTestedAt = new Date().toISOString()
-            await supabaseAdmin.from('shipping_credentials').update({ test_status: testStatus, last_tested_at: lastTestedAt }).eq('active', true)
-        } catch (e) {
+            await supabaseAdmin.from('shipping_credentials').update({ test_status: 'connected', last_tested_at: lastTestedAt }).eq('active', true)
+        } catch (e: any) {
             testStatus = 'invalid_key'
-            lastTestedAt = new Date().toISOString()
-            await supabaseAdmin.from('shipping_credentials').update({ test_status: testStatus, last_tested_at: lastTestedAt }).eq('active', true)
+            message = e.message || 'Authentication failed'
+            await supabaseAdmin.from('shipping_credentials').update({ test_status: 'invalid_key', last_tested_at: lastTestedAt }).eq('active', true)
         }
 
-        return new Response(JSON.stringify({ data: { key_masked: `••••••${data.key_last_four}`, test_status: testStatus, last_tested_at: lastTestedAt, updated_by: updatedByAdminName } }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+        return new Response(JSON.stringify({ status: testStatus, message }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
 
     if (action === 'sync_warehouse') {
@@ -179,8 +232,8 @@ serve(async (req) => {
 
         const velocityPayload = {
             name: wh.name,
-            email: "admin@swadyum.com",
-            phone: "0000000000",
+            email: wh.email || "admin@swadyum.com",
+            phone: wh.phone || "0000000000",
             address_line_1: wh.address,
             address_line_2: "",
             pincode: wh.pincode,

@@ -25,17 +25,29 @@ export default function ShippingSettings() {
         loadData();
     }, [activeTab]);
 
+    const invokeShipping = async (payload) => {
+        const res = await supabase.functions.invoke('shipping', { body: payload });
+        if (res.error) {
+            let message = res.error.message;
+            try {
+                const body = await res.error.context?.json();
+                if (body?.error) message = body.error;
+            } catch {}
+            throw new Error(message || 'Failed to execute shipping function');
+        }
+        if (res.data?.error) {
+            throw new Error(res.data.error);
+        }
+        return res.data;
+    };
+
     const loadData = async () => {
         try {
             setLoading(true);
             setError('');
             if (activeTab === 'credentials') {
-                const { data, error } = await supabase.functions.invoke('shipping', {
-                    body: { action: 'credential_status' }
-                });
-                if (error) throw error;
-                if (data.error) throw new Error(data.error);
-                setCredentialStatus(data.data);
+                const data = await invokeShipping({ action: 'credential_status' });
+                setCredentialStatus(data.data || data);
             } else if (activeTab === 'warehouses') {
                 const { data, error } = await supabase
                     .from('warehouses')
@@ -64,11 +76,7 @@ export default function ShippingSettings() {
             setLoading(true);
             setError('');
             setSuccessMsg('');
-            const { data, error } = await supabase.functions.invoke('shipping', {
-                body: { action: 'save_credentials', username, password }
-            });
-            if (error) throw error;
-            if (data.error) throw new Error(data.error);
+            await invokeShipping({ action: 'save_credentials', username, password });
             setUsername('');
             setPassword('');
             setSuccessMsg('Velocity credentials saved and encrypted successfully.');
@@ -85,15 +93,11 @@ export default function ShippingSettings() {
             setLoading(true);
             setError('');
             setSuccessMsg('');
-            const { data, error } = await supabase.functions.invoke('shipping', {
-                body: { action: 'credential_status' }
-            });
-            if (error) throw error;
-            if (data.error) throw new Error(data.error);
-            if (data.data && data.data.test_status === 'connected') {
-                setSuccessMsg('Connection test successful. Connected to Velocity.');
+            const data = await invokeShipping({ action: 'test_connection' });
+            if (data.status === 'connected') {
+                setSuccessMsg(data.message || 'Successfully connected to Velocity API.');
             } else {
-                setError('Connection test failed.');
+                setError(data.message || 'Connection test failed.');
             }
             loadData();
         } catch (err) {
@@ -147,11 +151,7 @@ export default function ShippingSettings() {
             setSyncingWarehouseId(warehouseId);
             setError('');
             setSuccessMsg('');
-            const { data, error } = await supabase.functions.invoke('shipping', {
-                body: { action: 'sync_warehouse', warehouse_id: warehouseId }
-            });
-            if (error) throw error;
-            if (data.error) throw new Error(data.error);
+            const data = await invokeShipping({ action: 'sync_warehouse', warehouse_id: warehouseId });
             setSuccessMsg(`Warehouse synced to Velocity. ID: ${data.velocity_warehouse_id}`);
             loadData();
         } catch (err) {
