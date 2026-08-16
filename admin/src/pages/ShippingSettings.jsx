@@ -26,7 +26,9 @@ export default function ShippingSettings() {
     }, [activeTab]);
 
     const invokeShipping = async (payload) => {
-        const res = await supabase.functions.invoke('shipping', { body: payload });
+        const { data: { session } } = await supabase.auth.getSession();
+        const headers = session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
+        const res = await supabase.functions.invoke('shipping', { body: payload, headers });
         if (res.error) {
             let message = res.error.message;
             try {

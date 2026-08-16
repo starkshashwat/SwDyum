@@ -138,22 +138,21 @@ serve(async (req) => {
   }
 
   try {
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
-    )
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) throw new Error('Unauthorized: Missing Authorization header')
 
-    const { data: { user }, error: authError } = await supabaseClient.auth.getUser()
-    if (authError || !user) throw new Error('Unauthorized')
+    const token = authHeader.replace(/^Bearer\s+/i, '')
+    const supabaseAdmin = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '')
 
-    const { data: profile } = await supabaseClient.from('profiles').select('role').eq('id', user.id).single()
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
+    if (authError || !user) throw new Error('Unauthorized: Invalid or expired session')
+
+    const { data: profile } = await supabaseAdmin.from('profiles').select('role').eq('id', user.id).maybeSingle()
     const userRole = (profile?.role || '').toLowerCase()
-    if (!['admin', 'super admin', 'super_admin', 'editor', 'manager'].includes(userRole)) {
+    if (!['admin', 'super admin', 'super_admin', 'editor', 'manager'].some(r => userRole.includes(r))) {
       throw new Error(`Forbidden: Admin access required (Current role: ${profile?.role || 'none'})`)
     }
 
-    const supabaseAdmin = createClient(Deno.env.get('SUPABASE_URL') ?? '', Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '')
     const payload = await req.json()
     const { action } = payload
 
