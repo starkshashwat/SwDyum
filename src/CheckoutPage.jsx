@@ -181,8 +181,18 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
     if (currentUser && currentUser.id) {
       try {
         const { data: existingAddrs } = await supabase.from('addresses')
-          .select('id').eq('customer_id', currentUser.id);
-        if (!existingAddrs || existingAddrs.length === 0) {
+          .select('id, pin_code, city, street, full_name, phone')
+          .eq('customer_id', currentUser.id);
+
+        const normalise = (s) => (s || '').trim().toLowerCase();
+        const isDuplicate = (existingAddrs || []).some((a) =>
+          normalise(a.phone) === normalise(formData.phone) &&
+          normalise(a.pin_code) === normalise(formData.zip) &&
+          normalise(a.city) === normalise(formData.city) &&
+          normalise(a.street) === normalise(formData.address)
+        );
+
+        if (!isDuplicate) {
           await supabase.from('addresses').insert([{
             customer_id: currentUser.id,
             label: 'Home',
@@ -194,7 +204,7 @@ function CheckoutPage({ cart, clearCart, onNavigate, currentUser }) {
             state: formData.state,
             pin_code: formData.zip,
             country: 'India',
-            is_default: true
+            is_default: false
           }]);
         }
       } catch (e) { /* Address save is non-critical */ }

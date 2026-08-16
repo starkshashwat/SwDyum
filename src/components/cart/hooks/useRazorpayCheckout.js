@@ -75,14 +75,31 @@ export default function useRazorpayCheckout({
         if (!currentUser || !currentUser.id) return;
         try {
             const { data: existingAddrs, error: fetchError } = await supabase
-                .from('addresses').select('id').eq('customer_id', currentUser.id);
+                .from('addresses')
+                .select('id, pin_code, city, street, full_name, phone')
+                .eq('customer_id', currentUser.id);
             if (fetchError) return;
-            if (!existingAddrs || existingAddrs.length === 0) {
+
+            const newStreet = formData.address || '';
+            const newPin = formData.zip || '';
+            const newCity = formData.city || '';
+
+            // Deduplicate: only insert if no existing address shares the same
+            // phone + PIN code + city + street (normalised whitespace).
+            const normalise = (s) => (s || '').trim().toLowerCase();
+            const isDuplicate = (existingAddrs || []).some((a) =>
+                normalise(a.phone) === normalise(formData.phone) &&
+                normalise(a.pin_code) === normalise(newPin) &&
+                normalise(a.city) === normalise(newCity) &&
+                normalise(a.street) === normalise(newStreet)
+            );
+
+            if (!isDuplicate) {
                 await supabase.from('addresses').insert([{
                     customer_id: currentUser.id, label: 'Home',
                     full_name: formData.name, phone: formData.phone, email: formData.email,
-                    street: formData.address, city: formData.city, state: formData.state,
-                    pin_code: formData.zip, country: 'India', is_default: true,
+                    street: newStreet, city: formData.city, state: formData.state,
+                    pin_code: newPin, country: 'India', is_default: false,
                 }]);
             }
         } catch (e) { /* non-critical */ }

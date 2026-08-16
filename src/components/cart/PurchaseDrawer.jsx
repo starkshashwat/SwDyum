@@ -96,9 +96,11 @@ export default function PurchaseDrawer({
                 pinVerification.reset();
                 razorpay.reset();
                 setDragState('closed');
+                setAddressError('');
             }, 350);
         } else {
             setDragState('full');
+            setAddressError('');
         }
     }, [isOpen]);
 
@@ -150,6 +152,20 @@ export default function PurchaseDrawer({
         purchaseState.transition('idle');
     }, [removeCoupon, purchaseState]);
 
+    // ─── Address validation ───
+    const [addressError, setAddressError] = useState('');
+
+    const validateAddress = useCallback((data) => {
+        if (!data.name?.trim()) return 'Full name is required';
+        if (!data.phone?.trim()) return 'Phone number is required';
+        if (!data.address?.trim()) return 'Street address is required';
+        if (!data.city?.trim()) return 'City is required';
+        if (!data.state?.trim()) return 'State is required';
+        if (!data.zip?.trim()) return 'PIN code is required';
+        if (!/^\d{6}$/.test(data.zip.trim())) return 'Enter a valid 6-digit PIN code';
+        return '';
+    }, []);
+
     // ─── Checkout handler ───
     const handleSecureCheckout = useCallback(() => {
         if (!currentUser) {
@@ -181,6 +197,14 @@ export default function PurchaseDrawer({
                 zip: currentUser.zip || '',
             };
 
+        // Enforce address completeness before payment
+        const addrErr = validateAddress(formData);
+        if (addrErr) {
+            setAddressError(addrErr);
+            return;
+        }
+        setAddressError('');
+
         // 700ms Razorpay transition
         purchaseState.transition('processing', { message: 'Preparing Secure Payment...' });
 
@@ -208,6 +232,7 @@ export default function PurchaseDrawer({
         razorpay,
         onClose,
         onOpenLogin,
+        validateAddress,
     ]);
 
     // ─── FBT add handler ───
@@ -342,10 +367,38 @@ export default function PurchaseDrawer({
                                     addresses={addresses}
                                     loading={addressesLoading}
                                     selectedAddress={selectedAddress}
-                                    onSelectAddress={selectAddress}
+                                    onSelectAddress={(addr) => { selectAddress(addr); setAddressError(''); }}
                                     onSaveNewAddress={saveNewAddress}
                                     pinCode={pinVerification.pinCode}
+                                    hasError={!!addressError}
                                 />
+                            )}
+
+                            {/* Address validation error */}
+                            {addressError && (
+                                <div
+                                    role="alert"
+                                    style={{
+                                        margin: '0 var(--space-6)',
+                                        padding: '10px 14px',
+                                        background: '#fef2f2',
+                                        border: '1px solid #fecaca',
+                                        borderRadius: 10,
+                                        color: '#b91c1c',
+                                        fontSize: 13,
+                                        fontWeight: 500,
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: 6,
+                                    }}
+                                >
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                                        <circle cx="12" cy="12" r="10" />
+                                        <line x1="12" y1="8" x2="12" y2="12" />
+                                        <line x1="12" y1="16" x2="12.01" y2="16" />
+                                    </svg>
+                                    {addressError}
+                                </div>
                             )}
 
                             {/* Frequently Bought Together */}

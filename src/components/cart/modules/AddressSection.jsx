@@ -20,6 +20,7 @@ export default function AddressSection({
     onSelectAddress,
     onSaveNewAddress,
     pinCode,
+    hasError,
 }) {
     const [isExpanded, setIsExpanded] = useState(false);
     const [showNewForm, setShowNewForm] = useState(false);
@@ -68,7 +69,7 @@ export default function AddressSection({
         <div className="address-section">
             {/* Collapsed summary */}
             <button
-                className="address-toggle"
+                className={`address-toggle ${hasError ? 'address-toggle-error' : ''}`}
                 onClick={() => setIsExpanded(!isExpanded)}
                 type="button"
             >
