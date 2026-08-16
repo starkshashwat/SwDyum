@@ -20,7 +20,7 @@
 
 import { useEffect, useState } from 'react';
 import { Star, Check, X, Trash2, Search, MessageSquare } from 'lucide-react';
-import { apiClient, ApiError } from '../lib/apiClient';
+import { supabase } from '../lib/supabase';
 
 const FILTERS = [
   { key: 'all', label: 'All' },
@@ -40,22 +40,19 @@ export default function ReviewsList() {
     fetchReviews();
   }, [filter]);
 
-  const buildParams = () => {
-    const params = { limit: 100 };
-    if (filter === 'pending') params.is_approved = 'false';
-    if (filter === 'approved') params.is_approved = 'true';
-    if (filter === 'featured') params.is_featured = 'true';
-    return params;
-  };
-
   const fetchReviews = async () => {
     setLoading(true);
     setError('');
     try {
-      const res = await apiClient.get('/reviews', buildParams());
-      setReviews(res?.data || []);
+      let query = supabase.from('reviews').select('*, products(id, name, slug)').order('created_at', { ascending: false }).limit(100);
+      if (filter === 'pending') query = query.eq('is_approved', false);
+      if (filter === 'approved') query = query.eq('is_approved', true);
+      if (filter === 'featured') query = query.eq('is_featured', true);
+      const { data, error } = await query;
+      if (error) throw error;
+      setReviews(data || []);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to load reviews.');
+      setError(err.message || 'Failed to load reviews.');
     } finally {
       setLoading(false);
     }
@@ -63,29 +60,32 @@ export default function ReviewsList() {
 
   const toggleApproval = async (id, currentStatus) => {
     try {
-      await apiClient.patch(`/reviews/${id}`, { is_approved: !currentStatus });
+      const { error } = await supabase.from('reviews').update({ is_approved: !currentStatus }).eq('id', id);
+      if (error) throw error;
       setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, is_approved: !currentStatus } : r)));
     } catch (err) {
-      alert(`Error updating review: ${err instanceof ApiError ? err.message : 'Unknown error'}`);
+      alert(`Error updating review: ${err.message || 'Unknown error'}`);
     }
   };
 
   const toggleFeatured = async (id, currentStatus) => {
     try {
-      await apiClient.patch(`/reviews/${id}`, { is_featured: !currentStatus });
+      const { error } = await supabase.from('reviews').update({ is_featured: !currentStatus }).eq('id', id);
+      if (error) throw error;
       setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, is_featured: !currentStatus } : r)));
     } catch (err) {
-      alert(`Error updating review: ${err instanceof ApiError ? err.message : 'Unknown error'}`);
+      alert(`Error updating review: ${err.message || 'Unknown error'}`);
     }
   };
 
   const handleDelete = async (id) => {
     if (!window.confirm('Permanently delete this review? This cannot be undone.')) return;
     try {
-      await apiClient.delete(`/reviews/${id}`);
+      const { error } = await supabase.from('reviews').delete().eq('id', id);
+      if (error) throw error;
       setReviews((prev) => prev.filter((r) => r.id !== id));
     } catch (err) {
-      alert(`Error deleting review: ${err instanceof ApiError ? err.message : 'Unknown error'}`);
+      alert(`Error deleting review: ${err.message || 'Unknown error'}`);
     }
   };
 

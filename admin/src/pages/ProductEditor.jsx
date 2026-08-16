@@ -52,7 +52,7 @@ import { useNavigate, useParams, Link } from 'react-router-dom';
 import {
   ArrowLeft, Save, Loader2, Plus, Trash2, GripVertical, Image as ImageIcon,
 } from 'lucide-react';
-import { apiClient, ApiError } from '../lib/apiClient';
+import { supabase } from '../lib/supabase';
 import ImageUpload from '../components/shared/ImageUpload';
 import EmojiPicker from '../components/shared/EmojiPicker';
 import RichTextEditor from '../components/shared/RichTextEditor';
@@ -129,8 +129,8 @@ export default function ProductEditor() {
   // ------------------------------------------------------------------
   const fetchCategories = async () => {
     try {
-      const res = await apiClient.get('/categories', { limit: 100 });
-      setCategories(res?.data || []);
+      const { data } = await supabase.from('categories').select('id, name');
+      setCategories(data || []);
     } catch {
       // Non-fatal — the category dropdown will just be empty.
     }
@@ -140,8 +140,14 @@ export default function ProductEditor() {
     setLoading(true);
     setError(null);
     try {
-      const res = await apiClient.get(`/products/${id}`);
-      const data = res?.data || {};
+      const { data, error } = await supabase
+        .from('products')
+        .select('*, product_variants(*), product_images(*)')
+        .eq('id', id)
+        .single();
+      
+      if (error) throw error;
+      
       setFormData({
         name: data.name || '',
         slug: data.slug || '',
@@ -174,7 +180,7 @@ export default function ProductEditor() {
       setPdpConfig(merged);
       setPdpConfigRaw(JSON.stringify(merged, null, 2));
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Product not found.');
+      setError(err.message || 'Product not found.');
     } finally {
       setLoading(false);
     }
@@ -348,10 +354,12 @@ export default function ProductEditor() {
     try {
       let productId = id;
       if (isEditing) {
-        await apiClient.put(`/products/${id}`, productPayload);
+        const { error } = await supabase.from('products').update(productPayload).eq('id', id);
+        if (error) throw error;
       } else {
-        const res = await apiClient.post('/products', productPayload);
-        productId = res?.data?.id;
+        const { data, error } = await supabase.from('products').insert(productPayload).select().single();
+        if (error) throw error;
+        productId = data.id;
       }
 
       // Ensure the image with the lowest display_order is marked primary (thumbnail)
@@ -370,26 +378,22 @@ export default function ProductEditor() {
       // Persist nested sub-resources that actually have DB tables
       await Promise.all([
         ...persistVariants(productId),
-        ...persistFlat(updatedImages, setImages, '/product-images', productId),
+        ...persistFlat(updatedImages, setImages, 'product_images', productId),
       ]);
 
       navigate('/products');
     } catch (err) {
-      if (err instanceof ApiError) {
-        setError(err.message);
-        if (err.details?.fieldErrors) setFieldErrors(err.details.fieldErrors);
-      } else {
-        setError('Failed to save product.');
-      }
+      setError(err.message || 'Failed to save product.');
     } finally {
       setSaving(false);
     }
   };
 
-  // Variants are nested under /products/:productId/variants.
+  // Variants are nested under products
   const persistVariants = (productId) =>
-    variants.map((v) => {
+    variants.map(async (v) => {
       const payload = {
+        product_id: productId,
         weight_label: v.weight_label,
         price: Number(v.price) || 0,
         mrp: v.mrp === '' || v.mrp === null ? null : Number(v.mrp),
@@ -397,27 +401,22 @@ export default function ProductEditor() {
         sku: v.sku || undefined,
         is_active: v.is_active ?? true,
       };
-      if (v._deleted && v.id) return apiClient.delete(`/products/${productId}/variants/${v.id}`);
-      if (v.id) return apiClient.put(`/products/${productId}/variants/${v.id}`, payload);
+      if (v._deleted && v.id) return supabase.from('product_variants').delete().eq('id', v.id);
+      if (v.id) return supabase.from('product_variants').update(payload).eq('id', v.id);
       if (!v.weight_label) return Promise.resolve();
-      return apiClient.post(`/products/${productId}/variants`, payload);
+      return supabase.from('product_variants').insert(payload);
     });
 
-  // Flat resources (images/ingredients/trust badges/faqs/process steps)
-  // live at top-level routes and are scoped by product_id in the body.
-  const persistFlat = (items, setter, base, productId) =>
-    items.map((item) => {
+  // Flat resources (images)
+  const persistFlat = (items, setter, tableName, productId) =>
+    items.map(async (item) => {
       const { id: itemId, _deleted, ...rest } = item;
       const payload = { ...rest, product_id: productId };
-      if (_deleted && itemId) return apiClient.delete(`${base}/${itemId}`);
-      if (itemId) return apiClient.put(`${base}/${itemId}`, payload);
+      if (_deleted && itemId) return supabase.from(tableName).delete().eq('id', itemId);
+      if (itemId) return supabase.from(tableName).update(payload).eq('id', itemId);
       // Skip brand-new empty rows.
-      if (base === '/product-images' && !payload.url) return Promise.resolve();
-      if (base === '/product-ingredients' && !payload.ingredient) return Promise.resolve();
-      if (base === '/trust-badges' && !payload.label) return Promise.resolve();
-      if (base === '/faqs' && !payload.question) return Promise.resolve();
-      if (base === '/process-steps' && !payload.title) return Promise.resolve();
-      return apiClient.post(base, payload);
+      if (tableName === 'product_images' && !payload.url) return Promise.resolve();
+      return supabase.from(tableName).insert(payload);
     });
 
   if (loading) {

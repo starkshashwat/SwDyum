@@ -11,7 +11,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Edit2, Trash2, Search, ArrowUpDown, Loader2 } from 'lucide-react';
-import { apiClient, ApiError } from '../lib/apiClient';
+import { supabase } from '../lib/supabase';
 
 export default function CategoriesList() {
   const [categories, setCategories] = useState([]);
@@ -27,12 +27,16 @@ export default function CategoriesList() {
     setLoading(true);
     setError('');
     try {
-      // limit=100 keeps this a simple single-page list for now; the backend
-      // supports full pagination (page/limit/search) if this needs to grow.
-      const response = await apiClient.get('/categories', { limit: 100 });
-      setCategories(response?.data || []);
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('sort_order', { ascending: true })
+        .limit(100);
+      
+      if (error) throw error;
+      setCategories(data || []);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to load categories.');
+      setError(err.message || 'Failed to load categories.');
     } finally {
       setLoading(false);
     }
@@ -42,10 +46,11 @@ export default function CategoriesList() {
     if (!window.confirm(`Are you sure you want to delete the category "${name}"? This action cannot be undone.`)) return;
 
     try {
-      await apiClient.delete(`/categories/${id}`);
+      const { error } = await supabase.from('categories').delete().eq('id', id);
+      if (error) throw error;
       setCategories((prev) => prev.filter((c) => c.id !== id));
     } catch (err) {
-      alert(`Error deleting category: ${err instanceof ApiError ? err.message : 'Unknown error'}`);
+      alert(`Error deleting category: ${err.message || 'Unknown error'}`);
     }
   };
 

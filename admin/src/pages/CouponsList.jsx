@@ -25,7 +25,7 @@
 
 import { useEffect, useState } from 'react';
 import { Plus, Edit2, Trash2, Tag, X, Loader2, Save, Search } from 'lucide-react';
-import { apiClient, ApiError } from '../lib/apiClient';
+import { supabase } from '../lib/supabase';
 
 const EMPTY_FORM = {
   code: '',
@@ -69,12 +69,15 @@ export default function CouponsList() {
     setLoading(true);
     setError('');
     try {
-      const params = { limit: 100 };
-      if (search.trim()) params.search = search.trim();
-      const res = await apiClient.get('/coupons', params);
-      setCoupons(res?.data || []);
+      let query = supabase.from('coupons').select('*').order('created_at', { ascending: false }).limit(100);
+      if (search.trim()) {
+        query = query.ilike('code', `%${search.trim()}%`);
+      }
+      const { data, error } = await query;
+      if (error) throw error;
+      setCoupons(data || []);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to load coupons.');
+      setError(err.message || 'Failed to load coupons.');
     } finally {
       setLoading(false);
     }
@@ -132,20 +135,17 @@ export default function CouponsList() {
 
     try {
       if (editingId) {
-        const res = await apiClient.put(`/coupons/${editingId}`, payload);
-        setCoupons((prev) => prev.map((c) => (c.id === editingId ? res?.data : c)));
+        const { data, error } = await supabase.from('coupons').update(payload).eq('id', editingId).select().single();
+        if (error) throw error;
+        setCoupons((prev) => prev.map((c) => (c.id === editingId ? data : c)));
       } else {
-        const res = await apiClient.post('/coupons', payload);
-        setCoupons((prev) => [res?.data, ...prev]);
+        const { data, error } = await supabase.from('coupons').insert(payload).select().single();
+        if (error) throw error;
+        setCoupons((prev) => [data, ...prev]);
       }
       setModalOpen(false);
     } catch (err) {
-      if (err instanceof ApiError) {
-        setError(err.message);
-        if (err.details?.fieldErrors) setFieldErrors(err.details.fieldErrors);
-      } else {
-        setError('Failed to save coupon.');
-      }
+      setError(err.message || 'Failed to save coupon.');
     } finally {
       setSaving(false);
     }
@@ -154,19 +154,21 @@ export default function CouponsList() {
   const handleDelete = async (id, code) => {
     if (!window.confirm(`Delete coupon "${code}"? This cannot be undone.`)) return;
     try {
-      await apiClient.delete(`/coupons/${id}`);
+      const { error } = await supabase.from('coupons').delete().eq('id', id);
+      if (error) throw error;
       setCoupons((prev) => prev.filter((c) => c.id !== id));
     } catch (err) {
-      alert(`Error deleting coupon: ${err instanceof ApiError ? err.message : 'Unknown error'}`);
+      alert(`Error deleting coupon: ${err.message || 'Unknown error'}`);
     }
   };
 
   const toggleStatus = async (id, currentStatus) => {
     try {
-      await apiClient.patch(`/coupons/${id}`, { is_active: !currentStatus });
+      const { error } = await supabase.from('coupons').update({ is_active: !currentStatus }).eq('id', id);
+      if (error) throw error;
       setCoupons((prev) => prev.map((c) => (c.id === id ? { ...c, is_active: !currentStatus } : c)));
     } catch (err) {
-      alert(`Error updating coupon: ${err instanceof ApiError ? err.message : 'Unknown error'}`);
+      alert(`Error updating coupon: ${err.message || 'Unknown error'}`);
     }
   };
 

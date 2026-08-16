@@ -19,7 +19,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Save, Loader2, Plus, Trash2, GripVertical } from 'lucide-react';
-import { apiClient, ApiError } from '../lib/apiClient';
+import { supabase } from '../lib/supabase';
 import ImageUpload from '../components/shared/ImageUpload';
 import EmojiPicker from '../components/shared/EmojiPicker';
 
@@ -58,8 +58,14 @@ export default function CategoryEditor() {
     setLoading(true);
     setError(null);
     try {
-      const response = await apiClient.get(`/categories/${id}`);
-      const data = response?.data;
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*, category_pairings(*)')
+        .eq('id', id)
+        .single();
+      
+      if (error) throw error;
+
       setFormData({
         name: data.name || '',
         slug: data.slug || '',
@@ -70,7 +76,7 @@ export default function CategoryEditor() {
       });
       setPairings(data.category_pairings || []);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Category not found.');
+      setError(err.message || 'Category not found.');
     } finally {
       setLoading(false);
     }
@@ -107,39 +113,37 @@ export default function CategoryEditor() {
     try {
       let categoryId = id;
       if (isEditing) {
-        await apiClient.put(`/categories/${id}`, payload);
+        const { error } = await supabase.from('categories').update(payload).eq('id', id);
+        if (error) throw error;
       } else {
-        const response = await apiClient.post('/categories', payload);
-        categoryId = response?.data?.id;
+        const { data, error } = await supabase.from('categories').insert(payload).select().single();
+        if (error) throw error;
+        categoryId = data.id;
       }
 
       // Persist any pending pairing changes now that we have a category id.
       await Promise.all(
-        pairings.map((pairing) => {
+        pairings.map(async (pairing) => {
           const pairingPayload = {
+            category_id: categoryId,
             label: pairing.label,
-            icon: pairing.icon || undefined,
+            icon: pairing.icon || null,
             sort_order: Number(pairing.sort_order) || 0,
           };
           if (pairing._deleted && pairing.id) {
-            return apiClient.delete(`/categories/${categoryId}/pairings/${pairing.id}`);
+            return supabase.from('category_pairings').delete().eq('id', pairing.id);
           }
           if (pairing.id) {
-            return apiClient.put(`/categories/${categoryId}/pairings/${pairing.id}`, pairingPayload);
+            return supabase.from('category_pairings').update(pairingPayload).eq('id', pairing.id);
           }
           if (!pairing.label) return Promise.resolve(); // skip empty new rows
-          return apiClient.post(`/categories/${categoryId}/pairings`, pairingPayload);
+          return supabase.from('category_pairings').insert(pairingPayload);
         })
       );
 
       navigate('/categories');
     } catch (err) {
-      if (err instanceof ApiError) {
-        setError(err.message);
-        if (err.details?.fieldErrors) setFieldErrors(err.details.fieldErrors);
-      } else {
-        setError('Failed to save category.');
-      }
+      setError(err.message || 'Failed to save category.');
     } finally {
       setSaving(false);
     }

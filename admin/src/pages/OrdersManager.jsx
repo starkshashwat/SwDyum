@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { apiClient, ApiError } from '../lib/apiClient';
+import { supabase } from '../lib/supabase';
 import {
     Package, Search, ChevronLeft, ChevronRight, Download, X, RefreshCw,
     ArrowLeft, CreditCard, MapPin, Clock, Truck, Tag, Save, AlertCircle,
@@ -68,26 +68,27 @@ export default function OrdersManager() {
         try {
             setLoading(true);
             setError('');
-            const params = {
-                page: page + 1, // backend pages are 1-indexed
-                limit: PAGE_SIZE,
-            };
-            if (orderStatusFilter !== 'All') params.status = orderStatusFilter;
-            if (paymentStatusFilter !== 'All') params.payment_status = paymentStatusFilter;
-            if (dateFrom) params.date_from = new Date(dateFrom).toISOString();
+            let query = supabase.from('orders').select('*', { count: 'exact' });
+            if (orderStatusFilter !== 'All') query = query.eq('status', orderStatusFilter);
+            if (paymentStatusFilter !== 'All') query = query.eq('payment_status', paymentStatusFilter);
+            if (dateFrom) query = query.gte('created_at', new Date(dateFrom).toISOString());
             if (dateTo) {
                 const end = new Date(dateTo);
                 end.setHours(23, 59, 59, 999);
-                params.date_to = end.toISOString();
+                query = query.lte('created_at', end.toISOString());
             }
-            if (debouncedSearch.trim()) params.customer_email = debouncedSearch.trim();
+            if (debouncedSearch.trim()) query = query.ilike('customer_email', `%${debouncedSearch.trim()}%`);
 
-            const res = await apiClient.get('/orders', params);
+            query = query.order('created_at', { ascending: false });
+            query = query.range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1);
+
+            const { data, count, error } = await query;
             if (seq !== fetchSeqRef.current) return; // stale response
-            setOrders(res?.data || []);
-            setTotalCount(res?.pagination?.total || 0);
+            if (error) throw error;
+            setOrders(data || []);
+            setTotalCount(count || 0);
         } catch (err) {
-            setError(err instanceof ApiError ? err.message : 'Failed to load orders.');
+            setError(err.message || 'Failed to load orders.');
         } finally {
             setLoading(false);
         }
@@ -98,8 +99,15 @@ export default function OrdersManager() {
         try {
             // Server-side GROUP BY — the old approach pulled up to 1000 full
             // orders just to count them and silently capped there.
-            const res = await apiClient.get('/orders/stats');
-            const stats = res?.data || {};
+            const { data, error } = await supabase.from('orders').select('status, payment_status, total');
+            if (error) throw error;
+            const stats = {};
+            for (const row of data || []) {
+                const status = row.status || 'Pending';
+                if (!stats[status]) stats[status] = { count: 0, revenue: 0 };
+                stats[status].count += 1;
+                if (row.payment_status === 'Paid') stats[status].revenue += Number(row.total || 0);
+            }
             const counts = {};
             for (const card of STATUS_CARDS) {
                 let count = 0, revenue = 0;
@@ -134,18 +142,18 @@ export default function OrdersManager() {
 
     const updateOrderStatus = async (id, newStatus, note = null) => {
         try {
-            // tracking_entry is appended server-side — the old
-            // GET-then-PATCH tracking_history flow lost concurrent entries.
-            await apiClient.patch(`/orders/${id}`, {
-                status: newStatus,
-                tracking_entry: {
+            const { error } = await supabase.functions.invoke('admin-orders', {
+                body: {
+                    action: 'update_status',
+                    order_id: id,
                     status: newStatus,
                     note: note || `Status changed to ${newStatus} by admin`,
-                },
+                }
             });
+            if (error) throw error;
             fetchOrders(); fetchStatusCounts();
         } catch (err) {
-            alert(`Error updating order: ${err instanceof ApiError ? err.message : 'Unknown error'}`);
+            alert(`Error updating order: ${err.message || 'Unknown error'}`);
         }
     };
 
@@ -379,10 +387,15 @@ function OrderDetailsPanel({ orderId, onBack, onStatusChange }) {
         try {
             setLoading(true);
             setError('');
-            const res = await apiClient.get(`/orders/${orderId}`);
-            setOrder(res?.data || {});
+            const { data, error } = await supabase
+                .from('orders')
+                .select('*, order_items(*)')
+                .eq('id', orderId)
+                .single();
+            if (error) throw error;
+            setOrder(data || {});
         } catch (err) {
-            setError(err instanceof ApiError ? err.message : 'Failed to load order.');
+            setError(err.message || 'Failed to load order.');
         } finally {
             setLoading(false);
         }
@@ -752,10 +765,10 @@ function ShipmentPanel({ order, onUpdate }) {
     const fetchShipment = useCallback(async () => {
         try {
             setLoading(true);
-            const { data } = await apiClient.get(`/shipments`, { order_id: order.id });
+            const { data, error } = await supabase.from('shipments').select('*').eq('order_id', order.id).order('created_at', { ascending: false }).limit(1);
+            if (error) throw error;
             if (data && data.length > 0) {
-                const res = await apiClient.get(`/shipments/${data[0].id}`);
-                setShipment(res.data);
+                setShipment(data[0]);
             } else {
                 setShipment(null);
             }
@@ -779,11 +792,14 @@ function ShipmentPanel({ order, onUpdate }) {
             if (overrides.height_cm) payload.height_cm = overrides.height_cm;
             if (overrides.weight_kg) payload.weight_kg = overrides.weight_kg;
             
-            await apiClient.post(`/orders/${order.id}/create-shipment`, payload);
+            const { error } = await supabase.functions.invoke('shipping', {
+                body: { action: 'create_shipment', order_id: order.id, ...payload }
+            });
+            if (error) throw error;
             await fetchShipment();
             if (onUpdate) onUpdate();
         } catch (err) {
-            setError(err instanceof ApiError ? err.message : 'Failed to create shipment.');
+            setError(err.message || 'Failed to create shipment.');
         } finally {
             setSaving(false);
         }
@@ -794,11 +810,14 @@ function ShipmentPanel({ order, onUpdate }) {
         try {
             setSaving(true);
             setError('');
-            await apiClient.post(`/orders/${order.id}/create-reverse-shipment`, reversePayload);
+            const { error } = await supabase.functions.invoke('shipping', {
+                body: { action: 'create_reverse_shipment', order_id: order.id, ...reversePayload }
+            });
+            if (error) throw error;
             await fetchShipment();
             if (onUpdate) onUpdate();
         } catch (err) {
-            setError(err instanceof ApiError ? err.message : 'Failed to create return pickup.');
+            setError(err.message || 'Failed to create return pickup.');
         } finally {
             setSaving(false);
         }
@@ -807,7 +826,10 @@ function ShipmentPanel({ order, onUpdate }) {
     const handleSync = async () => {
         try {
             setSaving(true);
-            await apiClient.post(`/shipments/${shipment.id}/sync`);
+            const { error } = await supabase.functions.invoke('shipping', {
+                body: { action: 'sync_shipment', shipment_id: shipment.id }
+            });
+            if (error) throw error;
             await fetchShipment();
             if (onUpdate) onUpdate();
         } catch (err) {
@@ -821,7 +843,10 @@ function ShipmentPanel({ order, onUpdate }) {
         if (!confirm('Cancel this shipment in Velocity?')) return;
         try {
             setSaving(true);
-            await apiClient.post(`/shipments/${shipment.id}/cancel`);
+            const { error } = await supabase.functions.invoke('shipping', {
+                body: { action: 'cancel_shipment', shipment_id: shipment.id }
+            });
+            if (error) throw error;
             await fetchShipment();
             if (onUpdate) onUpdate();
         } catch (err) {
@@ -1010,17 +1035,24 @@ function EditCustomerAddressModal({ order, onClose, onSave }) {
                 country: country.trim(),
                 phone: phone.trim()
             };
-            await apiClient.patch(`/orders/${order.id}`, {
-                customer_name: name.trim(),
-                customer_phone: phone.trim(),
-                customer_email: email.trim(),
-                shipping_address: addressObj,
-                shipping_details: addressObj
+            const { error } = await supabase.functions.invoke('admin-orders', {
+                body: {
+                    action: 'update_order',
+                    order_id: order.id,
+                    payload: {
+                        customer_name: name.trim(),
+                        customer_phone: phone.trim(),
+                        customer_email: email.trim(),
+                        shipping_address: addressObj,
+                        shipping_details: addressObj
+                    }
+                }
             });
+            if (error) throw error;
             onSave();
             onClose();
         } catch (err) {
-            setError(err instanceof ApiError ? err.message : 'Failed to update order details.');
+            setError(err.message || 'Failed to update order details.');
         } finally {
             setSaving(false);
         }

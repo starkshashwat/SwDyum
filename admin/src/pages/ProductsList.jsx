@@ -15,7 +15,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Edit2, Trash2, Search, Filter } from 'lucide-react';
-import { apiClient, ApiError } from '../lib/apiClient';
+import { supabase } from '../lib/supabase';
 
 export default function ProductsList() {
   const [products, setProducts] = useState([]);
@@ -31,9 +31,9 @@ export default function ProductsList() {
 
   const fetchCategories = async () => {
     try {
-      const res = await apiClient.get('/categories', { limit: 100 });
+      const { data } = await supabase.from('categories').select('id, name');
       const map = {};
-      (res?.data || []).forEach((c) => {
+      (data || []).forEach((c) => {
         map[c.id] = c.name;
       });
       setCategoriesById(map);
@@ -46,10 +46,15 @@ export default function ProductsList() {
     setLoading(true);
     setError('');
     try {
-      const res = await apiClient.get('/products', { limit: 100 });
-      setProducts(res?.data || []);
+      const { data, error } = await supabase
+        .from('products')
+        .select('*, product_variants(*), product_images(*)')
+        .order('sort_order', { ascending: true })
+        .limit(100);
+      if (error) throw error;
+      setProducts(data || []);
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Failed to load products.');
+      setError(err.message || 'Failed to load products.');
     } finally {
       setLoading(false);
     }
@@ -58,19 +63,21 @@ export default function ProductsList() {
   const handleDelete = async (id, name) => {
     if (!window.confirm(`Are you sure you want to delete the product "${name}"? This action cannot be undone.`)) return;
     try {
-      await apiClient.delete(`/products/${id}`);
+      const { error } = await supabase.from('products').delete().eq('id', id);
+      if (error) throw error;
       setProducts((prev) => prev.filter((p) => p.id !== id));
     } catch (err) {
-      alert(`Error deleting product: ${err instanceof ApiError ? err.message : 'Unknown error'}`);
+      alert(`Error deleting product: ${err.message || 'Unknown error'}`);
     }
   };
 
   const toggleStatus = async (id, currentStatus) => {
     try {
-      await apiClient.patch(`/products/${id}`, { is_active: !currentStatus });
+      const { error } = await supabase.from('products').update({ is_active: !currentStatus }).eq('id', id);
+      if (error) throw error;
       setProducts((prev) => prev.map((p) => (p.id === id ? { ...p, is_active: !currentStatus } : p)));
     } catch (err) {
-      alert(`Error updating status: ${err instanceof ApiError ? err.message : 'Unknown error'}`);
+      alert(`Error updating status: ${err.message || 'Unknown error'}`);
     }
   };
 
