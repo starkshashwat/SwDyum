@@ -391,7 +391,10 @@ async function _processOrder(supabaseAdmin: any, order: any, razorpayOrderId: st
   // 3. Create payment record (idempotent on razorpay_payment_id via unique
   // index; the pre-check above handles DBs where the index isn't applied yet).
   if (razorpayPaymentId) {
-    const { error: paymentInsertError } = await supabaseAdmin.from('payments').upsert([{
+    // Plain insert with duplicate-catch: PostgREST upsert with
+    // ON CONFLICT(column) cannot infer a PARTIAL unique index, so the old
+    // upsert errored and payment history rows went missing.
+    const { error: paymentInsertError } = await supabaseAdmin.from('payments').insert([{
       order_id: orderId,
       razorpay_payment_id: razorpayPaymentId,
       razorpay_order_id: razorpayOrderId,
@@ -400,9 +403,13 @@ async function _processOrder(supabaseAdmin: any, order: any, razorpayOrderId: st
       currency: 'INR',
       status: 'Paid',
       payment_date: new Date().toISOString()
-    }], { onConflict: 'razorpay_payment_id' });
+    }]);
     if (paymentInsertError) {
-      console.error(`Failed to record payment for order ${orderId}:`, paymentInsertError.message);
+      if (paymentInsertError.code === '23505') {
+        console.log(`Payment ${razorpayPaymentId} already recorded (unique violation). Continuing.`);
+      } else {
+        console.error(`Failed to record payment for order ${orderId}:`, paymentInsertError.message);
+      }
     }
   }
 
