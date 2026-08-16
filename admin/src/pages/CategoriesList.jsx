@@ -30,7 +30,7 @@ export default function CategoriesList() {
       const { data, error } = await supabase
         .from('categories')
         .select('*')
-        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false })
         .limit(100);
       
       if (error) throw error;

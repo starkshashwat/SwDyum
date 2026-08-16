@@ -131,6 +131,7 @@ export default function OrdersManager() {
 
 
     useEffect(() => { fetchStatusCounts(); }, [fetchStatusCounts]);
+    useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
     const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
     const hasActiveFilters = orderStatusFilter !== 'All' || paymentStatusFilter !== 'All' || dateFrom || dateTo || searchTerm;

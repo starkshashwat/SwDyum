@@ -49,7 +49,7 @@ export default function ProductsList() {
       const { data, error } = await supabase
         .from('products')
         .select('*, product_variants(*), product_images(*)')
-        .order('sort_order', { ascending: true })
+        .order('created_at', { ascending: false })
         .limit(100);
       if (error) throw error;
       setProducts(data || []);
