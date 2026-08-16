@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { apiClient } from '../lib/apiClient';
+import { supabase } from '../lib/supabase';
 
 export default function ShippingSettings() {
     const [activeTab, setActiveTab] = useState('credentials');
@@ -30,13 +30,25 @@ export default function ShippingSettings() {
             setLoading(true);
             setError('');
             if (activeTab === 'credentials') {
-                const { data } = await apiClient.get('/admin/shipping/credentials/status');
-                setCredentialStatus(data);
+                const { data, error } = await supabase.functions.invoke('shipping', {
+                    body: { action: 'credential_status' }
+                });
+                if (error) throw error;
+                if (data.error) throw new Error(data.error);
+                setCredentialStatus(data.data);
             } else if (activeTab === 'warehouses') {
-                const { data } = await apiClient.get('/admin/shipping/warehouses');
+                const { data, error } = await supabase
+                    .from('warehouses')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                if (error) throw error;
                 setWarehouses(data || []);
             } else if (activeTab === 'presets') {
-                const { data } = await apiClient.get('/admin/shipping/dimension-presets');
+                const { data, error } = await supabase
+                    .from('package_dimension_presets')
+                    .select('*')
+                    .order('sort_order', { ascending: true });
+                if (error) throw error;
                 setPresets(data || []);
             }
         } catch (err) {
@@ -52,7 +64,11 @@ export default function ShippingSettings() {
             setLoading(true);
             setError('');
             setSuccessMsg('');
-            await apiClient.post('/admin/shipping/credentials', { username, password });
+            const { data, error } = await supabase.functions.invoke('shipping', {
+                body: { action: 'save_credentials', username, password }
+            });
+            if (error) throw error;
+            if (data.error) throw new Error(data.error);
             setUsername('');
             setPassword('');
             setSuccessMsg('Velocity credentials saved and encrypted successfully.');
@@ -69,11 +85,15 @@ export default function ShippingSettings() {
             setLoading(true);
             setError('');
             setSuccessMsg('');
-            const res = await apiClient.post('/admin/shipping/test-connection');
-            if (res.status === 'connected') {
-                setSuccessMsg(res.message);
+            const { data, error } = await supabase.functions.invoke('shipping', {
+                body: { action: 'credential_status' }
+            });
+            if (error) throw error;
+            if (data.error) throw new Error(data.error);
+            if (data.data && data.data.test_status === 'connected') {
+                setSuccessMsg('Connection test successful. Connected to Velocity.');
             } else {
-                setError(res.message);
+                setError('Connection test failed.');
             }
             loadData();
         } catch (err) {
@@ -88,10 +108,29 @@ export default function ShippingSettings() {
         try {
             setLoading(true);
             setError('');
+
+            if (warehouseForm.is_default) {
+                // If making this default, unset others
+                let query = supabase.from('warehouses').update({ is_default: false });
+                if (warehouseForm.id) {
+                    query = query.neq('id', warehouseForm.id);
+                } else {
+                    query = query.neq('id', '00000000-0000-0000-0000-000000000000'); // dummy to apply to all
+                }
+                await query;
+            }
+
             if (warehouseForm.id) {
-                await apiClient.patch(`/admin/shipping/warehouses/${warehouseForm.id}`, warehouseForm);
+                const { error } = await supabase
+                    .from('warehouses')
+                    .update(warehouseForm)
+                    .eq('id', warehouseForm.id);
+                if (error) throw error;
             } else {
-                await apiClient.post('/admin/shipping/warehouses', warehouseForm);
+                const { error } = await supabase
+                    .from('warehouses')
+                    .insert([warehouseForm]);
+                if (error) throw error;
             }
             setWarehouseForm(null);
             setSuccessMsg('Warehouse saved.');
@@ -108,8 +147,12 @@ export default function ShippingSettings() {
             setSyncingWarehouseId(warehouseId);
             setError('');
             setSuccessMsg('');
-            const res = await apiClient.post(`/admin/shipping/warehouses/${warehouseId}/sync-velocity`);
-            setSuccessMsg(`Warehouse synced to Velocity. ID: ${res.velocity_warehouse_id}`);
+            const { data, error } = await supabase.functions.invoke('shipping', {
+                body: { action: 'sync_warehouse', warehouse_id: warehouseId }
+            });
+            if (error) throw error;
+            if (data.error) throw new Error(data.error);
+            setSuccessMsg(`Warehouse synced to Velocity. ID: ${data.velocity_warehouse_id}`);
             loadData();
         } catch (err) {
             setError(err.message || 'Failed to sync warehouse to Velocity.');
@@ -124,9 +167,16 @@ export default function ShippingSettings() {
             setLoading(true);
             setError('');
             if (presetForm.id) {
-                await apiClient.patch(`/admin/shipping/dimension-presets/${presetForm.id}`, presetForm);
+                const { error } = await supabase
+                    .from('package_dimension_presets')
+                    .update(presetForm)
+                    .eq('id', presetForm.id);
+                if (error) throw error;
             } else {
-                await apiClient.post('/admin/shipping/dimension-presets', presetForm);
+                const { error } = await supabase
+                    .from('package_dimension_presets')
+                    .insert([presetForm]);
+                if (error) throw error;
             }
             setPresetForm(null);
             setSuccessMsg('Preset saved.');
@@ -142,7 +192,11 @@ export default function ShippingSettings() {
         if (!confirm('Are you sure you want to delete this preset?')) return;
         try {
             setLoading(true);
-            await apiClient.delete(`/admin/shipping/dimension-presets/${id}`);
+            const { error } = await supabase
+                .from('package_dimension_presets')
+                .delete()
+                .eq('id', id);
+            if (error) throw error;
             setSuccessMsg('Preset deleted.');
             loadData();
         } catch (err) {
